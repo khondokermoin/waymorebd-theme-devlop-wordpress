@@ -1,0 +1,185 @@
+<?php
+/**
+ * Order received / Thank-you — Way More BD (checkout/thankyou.php)
+ *
+ * Two moments, one page (matches the reference):
+ *   1. A "sweet alert" success modal auto-opens once per order (session-guarded).
+ *   2. Behind it, the shared order TRACKER: status timeline → products →
+ *      order summary → shipping details (isdb_render_order_tracker()).
+ *
+ * All WooCommerce thankyou hooks are preserved (payment plugins depend on them).
+ * functions.php removes woocommerce_order_details_table from the woocommerce_thankyou
+ * hook on this page so the default tables don't duplicate the custom tracker.
+ *
+ * Overrides: wp-content/plugins/woocommerce/templates/checkout/thankyou.php
+ *
+ * @package isdb-custom
+ * @var WC_Order $order
+ */
+
+defined( 'ABSPATH' ) || exit;
+?>
+
+<div class="woocommerce-order wmb-thankyou">
+
+	<?php if ( $order ) : ?>
+
+		<?php do_action( 'woocommerce_before_thankyou', $order->get_id() ); ?>
+
+		<?php if ( $order->has_status( 'failed' ) ) : ?>
+
+			<!-- Failed: reassure + clear recovery path (reduce panic) -->
+			<div class="mx-auto max-w-xl rounded-card bg-white p-8 text-center ring-1 ring-rose-100">
+				<span class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-rose-50 text-rose-600">
+					<svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.7 3.9a2 2 0 00-3.4 0z"/></svg>
+				</span>
+				<h1 class="mt-4 text-2xl font-bold text-brand-title">Payment didn't go through</h1>
+				<p class="mt-2 text-brand-body">No charge was made. Please try again — your cart is safe.</p>
+				<div class="mt-6 flex flex-wrap justify-center gap-3">
+					<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="rounded-card bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover"><?php esc_html_e( 'Pay again', 'woocommerce' ); ?></a>
+					<?php if ( is_user_logged_in() ) : ?>
+						<a href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>" class="rounded-card border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-stone-50"><?php esc_html_e( 'My account', 'woocommerce' ); ?></a>
+					<?php endif; ?>
+				</div>
+			</div>
+
+		<?php else : ?>
+
+			<?php
+			$order_no   = $order->get_order_number();
+			$placed_on  = wc_format_datetime( $order->get_date_created(), 'd M Y' );
+			$total_html = $order->get_formatted_order_total();
+			$first_name = $order->get_billing_first_name();
+			?>
+
+			<div
+				x-data="{ open:false }"
+				x-init="$nextTick(() => { const k='wmb_seen_<?php echo (int) $order->get_id(); ?>'; if (sessionStorage.getItem(k)!=='1'){ open=true; sessionStorage.setItem(k,'1'); } }); $watch('open', v => { document.body.style.overflow = v ? 'hidden' : '' })">
+
+				<!-- ═══════════════ SWEET-ALERT SUCCESS MODAL ═══════════════ -->
+				<div x-show="open" x-cloak class="fixed inset-0 z-[95] flex items-center justify-center p-4"
+					x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+					x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+					<div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="open=false"></div>
+
+					<div class="relative w-full max-w-md overflow-hidden rounded-2xl bg-white text-center shadow-2xl"
+						@keydown.escape.window="open=false"
+						x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90 translate-y-3" x-transition:enter-end="opacity-100 scale-100 translate-y-0">
+
+						<button type="button" @click="open=false" aria-label="Close" class="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
+							<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+						</button>
+
+						<div class="px-7 pb-7 pt-9">
+							<span class="inline-flex items-center gap-1.5 rounded-full bg-brand-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-primary">
+								<span class="h-1.5 w-1.5 rounded-full bg-brand-primary"></span> Confirmed
+							</span>
+
+							<span class="wmb-modal__icon mx-auto mt-5 flex h-24 w-24 items-center justify-center rounded-full bg-brand-primary/10">
+								<svg class="h-14 w-14 text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+							</span>
+
+							<h2 class="mt-5 text-2xl font-extrabold text-brand-title">Order Placed!</h2>
+							<p class="mt-2 text-sm leading-relaxed text-brand-body">Your order has been received and is being processed. A confirmation is on its way.</p>
+
+							<div class="mt-5 divide-y divide-slate-100 rounded-xl border border-slate-100 bg-brand-bg text-left">
+								<div class="flex items-center justify-between px-4 py-2.5">
+									<span class="text-[13px] text-slate-500">Order No</span>
+									<span class="text-[13px] font-bold text-brand-title">#<?php echo esc_html( $order_no ); ?></span>
+								</div>
+								<div class="flex items-center justify-between px-4 py-2.5">
+									<span class="text-[13px] text-slate-500">Total</span>
+									<span class="text-[13px] font-bold text-brand-title"><?php echo wp_kses_post( $total_html ); ?></span>
+								</div>
+								<div class="flex items-center justify-between px-4 py-2.5">
+									<span class="text-[13px] text-slate-500">Placed on</span>
+									<span class="text-[13px] font-bold text-brand-title"><?php echo esc_html( $placed_on ); ?></span>
+								</div>
+							</div>
+
+							<button type="button" @click="open=false" class="mt-6 w-full rounded-xl bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover">
+								View Order Tracker
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- ═══════════════ TRACKER HERO ═══════════════ -->
+			<div class="mx-auto max-w-3xl overflow-hidden rounded-2xl bg-brand-dark px-6 py-8 text-center text-white sm:px-10">
+				<span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/90">
+					<svg class="h-4 w-4 text-brand-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+					Thank you<?php echo $first_name ? ', ' . esc_html( $first_name ) : ''; ?>!
+				</span>
+				<h1 class="mt-4 text-2xl font-extrabold tracking-tight sm:text-3xl">Track Your Order</h1>
+				<p class="mt-2 text-sm text-white/70">Order <span class="font-bold text-white">#<?php echo esc_html( $order_no ); ?></span> · Placed on <?php echo esc_html( $placed_on ); ?></p>
+			</div>
+
+			<!-- ═══════════════ TRACKER BODY (shared) ═══════════════ -->
+			<div class="mt-6">
+				<?php isdb_render_order_tracker( $order ); ?>
+			</div>
+
+			<!-- Functional WC hooks (order-details table removed in functions.php; gateways/plugins still fire) -->
+			<div class="mx-auto mt-2 max-w-3xl empty:hidden">
+				<?php
+				do_action( 'woocommerce_thankyou_' . $order->get_payment_method(), $order->get_id() );
+				do_action( 'woocommerce_thankyou', $order->get_id() );
+				?>
+			</div>
+
+			<!-- Cross-sell: warmest re-buy moment -->
+			<?php
+			$purchased = array();
+			foreach ( $order->get_items() as $item ) {
+				$purchased[] = $item->get_product_id();
+			}
+			$suggestions = function_exists( 'isdb_best_sellers' ) ? isdb_best_sellers( 8 ) : array();
+			$cards       = array();
+			foreach ( $suggestions as $sp ) {
+				if ( $sp instanceof WC_Product && $sp->is_visible() && ! in_array( $sp->get_id(), $purchased, true ) ) {
+					$cards[] = $sp;
+				}
+				if ( count( $cards ) >= 4 ) {
+					break;
+				}
+			}
+			if ( $cards ) :
+				?>
+				<section class="mx-auto mt-14 max-w-5xl">
+					<h2 class="text-center text-xl font-bold text-brand-title">Complete your kitchen</h2>
+					<p class="mt-1 text-center text-sm text-slate-500">Popular picks other customers love.</p>
+					<div class="mt-6 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+						<?php foreach ( $cards as $cp ) : ?>
+							<a href="<?php echo esc_url( $cp->get_permalink() ); ?>" class="group rounded-2xl bg-white p-4 ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:shadow-lg">
+								<div class="overflow-hidden rounded-xl bg-brand-bg">
+									<?php echo $cp->get_image( 'woocommerce_thumbnail', array( 'class' => 'aspect-square w-full object-cover transition duration-500 group-hover:scale-105' ) ); ?>
+								</div>
+								<h3 class="mt-3 line-clamp-2 text-sm font-medium text-brand-title"><?php echo esc_html( $cp->get_name() ); ?></h3>
+								<div class="mt-1 font-bold text-brand-title"><?php echo wp_kses_post( $cp->get_price_html() ); ?></div>
+							</a>
+						<?php endforeach; ?>
+					</div>
+				</section>
+			<?php endif; ?>
+
+			<!-- Support promise + continue shopping -->
+			<div class="mx-auto mt-14 flex max-w-3xl flex-col items-center gap-5 rounded-2xl bg-brand-dark p-8 text-center text-white sm:flex-row sm:text-left">
+				<svg class="h-10 w-10 flex-none text-brand-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V5l7-3z"/></svg>
+				<div class="flex-1">
+					<p class="font-bold">Need anything? We're here.</p>
+					<p class="mt-1 text-sm text-white/70">That's our Customer Support Promise — real humans, quick replies. Questions about your order? Just reach out.</p>
+				</div>
+				<a href="<?php echo esc_url( home_url( '/shop/' ) ); ?>" class="flex-none rounded-xl bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover">Continue Shopping</a>
+			</div>
+
+		<?php endif; ?>
+
+	<?php else : ?>
+
+		<div class="mx-auto max-w-xl text-center">
+			<p class="text-brand-body"><?php echo esc_html( apply_filters( 'woocommerce_thankyou_order_received_text', __( 'Thank you. Your order has been received.', 'woocommerce' ), null ) ); ?></p>
+		</div>
+
+	<?php endif; ?>
+</div>

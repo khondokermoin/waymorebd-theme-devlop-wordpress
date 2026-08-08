@@ -1,0 +1,31 @@
+/*
+Theme Name: Way More BD — ISDB Custom
+Theme URI: https://waymorebd.com/
+Author: khondokermoin
+Author URI: https://waymorebd.com/
+Description: 100% custom-coded WooCommerce theme for Way More BD ("Your Trusted Kitchen Companion"). Raw PHP + Tailwind CSS + Alpine.js. No page builders.
+Version: 1.0.0
+Requires at least: 6.0
+Tested up to: 7.0
+Requires PHP: 7.4
+WC requires at least: 8.0
+WC tested up to: 10.6
+Text Domain: isdb-custom
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+*/
+
+/*
+ * NOTE: Real styling is handled by Tailwind (see functions.php).
+ * This file only carries the WordPress theme header above — it is what
+ * registers the theme with WP. Keep the header block intact.
+ *
+ * A few utility fallbacks below cover things Tailwind can't (Alpine x-cloak,
+ * and hiding WC's default cart-empty flash). Everything else = Tailwind classes.
+ */
+
+[x-cloak] { display: none !important; }
+
+/* Hide the theme until Alpine + Tailwind have painted, prevents FOUC */
+.wmb-no-fouc { visibility: hidden; }
+.wmb-ready .wmb-no-fouc { visibility: visible; }

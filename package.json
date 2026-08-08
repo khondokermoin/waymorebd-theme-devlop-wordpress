@@ -1,0 +1,14 @@
+{
+  "name": "isdb-custom",
+  "version": "1.0.0",
+  "description": "Way More BD custom WooCommerce theme — Tailwind build",
+  "private": true,
+  "scripts": {
+    "dev": "tailwindcss -i ./assets/css/tailwind.css -o ./assets/css/app.css --watch",
+    "build": "tailwindcss -i ./assets/css/tailwind.css -o ./assets/css/app.css --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.15",
+    "tailwindcss": "^3.4.16"
+  }
+}

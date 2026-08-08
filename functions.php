@@ -1,0 +1,1715 @@
+<?php
+/**
+ * Way More BD — ISDB Custom theme bootstrap.
+ *
+ * @package isdb-custom
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+if ( ! defined( 'ISDB_VERSION' ) ) {
+	define( 'ISDB_VERSION', '1.0.0' );
+}
+
+/*
+ * Free-shipping threshold (store currency). Drives the mini-cart / cart
+ * "You're ৳X away from free shipping" goal-gradient bar.
+ * 0 = disabled/hidden (we never show an invented number). Set this to your
+ * REAL free-shipping minimum once your shipping zone is configured.
+ */
+if ( ! defined( 'ISDB_FREE_SHIP_THRESHOLD' ) ) {
+	define( 'ISDB_FREE_SHIP_THRESHOLD', 0 );
+}
+
+/** Official Way More BD social / contact endpoints. */
+if ( ! defined( 'ISDB_FACEBOOK_URL' ) ) {
+	define( 'ISDB_FACEBOOK_URL', 'https://www.facebook.com/waymore.bd' );
+}
+
+/**
+ * Payment-methods strip image.
+ *
+ * Drop your own combined gateway image at:
+ *     wp-content/themes/isdb-custom/assets/img/payments.png   (or .webp/.jpg)
+ * …or point ISDB_PAYMENT_IMAGE at a Media Library URL:
+ *     define( 'ISDB_PAYMENT_IMAGE', 'https://waymorebd.com/wp-content/uploads/…' );
+ *
+ * When no image is found the footer falls back to text plates, so the strip
+ * never renders as a broken image.
+ *
+ * @return string Image URL, or '' when none is available.
+ */
+function isdb_payment_image_url() {
+	if ( defined( 'ISDB_PAYMENT_IMAGE' ) && ISDB_PAYMENT_IMAGE ) {
+		return ISDB_PAYMENT_IMAGE;
+	}
+	foreach ( array( 'payment.png', 'payments.png', 'payment.webp', 'payments.webp', 'payment.jpg', 'payments.jpg', 'payment.svg', 'payments.svg' ) as $file ) {
+		if ( file_exists( get_theme_file_path( 'assets/img/' . $file ) ) ) {
+			return get_theme_file_uri( 'assets/img/' . $file );
+		}
+	}
+	return '';
+}
+
+/** Optional "Verified by …" badge image, same lookup rules. */
+function isdb_ssl_badge_url() {
+	if ( defined( 'ISDB_SSL_BADGE_IMAGE' ) && ISDB_SSL_BADGE_IMAGE ) {
+		return ISDB_SSL_BADGE_IMAGE;
+	}
+	foreach ( array( 'ssl-badge.png', 'ssl-badge.webp', 'ssl-badge.svg' ) as $file ) {
+		if ( file_exists( get_theme_file_path( 'assets/img/' . $file ) ) ) {
+			return get_theme_file_uri( 'assets/img/' . $file );
+		}
+	}
+	return '';
+}
+
+/* ------------------------------------------------------------------ *
+ * 1. THEME SUPPORT
+ * ------------------------------------------------------------------ */
+add_action( 'after_setup_theme', function () {
+
+	// Hand template control to this theme (REQUIRED for WC overrides).
+	add_theme_support( 'woocommerce' );
+
+	// Native WooCommerce gallery UX — no plugin needed.
+	add_theme_support( 'wc-product-gallery-zoom' );
+	add_theme_support( 'wc-product-gallery-lightbox' );
+	add_theme_support( 'wc-product-gallery-slider' );
+
+	// Standard WP supports.
+	add_theme_support( 'title-tag' );
+	add_theme_support( 'post-thumbnails' );
+	add_theme_support( 'automatic-feed-links' );
+	add_theme_support( 'html5', array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script' ) );
+
+	register_nav_menus( array(
+		'primary' => __( 'Primary Menu', 'isdb-custom' ),
+		'footer'  => __( 'Footer Menu', 'isdb-custom' ),
+	) );
+} );
+
+/* ------------------------------------------------------------------ *
+ * 2. HPOS (Custom Order Tables) COMPATIBILITY
+ *    This install has woocommerce_custom_orders_table_enabled = yes.
+ * ------------------------------------------------------------------ */
+add_action( 'before_woocommerce_init', function () {
+	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+			'custom_order_tables',
+			__FILE__,
+			true
+		);
+	}
+} );
+
+/* ------------------------------------------------------------------ *
+ * 3. ASSETS — Tailwind + Alpine + theme JS
+ * ------------------------------------------------------------------ */
+add_action( 'wp_enqueue_scripts', function () {
+
+	/*
+	 * TAILWIND CSS (production)
+	 * -------------------------
+	 * Compiled + minified from assets/css/tailwind.css via `npm run build`
+	 * (see package.json / tailwind.config.js). Rebuild whenever you add new
+	 * utility classes to any .php template. Versioned by file mtime so browsers
+	 * pick up rebuilds without a manual cache bust.
+	 */
+	// Brand typeface — Open Sans (matches the design system).
+	wp_enqueue_style(
+		'isdb-fonts',
+		'https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap',
+		array(),
+		null
+	);
+
+	$app_css = get_theme_file_path( 'assets/css/app.css' );
+	if ( file_exists( $app_css ) ) {
+		wp_enqueue_style( 'isdb-tailwind', get_theme_file_uri( 'assets/css/app.css' ), array( 'isdb-fonts' ), (string) filemtime( $app_css ) );
+	}
+
+	// Theme header block (x-cloak, FOUC guard).
+	wp_enqueue_style( 'isdb-style', get_stylesheet_uri(), array( 'isdb-tailwind' ), ISDB_VERSION );
+
+	// ALPINE.JS (product tabs, gallery reactivity). `defer` is required by Alpine.
+	wp_enqueue_script( 'alpinejs', 'https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js', array(), '3.14.1', array( 'in_footer' => true, 'strategy' => 'defer' ) );
+
+	// Theme JS (only loaded if the file exists — safe on fresh scaffold).
+	$app_js = get_theme_file_path( 'assets/js/app.js' );
+	if ( file_exists( $app_js ) ) {
+		wp_enqueue_script( 'isdb-main', get_theme_file_uri( 'assets/js/app.js' ), array( 'jquery' ), ISDB_VERSION, true );
+	}
+
+	// Ensure WC cart-fragments script is present so the header badge updates via AJAX.
+	if ( function_exists( 'is_woocommerce' ) ) {
+		wp_enqueue_script( 'wc-cart-fragments' );
+	}
+}, 20 );
+
+/* ------------------------------------------------------------------ *
+ * 4. STRIP DEFAULT WOOCOMMERCE CSS  (Tailwind owns all styling)
+ * ------------------------------------------------------------------ */
+add_filter( 'woocommerce_enqueue_styles', '__return_empty_array' );
+
+/* ------------------------------------------------------------------ *
+ * 5. CONTENT WRAPPERS
+ *    Remove WC's default sidebar + open/close wrappers; we render our
+ *    own <main> inside header.php/footer.php + the templates.
+ * ------------------------------------------------------------------ */
+remove_action( 'woocommerce_sidebar', 'woocommerce_get_sidebar', 10 );
+
+remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10 );
+remove_action( 'woocommerce_after_main_content', 'woocommerce_output_content_wrapper_end', 10 );
+
+add_action( 'woocommerce_before_main_content', function () {
+	echo '<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">';
+}, 10 );
+add_action( 'woocommerce_after_main_content', function () {
+	echo '</div>';
+}, 10 );
+
+/* ------------------------------------------------------------------ *
+ * 6. CART COUNT FRAGMENT  — live-updates the header badge after AJAX add
+ * ------------------------------------------------------------------ */
+add_filter( 'woocommerce_add_to_cart_fragments', function ( $fragments ) {
+	$count = function_exists( 'WC' ) && WC()->cart ? WC()->cart->get_cart_contents_count() : 0;
+
+	// (a) The header badge count.
+	ob_start();
+	?>
+	<span class="wmb-cart-count absolute -right-1 -top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-bold text-slate-900 <?php echo $count > 0 ? '' : 'hidden'; ?>">
+		<?php echo esc_html( $count ); ?>
+	</span>
+	<?php
+	$fragments['.wmb-cart-count'] = ob_get_clean();
+
+	// (b) The slide-over mini-cart drawer body — refreshed on every AJAX add/remove.
+	ob_start();
+	?>
+	<div class="widget_shopping_cart_content">
+		<?php if ( function_exists( 'woocommerce_mini_cart' ) ) { woocommerce_mini_cart(); } ?>
+	</div>
+	<?php
+	$fragments['div.widget_shopping_cart_content'] = ob_get_clean();
+
+	// (c) Floating cart widget (bottom-right pill: "N Items / total").
+	ob_start();
+	isdb_floating_cart();
+	$fragments['div.isdb-floating-cart'] = ob_get_clean();
+
+	return $fragments;
+} );
+
+/**
+ * Floating cart pill (bottom-right). Hidden when the cart is empty.
+ * Rendered in footer.php and refreshed through the cart fragments filter.
+ */
+function isdb_floating_cart() {
+	$count = isdb_cart_count();
+	?>
+	<div class="isdb-floating-cart fixed right-0 top-1/2 z-40 -translate-y-1/2 <?php echo $count > 0 ? '' : 'hidden'; ?>">
+		<button type="button" onclick="window.dispatchEvent(new CustomEvent('isdb-open-cart'))"
+			class="flex flex-col items-center gap-0.5 rounded-l-card bg-brand-primary px-3 py-2.5 text-white shadow-lg transition hover:bg-brand-hover">
+			<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
+			<span class="whitespace-nowrap text-[11px] font-bold leading-tight"><?php echo esc_html( $count ); ?> Items</span>
+			<span class="whitespace-nowrap text-[11px] font-semibold leading-tight opacity-90"><?php echo wp_kses_post( isdb_cart_subtotal_html() ); ?></span>
+		</button>
+	</div>
+	<?php
+}
+
+/* ------------------------------------------------------------------ *
+ * 7. SMALL HELPERS
+ * ------------------------------------------------------------------ */
+
+/** Number of items currently in the cart (safe on non-WC pages). */
+function isdb_cart_count() {
+	return function_exists( 'WC' ) && WC()->cart ? (int) WC()->cart->get_cart_contents_count() : 0;
+}
+
+/** Cart subtotal, formatted (safe on non-WC pages). */
+function isdb_cart_subtotal_html() {
+	return function_exists( 'WC' ) && WC()->cart ? WC()->cart->get_cart_subtotal() : '';
+}
+
+/**
+ * Top-level product categories, ordered by popularity.
+ * Excludes the default "Uncategorized" term. Returns array of WP_Term.
+ *
+ * @param int $limit
+ * @return WP_Term[]
+ */
+function isdb_top_categories( $limit = 5 ) {
+	if ( ! taxonomy_exists( 'product_cat' ) ) {
+		return array();
+	}
+	$terms = get_terms( array(
+		'taxonomy'   => 'product_cat',
+		'hide_empty' => true,
+		'parent'     => 0,
+		'number'     => (int) $limit,
+		'orderby'    => 'count',
+		'order'      => 'DESC',
+		'exclude'    => array_filter( array( (int) get_option( 'default_product_cat' ) ) ),
+	) );
+	return is_wp_error( $terms ) ? array() : $terms;
+}
+
+/**
+ * Primary navigation. Uses an assigned 'primary' menu if one exists,
+ * otherwise renders real top-level product categories dynamically.
+ *
+ * @param string $variant 'desktop' | 'mobile'
+ */
+function isdb_primary_nav( $variant = 'desktop' ) {
+	$is_mobile = ( 'mobile' === $variant );
+
+	/*
+	 * Mobile: style links via arbitrary variants on the <ul> so wp_nav_menu
+	 * items (which don't receive our per-link class) look identical to the
+	 * dynamic fallback. Desktop nav sits on the dark bar -> white text.
+	 */
+	$mobile_link = '[&_a]:flex [&_a]:items-center [&_a]:rounded-lg [&_a]:px-4 [&_a]:py-3 '
+		. '[&_a]:text-[15px] [&_a]:font-semibold [&_a]:text-brand-title [&_a]:transition '
+		. '[&_a:hover]:bg-brand-soft [&_a:hover]:text-brand-primary '
+		. '[&_.current-menu-item>a]:bg-brand-soft [&_.current-menu-item>a]:text-brand-primary '
+		. '[&_li]:border-b [&_li]:border-slate-50 [&_li:last-child]:border-0';
+
+	$ul_class  = $is_mobile
+		? 'flex flex-col gap-0.5 p-2 ' . $mobile_link
+		: 'flex items-center gap-7 h-12 text-sm font-semibold text-white';
+	$a_class   = $is_mobile
+		? 'flex items-center rounded-lg px-4 py-3 text-[15px] font-semibold text-brand-title transition hover:bg-brand-soft hover:text-brand-primary'
+		: 'text-white/90 hover:text-brand-primary transition';
+
+	if ( has_nav_menu( 'primary' ) ) {
+		wp_nav_menu( array(
+			'theme_location' => 'primary',
+			'container'      => false,
+			'menu_class'     => $ul_class,
+		) );
+		return;
+	}
+
+	// Dynamic fallback: real product categories.
+	echo '<ul class="' . esc_attr( $ul_class ) . '">';
+	echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( home_url( '/shop/' ) ) . '">Shop All</a></li>';
+	foreach ( isdb_top_categories( 5 ) as $term ) {
+		echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( get_term_link( $term ) ) . '">' . esc_html( $term->name ) . '</a></li>';
+	}
+	echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( home_url( '/about-us/' ) ) . '">About Us</a></li>';
+	echo '</ul>';
+}
+
+/**
+ * Free-shipping progress toward a threshold (goal-gradient nudge).
+ * Set ISDB_FREE_SHIP_THRESHOLD to your REAL free-shipping minimum to enable.
+ * Returns null when disabled (0) or off-cart — so we never invent a number.
+ *
+ * @return array{remaining:float, remaining_html:string, pct:float, reached:bool}|null
+ */
+function isdb_free_shipping_progress() {
+	if ( ! defined( 'ISDB_FREE_SHIP_THRESHOLD' ) || ISDB_FREE_SHIP_THRESHOLD <= 0 ) {
+		return null;
+	}
+	if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+		return null;
+	}
+	$threshold = (float) ISDB_FREE_SHIP_THRESHOLD;
+	$subtotal  = (float) WC()->cart->get_subtotal();
+	$remaining = max( 0, $threshold - $subtotal );
+
+	return array(
+		'remaining'      => $remaining,
+		'remaining_html' => wc_price( $remaining ),
+		'pct'            => min( 100, ( $subtotal / $threshold ) * 100 ),
+		'reached'        => $remaining <= 0,
+	);
+}
+
+/**
+ * Recent GENUINE product reviews (4★+) for homepage social proof.
+ * Never fabricates — returns only real approved reviews. Empty array if none.
+ *
+ * @param int $limit
+ * @return WP_Comment[]
+ */
+function isdb_recent_reviews( $limit = 3 ) {
+	if ( ! post_type_exists( 'product' ) ) {
+		return array();
+	}
+	$comments = get_comments( array(
+		'number'     => (int) $limit,
+		'status'     => 'approve',
+		'post_type'  => 'product',
+		'parent'     => 0,
+		'meta_query' => array(
+			array(
+				'key'     => 'rating',
+				'value'   => 4,
+				'compare' => '>=',
+				'type'    => 'NUMERIC',
+			),
+		),
+	) );
+	return is_array( $comments ) ? $comments : array();
+}
+
+/**
+ * Best-selling published products (by WooCommerce total_sales).
+ * Falls back to latest products when nothing has sold yet.
+ *
+ * @param int $limit
+ * @return WC_Product[]
+ */
+function isdb_best_sellers( $limit = 8 ) {
+	if ( ! function_exists( 'wc_get_products' ) ) {
+		return array();
+	}
+	$products = wc_get_products( array(
+		'status'   => 'publish',
+		'limit'    => (int) $limit,
+		'orderby'  => 'meta_value_num',
+		'meta_key' => 'total_sales',
+		'order'    => 'DESC',
+	) );
+	return is_array( $products ) ? $products : array();
+}
+
+/* ------------------------------------------------------------------ *
+ * 7b. CHECKOUT QUANTITY STEPPER  (AJAX)
+ *     WooCommerce has no native way to change cart quantity from the
+ *     checkout page, so we add a minimal endpoint. It only mutates the
+ *     cart; the checkout form itself is untouched, and the review box is
+ *     refreshed through WooCommerce's own `update_checkout` event.
+ * ------------------------------------------------------------------ */
+/**
+ * Map of product_id => array( key, qty ) for everything currently in the cart.
+ * Lets product cards render a quantity stepper instead of "Add to Cart"
+ * when the item is already in the cart (matches the reference UI).
+ *
+ * @return array
+ */
+function isdb_cart_qty_map() {
+	$map = array();
+	if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+		return $map;
+	}
+	foreach ( WC()->cart->get_cart() as $key => $item ) {
+		$pid = ! empty( $item['variation_id'] ) ? $item['variation_id'] : $item['product_id'];
+		// Same product added twice with different data: keep the largest line.
+		if ( ! isset( $map[ $pid ] ) || $item['quantity'] > $map[ $pid ]['qty'] ) {
+			$map[ $pid ] = array( 'key' => $key, 'qty' => (int) $item['quantity'] );
+		}
+	}
+	return $map;
+}
+
+/* ------------------------------------------------------------------ *
+ * 6d. SIMPLIFIED CHECKOUT FIELDS (BD-friendly — fewer inputs)
+ *     Trims WooCommerce's 10 default fields down to the 6 a Bangladeshi
+ *     COD customer actually needs: Full Name · Phone · Email(optional) ·
+ *     Address · District · Area/Thana. Fields are only relabelled/removed,
+ *     never renamed — orders, emails and admin keep working.
+ * ------------------------------------------------------------------ */
+add_filter( 'woocommerce_checkout_fields', 'isdb_simplify_checkout_fields', 20 );
+function isdb_simplify_checkout_fields( $fields ) {
+
+	foreach ( array( 'billing', 'shipping' ) as $g ) {
+		if ( empty( $fields[ $g ] ) ) {
+			continue;
+		}
+
+		// Drop the clutter.
+		unset(
+			$fields[ $g ][ "{$g}_last_name" ],
+			$fields[ $g ][ "{$g}_company" ],
+			$fields[ $g ][ "{$g}_address_2" ],
+			$fields[ $g ][ "{$g}_postcode" ]
+		);
+
+		// Full name (reuse first_name, full width).
+		if ( isset( $fields[ $g ][ "{$g}_first_name" ] ) ) {
+			$fields[ $g ][ "{$g}_first_name" ]['label']       = __( 'Full Name', 'isdb-custom' );
+			$fields[ $g ][ "{$g}_first_name" ]['placeholder'] = __( 'Your full name', 'isdb-custom' );
+			$fields[ $g ][ "{$g}_first_name" ]['class']       = array( 'form-row-wide' );
+			$fields[ $g ][ "{$g}_first_name" ]['priority']    = 10;
+		}
+
+		// Country stays (WC needs it) but is hidden — store defaults to BD below.
+		if ( isset( $fields[ $g ][ "{$g}_country" ] ) ) {
+			$fields[ $g ][ "{$g}_country" ]['class']    = array( 'form-row-wide', 'wmb-hidden-field' );
+			$fields[ $g ][ "{$g}_country" ]['priority'] = 15;
+		}
+
+		// Address (single line).
+		if ( isset( $fields[ $g ][ "{$g}_address_1" ] ) ) {
+			$fields[ $g ][ "{$g}_address_1" ]['label']       = __( 'Address', 'isdb-custom' );
+			$fields[ $g ][ "{$g}_address_1" ]['placeholder'] = __( 'House no. / building / street / area', 'isdb-custom' );
+			$fields[ $g ][ "{$g}_address_1" ]['class']       = array( 'form-row-wide' );
+			$fields[ $g ][ "{$g}_address_1" ]['priority']    = 40;
+		}
+
+		// District (state) + Area/Thana (city), side by side.
+		if ( isset( $fields[ $g ][ "{$g}_state" ] ) ) {
+			$fields[ $g ][ "{$g}_state" ]['label']       = __( 'District', 'isdb-custom' );
+			$fields[ $g ][ "{$g}_state" ]['placeholder'] = __( 'Select District', 'isdb-custom' );
+			$fields[ $g ][ "{$g}_state" ]['class']       = array( 'form-row-first' );
+			$fields[ $g ][ "{$g}_state" ]['priority']    = 50;
+		}
+		if ( isset( $fields[ $g ][ "{$g}_city" ] ) ) {
+			$fields[ $g ][ "{$g}_city" ]['label']       = __( 'Area / Thana', 'isdb-custom' );
+			$fields[ $g ][ "{$g}_city" ]['placeholder'] = __( 'Area / Thana', 'isdb-custom' );
+			$fields[ $g ][ "{$g}_city" ]['required']    = false;
+			$fields[ $g ][ "{$g}_city" ]['class']       = array( 'form-row-last' );
+			$fields[ $g ][ "{$g}_city" ]['priority']    = 60;
+		}
+	}
+
+	// Billing-only: Phone required, Email optional.
+	if ( isset( $fields['billing']['billing_phone'] ) ) {
+		$fields['billing']['billing_phone']['required']    = true;
+		$fields['billing']['billing_phone']['label']       = __( 'Phone Number', 'isdb-custom' );
+		$fields['billing']['billing_phone']['placeholder'] = __( '01XXXXXXXXX', 'isdb-custom' );
+		$fields['billing']['billing_phone']['class']       = array( 'form-row-first' );
+		$fields['billing']['billing_phone']['priority']    = 20;
+	}
+	if ( isset( $fields['billing']['billing_email'] ) ) {
+		$fields['billing']['billing_email']['required']    = false;
+		$fields['billing']['billing_email']['label']       = __( 'Email (optional)', 'isdb-custom' );
+		$fields['billing']['billing_email']['placeholder'] = __( 'example@gmail.com (optional)', 'isdb-custom' );
+		$fields['billing']['billing_email']['class']       = array( 'form-row-last' );
+		$fields['billing']['billing_email']['priority']    = 30;
+	}
+
+	return $fields;
+}
+
+// Default the checkout to Bangladesh so the hidden country field is valid.
+add_filter( 'default_checkout_billing_country', function () { return 'BD'; } );
+add_filter( 'default_checkout_shipping_country', function () { return 'BD'; } );
+
+/* ------------------------------------------------------------------ *
+ * 6e. THANK-YOU / ORDER TRACKER
+ *     thankyou.php renders its own order tracker (timeline + summary +
+ *     shipping), so drop WooCommerce's default order-details/customer tables
+ *     to avoid duplication. Plugins hooking woocommerce_thankyou still fire.
+ * ------------------------------------------------------------------ */
+add_action( 'wp', function () {
+	if ( function_exists( 'is_order_received_page' ) && is_order_received_page() ) {
+		remove_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
+	}
+} );
+
+/**
+ * Map an order's status to a step index on the tracker timeline.
+ * Filterable so a store using custom statuses (packed/shipped) can slot them in.
+ *
+ * @param WC_Order $order
+ * @return int
+ */
+function isdb_order_timeline_step( $order ) {
+	$map = apply_filters( 'isdb_order_timeline_status_map', array(
+		'pending'    => 0,
+		'on-hold'    => 0,
+		'processing' => 1,
+		'packed'     => 2,
+		'ready'      => 2,
+		'shipped'    => 3,
+		'in-transit' => 3,
+		'out-for-delivery' => 3,
+		'completed'  => 4,
+	) );
+	$status = $order->get_status();
+	return isset( $map[ $status ] ) ? (int) $map[ $status ] : 0;
+}
+
+/**
+ * Public URL of the standalone order-tracking page.
+ * Create a Page using the "Order Tracking" template (slug: track-order).
+ * Filterable if your slug differs.
+ *
+ * @return string
+ */
+function isdb_track_order_url() {
+	return apply_filters( 'isdb_track_order_url', home_url( '/track-order/' ) );
+}
+
+/**
+ * Auto-create the public "Track Order" page (slug: track-order) using the
+ * "Order Tracking" template, so the header/menu link works with no manual setup.
+ * Runs on theme activation and once in admin (option-guarded).
+ */
+function isdb_ensure_track_order_page() {
+	if ( get_page_by_path( 'track-order' ) ) {
+		return;
+	}
+	$page_id = wp_insert_post( array(
+		'post_title'  => 'Track Order',
+		'post_name'   => 'track-order',
+		'post_status' => 'publish',
+		'post_type'   => 'page',
+	) );
+	if ( $page_id && ! is_wp_error( $page_id ) ) {
+		update_post_meta( $page_id, '_wp_page_template', 'template-track-order.php' );
+	}
+}
+add_action( 'after_switch_theme', 'isdb_ensure_track_order_page' );
+add_action( 'admin_init', function () {
+	if ( get_option( 'isdb_track_page_done' ) ) {
+		return;
+	}
+	isdb_ensure_track_order_page();
+	update_option( 'isdb_track_page_done', 1 );
+} );
+
+/**
+ * Title / lead / body for the branded policy pages, keyed by slug.
+ * Slugs match the footer links. Body uses only prose-safe tags.
+ *
+ * @return array<string,array{title:string,excerpt:string,content:string}>
+ */
+function isdb_policy_pages_content() {
+	$return = <<<'HTML'
+<p>At WayMoreBD, your satisfaction isn't just a promise—it's our top priority. We understand that sometimes things don't go exactly as planned. If something isn't right, we've got your back with a smooth, worry-free return process.</p>
+
+<h2>3-Day Easy Return Window</h2>
+<p>Take your time! You have a full <strong>3 days</strong> from the moment you receive your order to request a return if the product is damaged, defective, or not what you expected.</p>
+
+<h2>Zero-Hassle Return Process</h2>
+<p>We hate complicated forms as much as you do. Returning an item is as easy as reaching out to us:</p>
+<ul>
+<li>Contact our friendly support team via WhatsApp, Facebook Messenger, Live Chat, or a quick phone call.</li>
+<li>Simply share your <strong>Order ID</strong>, a brief note about the issue, and a quick photo or video so we can instantly verify and assist you.</li>
+</ul>
+
+<h2>Your Choice: Replacement or Fast Refund</h2>
+<p>Once your return is approved, you hold the power. Choose what works best for you:</p>
+<ul>
+<li><strong>Replacement:</strong> We'll swiftly deliver a brand-new, perfect product right to your doorstep.</li>
+<li><strong>Refund:</strong> Get your money safely back through your original payment method (bKash/Nagad/Card). For our Cash on Delivery (COD) family, refunds are seamlessly processed via mobile banking.</li>
+</ul>
+
+<h2>Simple Conditions for a Happy Return</h2>
+<p>To help us process your return instantly, just ensure:</p>
+<ul>
+<li>The product is completely unused and resting in its original packaging.</li>
+<li>All those little extras—accessories, tags, and freebies—are included.</li>
+</ul>
+<blockquote><strong>Note:</strong> We cannot accept returns for items damaged due to accidental misuse or mishandling.</blockquote>
+
+<h2>Pre-Order Items</h2>
+<p>Special pre-order items are uniquely sourced for you! They can be safely returned if they arrive in a damaged or defective condition.</p>
+
+<h2>No Hassle, No Stress</h2>
+<p>Our dedicated team is standing by to guide you through every step of the return process. Your happiness means everything to us. Shop with absolute confidence and peace of mind at WayMoreBD.</p>
+HTML;
+
+	$terms = <<<'HTML'
+<p>Thank you for choosing WayMoreBD! When you shop with us, we want you to feel completely secure. These simple Terms of Service are designed to ensure a transparent, fair, and delightful shopping experience for you.</p>
+
+<h2>Your Account &amp; Security</h2>
+<p>When you create an account with WayMoreBD, you are trusting us with your details. In return, we ask that you keep your login credentials safe. You are in control of your account, and any activity under your account is your responsibility.</p>
+
+<h2>Honest Pricing &amp; Product Information</h2>
+<p>We strive for <strong>100% accuracy</strong>. Every image, description, and price on WayMoreBD is crafted to give you the clearest picture of what you are buying. In the rare event of a typographical error in pricing or stock, we promise to communicate with you honestly and find a fair solution before processing the order.</p>
+
+<h2>Seamless Order Fulfillment</h2>
+<p>When you tap "Place Order," our team immediately gets to work. We reserve the right to accept, decline, or gracefully cancel orders in cases of stock unavailability or security concerns. If an order is canceled after payment, your money will be refunded instantly—no questions asked.</p>
+
+<h2>A Community of Respect</h2>
+<p>WayMoreBD is built on mutual trust. By using our platform, you agree to interact respectfully and use our website for its intended purpose—enjoying a premium shopping experience without engaging in fraudulent or harmful activities.</p>
+HTML;
+
+	$privacy = <<<'HTML'
+<p>At WayMoreBD, we don't just protect your packages; we protect your digital footprint. We know that your personal information is extremely private, and we treat it with the highest level of security and respect.</p>
+
+<h2>What We Collect &amp; Why</h2>
+<p>To deliver your favorite items to your doorstep, we only collect the essentials: your name, shipping address, phone number, and email. This information is strictly used to:</p>
+<ul>
+<li>Process and deliver your orders lightning-fast.</li>
+<li>Send you important updates regarding your delivery status.</li>
+<li>Make your next checkout experience even smoother.</li>
+</ul>
+
+<h2>100% Secure Payments</h2>
+<p>Your financial safety is non-negotiable. When you pay online, your credit card or mobile banking details are encrypted and processed through highly secure, bank-level payment gateways. <strong>WayMoreBD never stores your sensitive payment or card information.</strong></p>
+
+<h2>We Never Sell Your Data</h2>
+<p>Your trust is our biggest asset. WayMoreBD absolutely guarantees that your personal information will never be sold, rented, or traded to third-party companies. We only share necessary details (like your address and phone number) with our trusted delivery partners so they can bring your package home.</p>
+
+<h2>Your Control</h2>
+<p>You are always in the driver's seat. You have the complete right to access, edit, or request the deletion of your personal data from our system at any time. Just drop us a message, and we'll handle it immediately.</p>
+<blockquote>Shop freely and securely. At WayMoreBD, your privacy is always in safe hands.</blockquote>
+HTML;
+
+	$contact = <<<'HTML'
+<p>Have a question, a special request, or simply want to say hello? Our friendly team at WayMoreBD is always ready to help. Reach out through whichever channel is easiest for you—we usually reply within a few hours.</p>
+HTML;
+
+	$company = <<<'HTML'
+<p>WayMoreBD is a homegrown Bangladeshi online store with one simple mission: to bring premium kitchen and home essentials to your doorstep—honestly priced, carefully sourced, and delivered with care.</p>
+
+<h2>Who We Are</h2>
+<p>We started WayMoreBD because we believe everyday families deserve more—more quality, more honesty, and more value for every taka they spend. From our base in Dhaka, we hand-pick products we would happily use in our own homes and make them available to customers across Bangladesh.</p>
+
+<h2>What We Stand For</h2>
+<ul>
+<li><strong>Honesty first:</strong> real photos, clear prices, and no hidden surprises at checkout.</li>
+<li><strong>Quality you can trust:</strong> every product is checked before it reaches you.</li>
+<li><strong>Customer care that feels personal:</strong> real humans, quick replies, and a genuine "we've got your back" attitude.</li>
+<li><strong>Cash on Delivery convenience:</strong> pay only when your order arrives safely.</li>
+</ul>
+
+<h2>Where to Find Us</h2>
+<p>WayMoreBD<br>New Market, Dhaka, Bangladesh<br>Phone: +880 1868 662477<br>Email: info.waymore.bd@gmail.com</p>
+HTML;
+
+	$stories = <<<'HTML'
+<p>Behind every order is a real kitchen, a real family, and a real moment made a little easier. These are the stories that keep us going.</p>
+
+<h2>Why We Started</h2>
+<p>WayMoreBD began with a simple frustration: too many online stores promised the world and delivered disappointment. We wanted to build the opposite—a place where "what you see is what you get," where support actually supports, and where shopping feels safe and joyful.</p>
+
+<h2>The WayMore Difference</h2>
+<p>We obsess over the small things—the way an order is packed, how fast a question is answered, the little freebies that make you smile. Because we know it's these details that turn a first-time buyer into a lifelong friend of the brand.</p>
+
+<h2>Made for Bangladeshi Homes</h2>
+<p>From spices to kitchen tools to everyday essentials, everything we offer is chosen with local homes in mind. Our goal is simple: help you cook, care, and live a little better every single day.</p>
+
+<blockquote>Every product we deliver carries a promise—quality you can feel and service you can trust.</blockquote>
+HTML;
+
+	$careers = <<<'HTML'
+<p>At WayMoreBD, we're building something special—and we're always looking for passionate people who want to grow with us. If you love solving problems, delighting customers, and doing honest work, you'll feel right at home here.</p>
+
+<h2>Why Join WayMoreBD</h2>
+<ul>
+<li><strong>Real impact:</strong> your work directly shapes the experience of thousands of customers.</li>
+<li><strong>A culture of respect:</strong> we win as a team and support each other every step of the way.</li>
+<li><strong>Room to grow:</strong> we invest in people who take initiative and learn fast.</li>
+</ul>
+
+<h2>Who We're Looking For</h2>
+<p>We welcome talented, dependable people across customer support, operations, marketing, and delivery. More than a perfect CV, we value a great attitude, honesty, and a genuine desire to help others.</p>
+
+<h2>How to Apply</h2>
+<p>Interested in joining the family? Send your CV and a short note about yourself to <a href="mailto:info.waymore.bd@gmail.com">info.waymore.bd@gmail.com</a> with the role you're excited about in the subject line. We review every application with care and reach out if there's a good fit.</p>
+HTML;
+
+	return array(
+		'return-refund-policy' => array(
+			'title'    => 'Happy Return & Refund Policy',
+			'excerpt'  => 'Your Happiness is Our Guarantee',
+			'content'  => $return,
+			'template' => 'template-policy.php',
+		),
+		'terms-and-conditions' => array(
+			'title'    => 'Terms of Services',
+			'excerpt'  => 'Welcome to the WayMoreBD Family',
+			'content'  => $terms,
+			'template' => 'template-policy.php',
+		),
+		'privacy-policy'       => array(
+			'title'    => 'Privacy Policy',
+			'excerpt'  => 'Your Privacy is Our Promise',
+			'content'  => $privacy,
+			'template' => 'template-policy.php',
+		),
+		'contact'              => array(
+			'title'    => 'Contact Us',
+			'excerpt'  => "We're Always Just a Message Away",
+			'content'  => $contact,
+			'template' => 'template-contact.php',
+		),
+		'company-information'  => array(
+			'title'    => 'Company Information',
+			'excerpt'  => 'The Story Behind WayMoreBD',
+			'content'  => $company,
+			'template' => 'template-policy.php',
+		),
+		'our-stories'          => array(
+			'title'    => 'Our Stories',
+			'excerpt'  => 'Real People. Real Kitchens. Real WayMore.',
+			'content'  => $stories,
+			'template' => 'template-policy.php',
+		),
+		'careers'              => array(
+			'title'    => 'Careers',
+			'excerpt'  => 'Grow With Us',
+			'content'  => $careers,
+			'template' => 'template-policy.php',
+		),
+	);
+}
+
+/**
+ * Auto-create the branded policy pages (Return, Terms, Privacy) using the
+ * "Policy Page" template. Slugs match the footer links; existing pages are
+ * never overwritten (safe to edit in wp-admin afterwards).
+ */
+function isdb_ensure_policy_pages() {
+	foreach ( isdb_policy_pages_content() as $slug => $data ) {
+		if ( get_page_by_path( $slug ) ) {
+			continue;
+		}
+		$page_id = wp_insert_post( array(
+			'post_title'   => $data['title'],
+			'post_name'    => $slug,
+			'post_excerpt' => $data['excerpt'],
+			'post_content' => $data['content'],
+			'post_status'  => 'publish',
+			'post_type'    => 'page',
+		) );
+		if ( $page_id && ! is_wp_error( $page_id ) ) {
+			$template = ! empty( $data['template'] ) ? $data['template'] : 'template-policy.php';
+			update_post_meta( $page_id, '_wp_page_template', $template );
+		}
+	}
+}
+add_action( 'after_switch_theme', 'isdb_ensure_policy_pages' );
+add_action( 'admin_init', function () {
+	// Bumped key (v2) so newly added managed pages are created even if the
+	// earlier policy-only batch already ran. get_page_by_path() skips existing.
+	if ( get_option( 'isdb_managed_pages_v2' ) ) {
+		return;
+	}
+	isdb_ensure_policy_pages();
+	update_option( 'isdb_managed_pages_v2', 1 );
+} );
+
+/**
+ * Simple per-IP throttle for the public order lookup (defense-in-depth against
+ * order-ID + phone brute-forcing). 10 attempts per 10 minutes.
+ *
+ * @return bool True while under the limit.
+ */
+function isdb_track_lookup_allowed() {
+	$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'x';
+	$key = 'isdb_track_try_' . md5( $ip );
+	$n   = (int) get_transient( $key );
+	if ( $n >= 10 ) {
+		return false;
+	}
+	set_transient( $key, $n + 1, 10 * MINUTE_IN_SECONDS );
+	return true;
+}
+
+/**
+ * Look up an order for the PUBLIC tracker, verifying ownership.
+ *
+ * Security: never expose an order by number alone (numbers are enumerable).
+ * We accept it only when EITHER the logged-in requester owns the order, OR the
+ * phone/email they supplied matches the order's billing record.
+ *
+ * @param string $number  Order number / ID (any format; digits are extracted).
+ * @param string $contact Billing phone or email used to verify a guest.
+ * @return array{order:?WC_Order, error:string}
+ */
+function isdb_find_trackable_order( $number, $contact = '' ) {
+	$digits = preg_replace( '/\D+/', '', (string) $number );
+	if ( '' === $digits ) {
+		return array( 'order' => null, 'error' => 'Please enter a valid order number.' );
+	}
+
+	$order = wc_get_order( (int) $digits );
+	if ( ! $order instanceof WC_Order ) {
+		return array( 'order' => null, 'error' => 'No order found with that number. Please check and try again.' );
+	}
+
+	// Owner shortcut — logged-in customer viewing their own order.
+	if ( is_user_logged_in() && (int) $order->get_customer_id() === get_current_user_id() ) {
+		return array( 'order' => $order, 'error' => '' );
+	}
+
+	// Guest: require a matching phone or email.
+	$contact = trim( (string) $contact );
+	if ( '' === $contact ) {
+		return array( 'order' => null, 'error' => 'Enter the phone number used on the order to view it.' );
+	}
+
+	if ( is_email( $contact ) ) {
+		$match = ( 0 === strcasecmp( trim( $order->get_billing_email() ), $contact ) );
+	} else {
+		$norm  = static function ( $p ) {
+			$p = preg_replace( '/\D+/', '', (string) $p );
+			return strlen( $p ) >= 10 ? substr( $p, -10 ) : $p; // ignore +88 / leading 0
+		};
+		$in    = $norm( $contact );
+		$match = ( '' !== $in && $in === $norm( $order->get_billing_phone() ) );
+	}
+
+	if ( ! $match ) {
+		return array( 'order' => null, 'error' => 'The details don\'t match our records. Please check the phone/email used on the order.' );
+	}
+
+	return array( 'order' => $order, 'error' => '' );
+}
+
+/**
+ * Render the order-tracker BODY — status timeline, products, order summary and
+ * shipping details. Shared by the thank-you page and the standalone tracking
+ * page (each supplies its own hero). Styling lives in .wmb-stepper (app.css).
+ *
+ * @param WC_Order $order
+ */
+function isdb_render_order_tracker( $order ) {
+	if ( ! $order instanceof WC_Order ) {
+		return;
+	}
+
+	$is_paid      = $order->is_paid();
+	$total_raw    = (float) $order->get_total();
+	$paid_raw     = $is_paid ? $total_raw : 0.0;
+	$due_raw      = $is_paid ? 0.0 : $total_raw;
+	$discount_raw = (float) $order->get_total_discount();
+	$ship_raw     = (float) $order->get_shipping_total();
+	$current      = isdb_order_timeline_step( $order );
+	$is_cancelled = $order->has_status( array( 'cancelled', 'refunded' ) );
+	$total_html   = $order->get_formatted_order_total();
+
+	$steps = array(
+		array( 'label' => 'Order Placed', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12A2.25 2.25 0 0118.628 21H5.372a2.25 2.25 0 01-2.24-2.493l1.264-12A2.25 2.25 0 016.632 6h10.736a2.25 2.25 0 012.24 2.007z"/>' ),
+		array( 'label' => 'Confirmed', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>' ),
+		array( 'label' => 'Packed', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/>' ),
+		array( 'label' => 'On the Way', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>' ),
+		array( 'label' => 'Delivered', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>' ),
+	);
+	$last_index = count( $steps ) - 1;
+	$fill_pct   = $last_index > 0 ? min( 100, ( $current / $last_index ) * 100 ) : 0;
+	?>
+	<!-- ── STATUS TIMELINE ── -->
+	<div class="mx-auto max-w-3xl rounded-2xl border border-slate-100 bg-white p-6 sm:p-8">
+		<div class="mb-6 flex items-center justify-between">
+			<h2 class="flex items-center gap-2 text-base font-bold text-brand-title">
+				<svg class="h-5 w-5 text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+				Order Timeline
+			</h2>
+			<?php if ( $is_cancelled ) : ?>
+				<span class="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-rose-600"><?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?></span>
+			<?php else : ?>
+				<span class="rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand-primary"><?php echo esc_html( $steps[ min( $current, $last_index ) ]['label'] ); ?></span>
+			<?php endif; ?>
+		</div>
+
+		<div class="wmb-stepper" style="--wmb-fill: <?php echo esc_attr( $is_cancelled ? 0 : $fill_pct ); ?>%;">
+			<?php
+			foreach ( $steps as $i => $step ) :
+				$state = $is_cancelled ? 'pending' : ( $i < $current ? 'done' : ( $i === $current ? 'active' : 'pending' ) );
+				?>
+				<div class="wmb-step wmb-step--<?php echo esc_attr( $state ); ?>">
+					<div class="wmb-step__circle">
+						<?php if ( 'done' === $state ) : ?>
+							<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+						<?php else : ?>
+							<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><?php echo $step['icon']; // phpcs:ignore WordPress.Security.EscapeOutput ?></svg>
+						<?php endif; ?>
+					</div>
+					<span class="wmb-step__label"><?php echo esc_html( $step['label'] ); ?></span>
+				</div>
+			<?php endforeach; ?>
+		</div>
+	</div>
+
+	<!-- ── PRODUCTS + SUMMARY + SHIPPING ── -->
+	<div class="mx-auto mt-6 grid max-w-3xl gap-6 lg:grid-cols-[1fr,320px] lg:items-start">
+
+		<section class="rounded-2xl border border-slate-100 bg-white p-6">
+			<h2 class="mb-4 text-base font-bold text-brand-title">Products</h2>
+			<ul class="divide-y divide-slate-100">
+				<?php foreach ( $order->get_items() as $item ) :
+					$product   = $item->get_product();
+					$thumb     = $product ? $product->get_image( array( 56, 56 ), array( 'class' => 'h-14 w-14 rounded-lg object-cover' ) ) : '';
+					$line_html = $order->get_formatted_line_subtotal( $item );
+					?>
+					<li class="flex items-center gap-3 py-3">
+						<div class="flex-none overflow-hidden rounded-lg bg-brand-bg"><?php echo wp_kses_post( $thumb ); ?></div>
+						<div class="min-w-0 flex-1">
+							<p class="truncate text-sm font-semibold text-brand-title"><?php echo esc_html( $item->get_name() ); ?></p>
+							<p class="mt-0.5 text-xs text-slate-500">Qty: <?php echo esc_html( $item->get_quantity() ); ?></p>
+						</div>
+						<span class="flex-none text-sm font-bold text-brand-title"><?php echo wp_kses_post( $line_html ); ?></span>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</section>
+
+		<div class="space-y-6">
+			<section class="rounded-2xl border border-slate-100 bg-white p-6">
+				<h2 class="mb-4 text-base font-bold text-brand-title">Order Summary</h2>
+				<dl class="space-y-2.5 text-sm">
+					<div class="flex items-center justify-between">
+						<dt class="text-slate-500">Subtotal</dt>
+						<dd class="font-semibold text-brand-title"><?php echo wp_kses_post( wc_price( $order->get_subtotal() ) ); ?></dd>
+					</div>
+					<?php if ( $discount_raw > 0 ) : ?>
+						<div class="flex items-center justify-between">
+							<dt class="text-slate-500">Discount</dt>
+							<dd class="font-semibold text-emerald-600">&minus;<?php echo wp_kses_post( wc_price( $discount_raw ) ); ?></dd>
+						</div>
+					<?php endif; ?>
+					<div class="flex items-center justify-between">
+						<dt class="text-slate-500">Delivery Fee</dt>
+						<dd class="font-semibold text-brand-title"><?php echo $ship_raw > 0 ? wp_kses_post( wc_price( $ship_raw ) ) : '<span class="text-emerald-600">Free</span>'; ?></dd>
+					</div>
+					<div class="flex items-center justify-between border-t border-slate-100 pt-2.5">
+						<dt class="font-bold text-brand-title">Grand Total</dt>
+						<dd class="text-base font-extrabold text-brand-primary"><?php echo wp_kses_post( $total_html ); ?></dd>
+					</div>
+					<div class="flex items-center justify-between">
+						<dt class="text-slate-500">Total Paid</dt>
+						<dd class="font-semibold text-brand-title"><?php echo wp_kses_post( wc_price( $paid_raw ) ); ?></dd>
+					</div>
+					<div class="flex items-center justify-between">
+						<dt class="text-slate-500">Amount Due</dt>
+						<dd class="font-bold <?php echo $due_raw > 0 ? 'text-rose-600' : 'text-emerald-600'; ?>"><?php echo wp_kses_post( wc_price( $due_raw ) ); ?></dd>
+					</div>
+				</dl>
+
+				<div class="mt-4 flex items-center justify-between rounded-xl bg-brand-bg px-3.5 py-2.5">
+					<span class="text-xs font-medium text-slate-500">Payment Status</span>
+					<span class="inline-flex items-center gap-1.5 text-xs font-bold <?php echo $is_paid ? 'text-emerald-600' : 'text-amber-600'; ?>">
+						<span class="h-1.5 w-1.5 rounded-full <?php echo $is_paid ? 'bg-emerald-500' : 'bg-amber-500'; ?>"></span>
+						<?php echo $is_paid ? 'Paid' : 'Payment Pending'; ?>
+					</span>
+				</div>
+
+				<?php if ( $due_raw > 0 && $order->needs_payment() ) : ?>
+					<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="mt-3 block rounded-xl border border-brand-primary px-4 py-2.5 text-center text-sm font-bold text-brand-primary transition hover:bg-brand-primary hover:text-white">
+						Pay Remaining Amount
+					</a>
+				<?php endif; ?>
+			</section>
+
+			<section class="rounded-2xl border border-slate-100 bg-white p-6">
+				<h2 class="mb-4 text-base font-bold text-brand-title">Shipping Details</h2>
+				<dl class="space-y-3 text-sm">
+					<div>
+						<dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Customer</dt>
+						<dd class="mt-0.5 font-semibold text-brand-title"><?php echo esc_html( $order->get_formatted_billing_full_name() ); ?></dd>
+					</div>
+					<?php if ( $order->get_billing_phone() ) : ?>
+						<div>
+							<dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Phone</dt>
+							<dd class="mt-0.5 font-semibold text-brand-title"><?php echo esc_html( $order->get_billing_phone() ); ?></dd>
+						</div>
+					<?php endif; ?>
+					<div>
+						<dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Delivery Address</dt>
+						<dd class="mt-0.5 leading-relaxed text-brand-body"><?php echo wp_kses_post( $order->get_formatted_billing_address() ?: '&mdash;' ); ?></dd>
+					</div>
+					<div>
+						<dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Payment Method</dt>
+						<dd class="mt-0.5 font-semibold text-brand-title"><?php echo esc_html( $order->get_payment_method_title() ); ?></dd>
+					</div>
+				</dl>
+			</section>
+		</div>
+	</div>
+	<?php
+}
+
+/* ------------------------------------------------------------------ *
+ * 6a. CHECKOUT LAYOUT SPLIT
+ *     Core fires BOTH the order-review table and the payment box from the
+ *     single `woocommerce_checkout_order_review` action. We detach them so
+ *     the template can place items (left column) and payment (right column)
+ *     independently. Safe because WC's update_order_review AJAX targets the
+ *     two fragments by CLASS (.woocommerce-checkout-review-order-table and
+ *     .woocommerce-checkout-payment) — both still exist in the DOM.
+ * ------------------------------------------------------------------ */
+add_action( 'wp', function () {
+	if ( ! function_exists( 'is_checkout' ) || ! is_checkout() ) {
+		return;
+	}
+	remove_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 );
+	remove_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20 );
+
+	// Coupon is rendered in the right column, not at the top of the page.
+	remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
+} );
+
+/**
+ * Checkout order-summary totals — rendered in the RIGHT column, and refreshed
+ * live via the fragment below whenever address/shipping/qty changes.
+ */
+function isdb_render_checkout_totals() {
+	?>
+	<div class="wmb-order-totals space-y-2.5 text-sm">
+		<div class="flex items-center justify-between">
+			<span class="text-brand-body">Sub total</span>
+			<span class="font-semibold text-brand-title"><?php wc_cart_totals_subtotal_html(); ?></span>
+		</div>
+
+		<?php foreach ( WC()->cart->get_coupons() as $code => $coupon ) : ?>
+			<div class="flex items-center justify-between text-emerald-700">
+				<span><?php wc_cart_totals_coupon_label( $coupon ); ?></span>
+				<span><?php wc_cart_totals_coupon_html( $coupon ); ?></span>
+			</div>
+		<?php endforeach; ?>
+
+		<?php do_action( 'woocommerce_review_order_before_shipping' ); ?>
+		<?php if ( WC()->cart->needs_shipping() && WC()->cart->show_shipping() ) : ?>
+			<div class="isdb-ship-rows [&_ul]:m-0 [&_ul]:list-none [&_ul]:p-0 [&_li]:flex [&_li]:items-center [&_li]:justify-between [&_li]:py-0.5 [&_label]:m-0 [&_label]:text-brand-body [&_.amount]:font-semibold [&_.amount]:text-brand-title">
+				<?php wc_cart_totals_shipping_html(); ?>
+			</div>
+		<?php else : ?>
+			<div class="flex items-center justify-between">
+				<span class="text-brand-body">Delivery cost</span>
+				<span class="font-semibold text-brand-title"><?php echo esc_html( wc_price( 0 ) ); ?></span>
+			</div>
+		<?php endif; ?>
+		<?php do_action( 'woocommerce_review_order_after_shipping' ); ?>
+
+		<?php foreach ( WC()->cart->get_fees() as $fee ) : ?>
+			<div class="flex items-center justify-between">
+				<span class="text-brand-body"><?php echo esc_html( $fee->name ); ?></span>
+				<span><?php wc_cart_totals_fee_html( $fee ); ?></span>
+			</div>
+		<?php endforeach; ?>
+
+		<?php do_action( 'woocommerce_review_order_before_order_total' ); ?>
+		<div class="flex items-center justify-between border-t border-[#e0e0e0] pt-3">
+			<span class="text-base font-bold text-brand-title">Total</span>
+			<span class="text-lg font-extrabold text-brand-primary"><?php wc_cart_totals_order_total_html(); ?></span>
+		</div>
+		<?php do_action( 'woocommerce_review_order_after_order_total' ); ?>
+	</div>
+	<?php
+}
+
+// Keep the right-column totals in sync with WooCommerce's update_order_review AJAX.
+add_filter( 'woocommerce_update_order_review_fragments', function ( $fragments ) {
+	ob_start();
+	isdb_render_checkout_totals();
+	$fragments['.wmb-order-totals'] = ob_get_clean();
+	return $fragments;
+} );
+
+/* ------------------------------------------------------------------ *
+ * 6b. AUTH PLUGIN BRIDGES  (Social login + phone/OTP login)
+ *     These render ONLY when a provider plugin is actually active — no
+ *     dead buttons are ever printed.
+ * ------------------------------------------------------------------ */
+
+/**
+ * Render social-login buttons (Nextend Social Login, or any plugin exposing
+ * a known shortcode).
+ *
+ * @return bool True when something was printed.
+ */
+function isdb_render_social_login() {
+	$html = isdb_get_social_login_html();
+	if ( '' === $html ) {
+		return false;
+	}
+	echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- plugin-generated markup.
+	return true;
+}
+
+/**
+ * Social-login buttons as an HTML string (empty when nothing to show).
+ *
+ * NOTE: NextendSocialLogin::renderButtonsWithContainer() RETURNS the markup,
+ * it does not echo — and it returns '' when the user is already logged in or
+ * no provider is enabled. Callers must check the string, not just whether the
+ * plugin exists, otherwise you get a divider with nothing under it.
+ *
+ * @return string
+ */
+function isdb_get_social_login_html() {
+	static $cached = null;
+	if ( null !== $cached ) {
+		return $cached;
+	}
+
+	$html = '';
+
+	// Nextend Social Login — official PHP API.
+	if ( class_exists( 'NextendSocialLogin' ) && method_exists( 'NextendSocialLogin', 'renderButtonsWithContainer' ) ) {
+		$html = (string) NextendSocialLogin::renderButtonsWithContainer();
+	}
+
+	// Fallback: any known shortcode.
+	if ( '' === trim( $html ) ) {
+		$tags = apply_filters( 'isdb_social_login_shortcodes', array(
+			'nextend_social_login',
+			'miniorange_social_login',
+			'wordpress_social_login',
+		) );
+		foreach ( (array) $tags as $tag ) {
+			if ( shortcode_exists( $tag ) ) {
+				$html = (string) do_shortcode( '[' . $tag . ']' );
+				if ( '' !== trim( $html ) ) {
+					break;
+				}
+			}
+		}
+	}
+
+	$cached = trim( $html );
+	return $cached;
+}
+
+/**
+ * Render a phone / OTP login form from whichever OTP plugin is active.
+ *
+ * Set the exact shortcode in wp-config.php or a child theme if auto-detection
+ * misses yours:
+ *     define( 'ISDB_OTP_SHORTCODE', '[your-otp-shortcode]' );
+ * …or filter `isdb_otp_shortcode`.
+ *
+ * @return bool True when something was printed.
+ */
+function isdb_render_otp_login() {
+	// 1) Explicit override always wins.
+	$explicit = defined( 'ISDB_OTP_SHORTCODE' ) ? ISDB_OTP_SHORTCODE : '';
+	$explicit = apply_filters( 'isdb_otp_shortcode', $explicit );
+	if ( $explicit ) {
+		echo do_shortcode( $explicit );
+		return true;
+	}
+
+	// 2) Auto-detect common OTP-plugin shortcodes.
+	$tags = apply_filters( 'isdb_otp_login_shortcodes', array(
+		'xoo-el-inline-form',   // xootix Login/Register
+		'xoo-ml-form',          // xootix Mobile Login
+		'miniorange_otp_login',
+		'mo_phone_login',
+		'otp_login_form',
+		'loginotp',
+		'wpotp_login',
+		'digits_login',
+	) );
+	foreach ( (array) $tags as $tag ) {
+		if ( shortcode_exists( $tag ) ) {
+			echo do_shortcode( '[' . $tag . ']' );
+			return true;
+		}
+	}
+	return false;
+}
+
+/** True when some OTP provider is available (used to pick the login layout). */
+function isdb_has_otp_login() {
+	if ( defined( 'ISDB_OTP_SHORTCODE' ) && ISDB_OTP_SHORTCODE ) {
+		return true;
+	}
+	if ( apply_filters( 'isdb_otp_shortcode', '' ) ) {
+		return true;
+	}
+	foreach ( apply_filters( 'isdb_otp_login_shortcodes', array( 'xoo-el-inline-form', 'xoo-ml-form', 'miniorange_otp_login', 'mo_phone_login', 'otp_login_form', 'loginotp', 'wpotp_login', 'digits_login' ) ) as $tag ) {
+		if ( shortcode_exists( $tag ) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * True only when social buttons would actually RENDER something.
+ * Deliberately checks the produced HTML, not merely whether a plugin is
+ * installed — a configured-but-silent plugin used to leave an empty divider.
+ */
+function isdb_has_social_login() {
+	return '' !== isdb_get_social_login_html();
+}
+
+/* ------------------------------------------------------------------ *
+ * 7a. BRAND + COMBO DATA SOURCES
+ * ------------------------------------------------------------------ */
+
+/** First registered brand taxonomy on this install (WC 9.6+ ships product_brand). */
+function isdb_brand_taxonomy() {
+	foreach ( array( 'product_brand', 'pwb-brand', 'yith_product_brand' ) as $tax ) {
+		if ( taxonomy_exists( $tax ) ) {
+			return $tax;
+		}
+	}
+	return '';
+}
+
+/**
+ * Brand terms for the "Our Brands" strip. Empty array when the store has no
+ * brand taxonomy or no brands yet — the section then simply doesn't render
+ * (we never fake brands).
+ *
+ * @param int $limit
+ * @return WP_Term[]
+ */
+function isdb_brand_terms( $limit = 12 ) {
+	$tax = isdb_brand_taxonomy();
+	if ( ! $tax ) {
+		return array();
+	}
+	$terms = get_terms( array(
+		'taxonomy'   => $tax,
+		'hide_empty' => true,
+		'number'     => (int) $limit,
+		'orderby'    => 'count',
+		'order'      => 'DESC',
+	) );
+	return is_wp_error( $terms ) ? array() : $terms;
+}
+
+/**
+ * Products for the "Exclusive Combo Deals" section.
+ * Looks for a `combo`/`combos`/`combo-deals` product category first, then
+ * falls back to grouped products (WooCommerce's native "bundle" type).
+ *
+ * @param int $limit
+ * @return WC_Product[]
+ */
+function isdb_combo_products( $limit = 8 ) {
+	if ( ! function_exists( 'wc_get_products' ) ) {
+		return array();
+	}
+
+	foreach ( array( 'combo', 'combos', 'combo-deals', 'combo-offer' ) as $slug ) {
+		if ( term_exists( $slug, 'product_cat' ) ) {
+			$found = wc_get_products( array(
+				'status'   => 'publish',
+				'limit'    => (int) $limit,
+				'category' => array( $slug ),
+			) );
+			if ( ! empty( $found ) ) {
+				return $found;
+			}
+		}
+	}
+
+	$grouped = wc_get_products( array(
+		'status' => 'publish',
+		'limit'  => (int) $limit,
+		'type'   => 'grouped',
+	) );
+	return is_array( $grouped ) ? $grouped : array();
+}
+
+/**
+ * "Buy now" URL — adds the product to the cart and lands on checkout.
+ * Uses WooCommerce's own ?add-to-cart handler, so stock/validation still apply.
+ *
+ * @param int $product_id
+ * @return string
+ */
+function isdb_buy_now_url( $product_id ) {
+	$checkout = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : home_url( '/checkout/' );
+	return add_query_arg( 'add-to-cart', (int) $product_id, $checkout );
+}
+
+/**
+ * Reusable carousel shell.
+ * Prints the opening markup; caller echoes the slides; then call
+ * isdb_carousel_end(). Arrows are wired by the shared carousel JS.
+ *
+ * @param string $extra_track_class
+ */
+function isdb_carousel_start( $extra_track_class = '' ) {
+	?>
+	<div class="isdb-carousel relative">
+		<button type="button" class="isdb-car-prev absolute -left-3 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-brand-primary text-white shadow-md transition hover:bg-brand-hover disabled:pointer-events-none disabled:opacity-0" aria-label="Previous">
+			<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+		</button>
+
+		<div class="isdb-car-track flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-1 sm:gap-4 <?php echo esc_attr( $extra_track_class ); ?>" style="scrollbar-width:none;">
+	<?php
+}
+
+/** Closes the carousel shell opened by isdb_carousel_start(). */
+function isdb_carousel_end() {
+	?>
+		</div>
+
+		<button type="button" class="isdb-car-next absolute -right-3 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-brand-primary text-white shadow-md transition hover:bg-brand-hover disabled:pointer-events-none disabled:opacity-0" aria-label="Next">
+			<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+		</button>
+	</div>
+	<?php
+}
+
+/* ------------------------------------------------------------------ *
+ * 7c. LIVE SEARCH  (type-ahead product results, no page reload)
+ * ------------------------------------------------------------------ */
+
+/**
+ * Brand label for a product: native WooCommerce `product_brand` taxonomy when
+ * present, otherwise the first product category. Empty string if neither.
+ *
+ * @param WC_Product $product
+ * @return string
+ */
+function isdb_product_brand_label( $product ) {
+	foreach ( array( 'product_brand', 'pwb-brand', 'yith_product_brand' ) as $tax ) {
+		if ( taxonomy_exists( $tax ) ) {
+			$terms = wp_get_post_terms( $product->get_id(), $tax, array( 'fields' => 'names' ) );
+			if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+				return $terms[0];
+			}
+		}
+	}
+	$cats = wc_get_product_terms( $product->get_id(), 'product_cat', array( 'fields' => 'names' ) );
+	return ! empty( $cats ) ? $cats[0] : '';
+}
+
+add_action( 'wp_ajax_isdb_live_search', 'isdb_live_search' );
+add_action( 'wp_ajax_nopriv_isdb_live_search', 'isdb_live_search' );
+function isdb_live_search() {
+	$term = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
+
+	if ( mb_strlen( $term ) < 2 || ! function_exists( 'wc_get_products' ) ) {
+		wp_send_json_success( array( 'items' => array(), 'more' => '' ) );
+	}
+
+	$products = wc_get_products( array(
+		'status'   => 'publish',
+		'limit'    => 8,
+		's'        => $term,
+		'orderby'  => 'relevance',
+	) );
+
+	$items = array();
+	foreach ( (array) $products as $p ) {
+		if ( ! $p instanceof WC_Product || ! $p->is_visible() ) {
+			continue;
+		}
+		$img_id = $p->get_image_id();
+		$items[] = array(
+			'title' => $p->get_name(),
+			'url'   => $p->get_permalink(),
+			'img'   => $img_id ? wp_get_attachment_image_url( $img_id, 'woocommerce_gallery_thumbnail' ) : wc_placeholder_img_src( 'woocommerce_gallery_thumbnail' ),
+			'price' => wp_strip_all_tags( $p->get_price_html() ),
+			'reg'   => ( $p->is_on_sale() && $p->get_regular_price() ) ? wp_strip_all_tags( wc_price( $p->get_regular_price() ) ) : '',
+			'brand' => isdb_product_brand_label( $p ),
+		);
+	}
+
+	wp_send_json_success( array(
+		'items' => $items,
+		'more'  => add_query_arg( array( 's' => rawurlencode( $term ), 'post_type' => 'product' ), home_url( '/' ) ),
+	) );
+}
+
+/** Cart state for JS (used to swap card buttons into steppers after AJAX add). */
+add_action( 'wp_ajax_isdb_cart_state', 'isdb_cart_state' );
+add_action( 'wp_ajax_nopriv_isdb_cart_state', 'isdb_cart_state' );
+function isdb_cart_state() {
+	wp_send_json_success( array( 'items' => isdb_cart_qty_map() ) );
+}
+
+add_action( 'wp_ajax_isdb_checkout_qty', 'isdb_checkout_qty' );
+add_action( 'wp_ajax_nopriv_isdb_checkout_qty', 'isdb_checkout_qty' );
+function isdb_checkout_qty() {
+	check_ajax_referer( 'isdb-checkout-qty', 'nonce' );
+
+	if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+		wp_send_json_error( array( 'message' => 'Cart unavailable.' ), 400 );
+	}
+
+	$key = isset( $_POST['cart_item_key'] ) ? sanitize_text_field( wp_unslash( $_POST['cart_item_key'] ) ) : '';
+	$qty = isset( $_POST['quantity'] ) ? (int) $_POST['quantity'] : -1;
+
+	$cart_item = WC()->cart->get_cart_item( $key );
+	if ( ! $key || $qty < 0 || ! $cart_item ) {
+		wp_send_json_error( array( 'message' => 'Invalid cart item.' ), 400 );
+	}
+
+	// Respect stock limits / sold-individually.
+	$product = $cart_item['data'];
+	if ( $product instanceof WC_Product ) {
+		if ( $product->is_sold_individually() ) {
+			$qty = min( 1, $qty );
+		}
+		$max = $product->get_max_purchase_quantity();
+		if ( $max > 0 ) {
+			$qty = min( $qty, $max );
+		}
+		if ( $qty > 0 && ! $product->has_enough_stock( $qty ) ) {
+			wp_send_json_error( array( 'message' => 'Not enough stock.' ), 400 );
+		}
+	}
+
+	// qty 0 removes the line (WooCommerce handles this in set_quantity).
+	WC()->cart->set_quantity( $key, $qty, true );
+
+	wp_send_json_success( array(
+		'count'    => WC()->cart->get_cart_contents_count(),
+		'is_empty' => WC()->cart->is_empty(),
+		'cart_url' => wc_get_cart_url(),
+	) );
+}
+
+/**
+ * Inline JS for the checkout quantity stepper.
+ * Delegated binding: the review box is replaced wholesale on every
+ * update_checkout, so handlers must survive DOM replacement.
+ */
+add_action( 'wp_enqueue_scripts', function () {
+	if ( ! function_exists( 'WC' ) ) {
+		return;
+	}
+	wp_register_script( 'isdb-qty', '', array( 'jquery' ), ISDB_VERSION, true );
+	wp_enqueue_script( 'isdb-qty' );
+	wp_localize_script( 'isdb-qty', 'isdbQty', array(
+		'ajax'       => admin_url( 'admin-ajax.php' ),
+		'nonce'      => wp_create_nonce( 'isdb-checkout-qty' ),
+		'isCheckout' => ( function_exists( 'is_checkout' ) && is_checkout() ) ? 1 : 0,
+	) );
+	wp_add_inline_script( 'isdb-qty', <<<'JS'
+jQuery(function ($) {
+	var busy = false;
+
+	function refreshCards() {
+		// Swap "Add to cart" <-> stepper on product cards using live cart state.
+		$.post(isdbQty.ajax, { action: 'isdb_cart_state' }).done(function (res) {
+			if (!res || !res.success) { return; }
+			var items = res.data.items || {};
+			$('.isdb-cart-ctl').each(function () {
+				var $ctl = $(this);
+				var pid  = String($ctl.data('product'));
+				var st   = items[pid];
+				if (st) {
+					$ctl.find('.isdb-add-wrap').addClass('hidden');
+					var $st = $ctl.find('.isdb-step-wrap').removeClass('hidden');
+					$st.find('.isdb-step-val').text(st.qty);
+					$st.find('.isdb-qty-btn').attr('data-key', st.key);
+					$st.find('.isdb-step-minus').attr('data-qty', st.qty - 1);
+					$st.find('.isdb-step-plus').attr('data-qty', st.qty + 1);
+				} else {
+					$ctl.find('.isdb-step-wrap').addClass('hidden');
+					$ctl.find('.isdb-add-wrap').removeClass('hidden');
+				}
+			});
+		});
+	}
+
+	$(document.body).on('click', '.isdb-qty-btn', function (e) {
+		e.preventDefault();
+		e.stopPropagation();
+		if (busy) { return; }
+
+		var $btn = $(this);
+		var key  = $btn.attr('data-key');
+		var qty  = parseInt($btn.attr('data-qty'), 10);
+		if (!key || isNaN(qty) || qty < 0) { return; }
+
+		busy = true;
+		$btn.closest('.isdb-review-item, .isdb-cart-ctl, .isdb-mini-item').css('opacity', 0.5);
+
+		$.post(isdbQty.ajax, {
+			action: 'isdb_checkout_qty',
+			nonce: isdbQty.nonce,
+			cart_item_key: key,
+			quantity: qty
+		}).done(function (res) {
+			if (isdbQty.isCheckout) {
+				if (res && res.success && res.data && res.data.is_empty) {
+					window.location.href = res.data.cart_url;
+					return;
+				}
+				$(document.body).trigger('update_checkout');
+			}
+			$(document.body).trigger('wc_fragment_refresh');
+			refreshCards();
+		}).always(function () {
+			busy = false;
+			$('.isdb-review-item, .isdb-cart-ctl, .isdb-mini-item').css('opacity', '');
+		});
+	});
+
+	// After WooCommerce's own AJAX add-to-cart, turn that card into a stepper.
+	$(document.body).on('added_to_cart wc_fragments_refreshed wc_fragments_loaded', function () {
+		refreshCards();
+	});
+
+	/* ---------------- LIVE SEARCH (type-ahead) ---------------- */
+	var timer = null, lastQ = '', xhr = null;
+
+	function hideBox($box) { $box.addClass('hidden').empty(); }
+
+	function render($box, data, q) {
+		if (!data.items.length) {
+			$box.removeClass('hidden').html(
+				'<li class="px-4 py-4 text-center text-[13px] text-slate-500">No products found for "' +
+				$('<i>').text(q).html() + '"</li>'
+			);
+			return;
+		}
+		var html = '';
+		data.items.forEach(function (it) {
+			html += '<li class="border-b border-slate-100 last:border-b-0">' +
+				'<a href="' + it.url + '" class="flex items-center gap-3 px-3 py-2.5 transition hover:bg-brand-bg">' +
+					'<img src="' + it.img + '" alt="" class="h-[50px] w-[50px] flex-none rounded border border-slate-200 object-contain" />' +
+					'<span class="min-w-0 flex-1">' +
+						'<span class="block truncate text-[13px] font-medium text-brand-title">' + $('<i>').text(it.title).html() + '</span>' +
+						'<span class="mt-0.5 block text-[13px] font-semibold text-brand-primary">' + it.price +
+							(it.reg ? ' <s class="ml-1 text-[11px] font-normal text-slate-400">' + it.reg + '</s>' : '') +
+						'</span>' +
+						(it.brand ? '<span class="block text-[11px] text-slate-500">' + $('<i>').text(it.brand).html() + '</span>' : '') +
+					'</span>' +
+				'</a></li>';
+		});
+		html += '<li class="border-t border-slate-100"><a href="' + data.more +
+			'" class="block px-4 py-2.5 text-center text-[12px] font-semibold text-brand-primary hover:underline">View all results &rarr;</a></li>';
+		$box.removeClass('hidden').html(html);
+	}
+
+	$(document.body).on('input', '.isdb-search-input', function () {
+		var $input = $(this);
+		var $box   = $input.closest('.isdb-search').find('.isdb-search-box');
+		var q      = $.trim($input.val());
+
+		clearTimeout(timer);
+		if (q.length < 2) { hideBox($box); lastQ = ''; return; }
+		if (q === lastQ) { return; }
+
+		timer = setTimeout(function () {
+			lastQ = q;
+			if (xhr && xhr.readyState !== 4) { xhr.abort(); }
+			$box.removeClass('hidden').html('<li class="px-4 py-4 text-center text-[13px] text-slate-500">Searching&hellip;</li>');
+			xhr = $.get(isdbQty.ajax, { action: 'isdb_live_search', q: q }).done(function (res) {
+				if (res && res.success) { render($box, res.data, q); }
+			});
+		}, 300); // debounce
+	});
+
+	// Re-open results when refocusing a field that still has a query.
+	$(document.body).on('focus', '.isdb-search-input', function () {
+		var $box = $(this).closest('.isdb-search').find('.isdb-search-box');
+		if ($box.children().length) { $box.removeClass('hidden'); }
+	});
+
+	// Close on outside click / Escape.
+	$(document).on('click', function (e) {
+		if (!$(e.target).closest('.isdb-search').length) { $('.isdb-search-box').addClass('hidden'); }
+	});
+	$(document).on('keydown', function (e) {
+		if (e.key === 'Escape') { $('.isdb-search-box').addClass('hidden'); }
+	});
+
+	/* ---------------- CAROUSELS (native scroll-snap + arrows) ----------------
+	   No Swiper needed: the track is a scroll-snap flex row, so touch/trackpad
+	   swiping is native and free. The arrows just scrollBy() one "page".      */
+	function syncArrows($car) {
+		var track = $car.find('.isdb-car-track')[0];
+		if (!track) { return; }
+		var scrollable = track.scrollWidth - track.clientWidth > 4;
+		var atStart = track.scrollLeft <= 2;
+		var atEnd   = track.scrollLeft >= (track.scrollWidth - track.clientWidth - 2);
+
+		$car.find('.isdb-car-prev, .isdb-car-next')
+			.toggleClass('hidden', !scrollable)
+			.toggleClass('sm:flex', scrollable);
+		$car.find('.isdb-car-prev').prop('disabled', atStart);
+		$car.find('.isdb-car-next').prop('disabled', atEnd);
+	}
+
+	function initCarousels() {
+		$('.isdb-carousel').each(function () {
+			var $car = $(this);
+			var track = $car.find('.isdb-car-track')[0];
+			if (!track || $car.data('isdbInit')) { syncArrows($car); return; }
+			$car.data('isdbInit', true);
+
+			$car.find('.isdb-car-prev').on('click', function () {
+				track.scrollBy({ left: -Math.round(track.clientWidth * 0.85), behavior: 'smooth' });
+			});
+			$car.find('.isdb-car-next').on('click', function () {
+				track.scrollBy({ left: Math.round(track.clientWidth * 0.85), behavior: 'smooth' });
+			});
+			track.addEventListener('scroll', function () { syncArrows($car); }, { passive: true });
+
+			syncArrows($car);
+		});
+	}
+
+	initCarousels();
+	$(window).on('resize', function () { $('.isdb-carousel').each(function () { syncArrows($(this)); }); });
+	// Re-sync after images load (scrollWidth changes as they paint).
+	$(window).on('load', initCarousels);
+	$(document.body).on('wc_fragments_refreshed', initCarousels);
+});
+JS
+	);
+}, 30 );
+
+/* ------------------------------------------------------------------ *
+ * 8. RAW SHOP FILTER ENGINE  (no plugin)
+ *    Reads our own GET params and injects tax_query/meta_query into
+ *    the WooCommerce product archive query. Sorting (?orderby=) is
+ *    left to WooCommerce core, which already handles it.
+ * ------------------------------------------------------------------ */
+add_action( 'woocommerce_product_query', 'isdb_apply_shop_filters', 20, 1 );
+function isdb_apply_shop_filters( $q ) {
+	if ( is_admin() ) {
+		return;
+	}
+
+	$meta_query = (array) $q->get( 'meta_query' );
+	$tax_query  = (array) $q->get( 'tax_query' );
+
+	// --- On sale only (this is what the homepage deal band links to) ---
+	if ( ! empty( $_GET['on_sale'] ) && function_exists( 'wc_get_product_ids_on_sale' ) ) {
+		$sale_ids = wc_get_product_ids_on_sale();
+		$sale_ids = ! empty( $sale_ids ) ? $sale_ids : array( 0 ); // 0 => "no matches" (never "all")
+		$existing = (array) $q->get( 'post__in' );
+		$q->set( 'post__in', $existing ? array_intersect( $existing, $sale_ids ) : $sale_ids );
+	}
+
+	// --- Price range ---
+	$min = isset( $_GET['min_price'] ) && '' !== $_GET['min_price'] ? floatval( $_GET['min_price'] ) : null;
+	$max = isset( $_GET['max_price'] ) && '' !== $_GET['max_price'] ? floatval( $_GET['max_price'] ) : null;
+	if ( null !== $min || null !== $max ) {
+		$price = array( 'key' => '_price', 'type' => 'NUMERIC' );
+		if ( null !== $min && null !== $max ) {
+			$price['value']   = array( $min, $max );
+			$price['compare'] = 'BETWEEN';
+		} elseif ( null !== $min ) {
+			$price['value']   = $min;
+			$price['compare'] = '>=';
+		} else {
+			$price['value']   = $max;
+			$price['compare'] = '<=';
+		}
+		$meta_query[] = $price;
+	}
+
+	// --- Minimum average rating ---
+	if ( ! empty( $_GET['rating'] ) ) {
+		$meta_query[] = array(
+			'key'     => '_wc_average_rating',
+			'value'   => floatval( $_GET['rating'] ),
+			'compare' => '>=',
+			'type'    => 'DECIMAL(3,2)',
+		);
+	}
+
+	// --- In stock only ---
+	if ( ! empty( $_GET['instock'] ) ) {
+		$meta_query[] = array(
+			'key'   => '_stock_status',
+			'value' => 'instock',
+		);
+	}
+
+	// --- Category filter (checkbox array OR comma-separated slugs) ---
+	if ( ! empty( $_GET['filter_cat'] ) ) {
+		$raw   = is_array( $_GET['filter_cat'] ) ? $_GET['filter_cat'] : explode( ',', wp_unslash( $_GET['filter_cat'] ) );
+		$slugs = array_filter( array_map( 'sanitize_title', (array) $raw ) );
+		if ( $slugs ) {
+			$tax_query[] = array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'slug',
+				'terms'    => $slugs,
+			);
+		}
+	}
+
+	if ( ! empty( $meta_query ) ) {
+		$q->set( 'meta_query', $meta_query );
+	}
+	if ( ! empty( $tax_query ) ) {
+		$q->set( 'tax_query', $tax_query );
+	}
+}
