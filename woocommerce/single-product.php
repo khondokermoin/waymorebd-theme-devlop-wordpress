@@ -99,10 +99,13 @@ $all_imgs  = array_filter( array_merge( array( $main_id ), $gallery ) );
 					if ( $main_id ) {
 						echo wp_get_attachment_image( $main_id, 'large', false, array(
 							'id'    => 'wmb-main-image',
-							'class' => 'aspect-square w-full object-cover transition duration-500',
+							'class'         => 'aspect-square w-full object-cover transition duration-500',
+								'loading'       => 'eager',       // LCP image — must not lazy-load.
+								'fetchpriority' => 'high',
+								'decoding'      => 'async',
 						) );
 					} else {
-						echo '<img id="wmb-main-image" class="aspect-square w-full object-cover"
+						echo '<img id="wmb-main-image" class="aspect-square w-full object-cover" width="1000" height="1000" fetchpriority="high" decoding="async"
 							src="https://images.unsplash.com/photo-1584990347449-a2d4c2c9a3f0?auto=format&fit=crop&w=1200&q=80"
 							alt="' . esc_attr( $product->get_name() ) . '">';
 					}

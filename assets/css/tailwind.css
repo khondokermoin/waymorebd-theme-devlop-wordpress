@@ -248,6 +248,49 @@
   .wmb-checkout #customer_details .woocommerce-shipping-fields__field-wrapper {
     @apply flex flex-wrap gap-x-3;
   }
+
+  /* ── Bulletproof address layout: flex ORDER + width targeted by field ID.
+     WooCommerce's country/state JS re-renders the address fields and strips the
+     classes/priorities set via filters — so we drive the whole layout from the
+     stable field-wrapper IDs instead. Country is hidden (store defaults to BD). ── */
+  .wmb-checkout #customer_details #billing_country_field,
+  .wmb-checkout #customer_details #shipping_country_field { display: none !important; }
+
+  /* Visual order — Name · Phone | Email · Address · District | Thana */
+  .wmb-checkout #customer_details #billing_first_name_field { order: 1; }
+  .wmb-checkout #customer_details #billing_phone_field      { order: 2; }
+  .wmb-checkout #customer_details #billing_email_field      { order: 3; }
+  .wmb-checkout #customer_details #billing_address_1_field  { order: 4; }
+  .wmb-checkout #customer_details #billing_state_field      { order: 5; }
+  .wmb-checkout #customer_details #billing_city_field       { order: 6; }
+  /* Shipping (Billing-address toggle) — Name · Address · District | Thana · Phone */
+  .wmb-checkout #customer_details #shipping_first_name_field { order: 1; }
+  .wmb-checkout #customer_details #shipping_address_1_field  { order: 2; }
+  .wmb-checkout #customer_details #shipping_state_field      { order: 3; }
+  .wmb-checkout #customer_details #shipping_city_field       { order: 4; }
+  .wmb-checkout #customer_details #shipping_phone_field      { order: 5; }
+
+  /* Full-width rows */
+  .wmb-checkout #customer_details #billing_first_name_field,
+  .wmb-checkout #customer_details #billing_address_1_field,
+  .wmb-checkout #customer_details #shipping_first_name_field,
+  .wmb-checkout #customer_details #shipping_address_1_field,
+  .wmb-checkout #customer_details #shipping_phone_field { width: 100%; }
+  /* Two-up pairs: full width on mobile, 50% side-by-side from sm up */
+  .wmb-checkout #customer_details #billing_phone_field,
+  .wmb-checkout #customer_details #billing_email_field,
+  .wmb-checkout #customer_details #billing_state_field,
+  .wmb-checkout #customer_details #billing_city_field,
+  .wmb-checkout #customer_details #shipping_state_field,
+  .wmb-checkout #customer_details #shipping_city_field { width: 100%; }
+  @media (min-width: 640px) {
+    .wmb-checkout #customer_details #billing_phone_field,
+    .wmb-checkout #customer_details #billing_email_field,
+    .wmb-checkout #customer_details #billing_state_field,
+    .wmb-checkout #customer_details #billing_city_field,
+    .wmb-checkout #customer_details #shipping_state_field,
+    .wmb-checkout #customer_details #shipping_city_field { width: calc(50% - 0.375rem); }
+  }
   .wmb-checkout .form-row-wide { @apply w-full; }
 
   /* --- Billing-address toggle (form-shipping.php) --- */

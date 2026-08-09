@@ -603,16 +603,19 @@ function isdb_simplify_checkout_fields( $fields ) {
 			$fields[ $g ][ "{$g}_city" ]['class']       = array( 'form-row-last' );
 			$fields[ $g ][ "{$g}_city" ]['priority']    = 60;
 		}
+
+		// Phone — billing always; shipping too when the store collects it (so
+		// shipping_phone never renders as a blank, placeholder-less box).
+		if ( isset( $fields[ $g ][ "{$g}_phone" ] ) ) {
+			$fields[ $g ][ "{$g}_phone" ]['label']       = __( 'Phone Number', 'isdb-custom' );
+			$fields[ $g ][ "{$g}_phone" ]['placeholder'] = __( 'Phone (01XXXXXXXXX)', 'isdb-custom' );
+			$fields[ $g ][ "{$g}_phone" ]['required']    = ( 'billing' === $g );
+			$fields[ $g ][ "{$g}_phone" ]['class']       = array( 'form-row-first' );
+			$fields[ $g ][ "{$g}_phone" ]['priority']    = 20;
+		}
 	}
 
-	// Billing-only: Phone + Email side by side (Full Name stays full-width above).
-	if ( isset( $fields['billing']['billing_phone'] ) ) {
-		$fields['billing']['billing_phone']['required']    = true;
-		$fields['billing']['billing_phone']['label']       = __( 'Phone Number', 'isdb-custom' );
-		$fields['billing']['billing_phone']['placeholder'] = __( 'Phone (01XXXXXXXXX)', 'isdb-custom' );
-		$fields['billing']['billing_phone']['class']       = array( 'form-row-first' );
-		$fields['billing']['billing_phone']['priority']    = 20;
-	}
+	// Billing-only: Email (Phone is handled in the loop above).
 	if ( isset( $fields['billing']['billing_email'] ) ) {
 		$fields['billing']['billing_email']['required']    = false;
 		$fields['billing']['billing_email']['label']       = __( 'Email', 'isdb-custom' ); // WC appends "(optional)" itself.
@@ -1848,7 +1851,7 @@ jQuery(function ($) {
 		data.items.forEach(function (it) {
 			html += '<li class="border-b border-slate-100 last:border-b-0">' +
 				'<a href="' + it.url + '" class="flex items-center gap-3 px-3 py-2.5 transition hover:bg-brand-bg">' +
-					'<img src="' + it.img + '" alt="" class="h-[50px] w-[50px] flex-none rounded border border-slate-200 object-contain" />' +
+					'<img src="' + it.img + '" alt="" width="50" height="50" loading="lazy" decoding="async" class="h-[50px] w-[50px] flex-none rounded border border-slate-200 object-contain" />' +
 					'<span class="min-w-0 flex-1">' +
 						'<span class="block truncate text-[13px] font-medium text-brand-title">' + $('<i>').text(it.title).html() + '</span>' +
 						'<span class="mt-0.5 block text-[13px] font-semibold text-brand-primary">' + it.price +

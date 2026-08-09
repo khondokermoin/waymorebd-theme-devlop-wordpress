@@ -74,9 +74,11 @@ function isdb_render_product_grid( $products, $limit = 8 ) {
 				x-init="play()" @mouseenter="stop()" @mouseleave="play()">
 
 				<div class="flex transition-transform duration-500 ease-out" :style="'transform: translateX(-' + (i * 100) + '%)'">
-					<?php foreach ( $hero_slides as $s ) : ?>
+					<?php foreach ( $hero_slides as $i => $s ) : ?>
 						<a href="<?php echo esc_url( $s['url'] ); ?>" class="w-full flex-none">
 							<img src="<?php echo esc_url( $s['img'] ); ?>" alt="<?php echo esc_attr( $s['alt'] ); ?>"
+								width="1000" height="400" decoding="async"
+								<?php echo 0 === $i ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"'; ?>
 								class="h-[180px] w-full object-cover sm:h-[260px] lg:h-[330px]" />
 						</a>
 					<?php endforeach; ?>
@@ -104,7 +106,7 @@ function isdb_render_product_grid( $products, $limit = 8 ) {
 
 			<!-- Right fixed banner -->
 			<a href="<?php echo esc_url( isdb_deals_url() ); ?>" class="hidden overflow-hidden rounded-lg lg:block">
-				<img src="<?php echo esc_url( get_theme_file_uri( 'assets/img/hero-side.svg' ) ); ?>" alt="Cash on Delivery nationwide" class="h-[330px] w-full object-cover" />
+				<img src="<?php echo esc_url( get_theme_file_uri( 'assets/img/hero-side.svg' ) ); ?>" alt="Cash on Delivery nationwide" width="500" height="410" loading="lazy" decoding="async" class="h-[330px] w-full object-cover" />
 			</a>
 		</div>
 	</section>
@@ -145,7 +147,7 @@ function isdb_render_product_grid( $products, $limit = 8 ) {
 						class="group w-[104px] flex-none snap-start rounded-card border border-[#e0e0e0] bg-white p-3 text-center transition hover:shadow-[3px_3px_8px_rgba(0,0,0,0.16)] sm:w-[120px]">
 						<span class="mx-auto flex h-[62px] w-[62px] items-center justify-center overflow-hidden rounded-full bg-brand-bg sm:h-[72px] sm:w-[72px]">
 							<?php if ( $img_url ) : ?>
-								<img src="<?php echo esc_url( $img_url ); ?>" alt="<?php echo esc_attr( $term->name ); ?>" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+								<?php echo wp_get_attachment_image( $thumb_id, 'medium', false, array( 'class' => 'h-full w-full object-cover transition duration-300 group-hover:scale-105', 'alt' => $term->name ) ); ?>
 							<?php else : ?>
 								<span class="text-xl font-black text-brand-primary"><?php echo esc_html( mb_substr( $term->name, 0, 1 ) ); ?></span>
 							<?php endif; ?>
@@ -253,7 +255,7 @@ function isdb_render_product_grid( $products, $limit = 8 ) {
 					<a href="<?php echo esc_url( get_term_link( $brand ) ); ?>"
 						class="single-brand flex h-[74px] w-[150px] flex-none snap-start items-center justify-center rounded-card border border-[#eee] bg-white px-3 transition hover:border-brand-primary sm:w-[180px]">
 						<?php if ( $b_img ) : ?>
-							<img src="<?php echo esc_url( $b_img ); ?>" alt="<?php echo esc_attr( $brand->name ); ?>" class="max-h-[52px] w-auto max-w-[124px] object-contain" />
+							<?php echo wp_get_attachment_image( $b_thumb, 'medium', false, array( 'class' => 'max-h-[52px] w-auto max-w-[124px] object-contain', 'alt' => $brand->name ) ); ?>
 						<?php else : ?>
 							<span class="text-center text-sm font-extrabold uppercase tracking-wide text-brand-title"><?php echo esc_html( $brand->name ); ?></span>
 						<?php endif; ?>
