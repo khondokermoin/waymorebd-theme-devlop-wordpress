@@ -471,7 +471,9 @@
   .wmb-thankyou tfoot .order-total th,
   .wmb-thankyou tfoot .order-total td { @apply font-extrabold text-slate-900; }
   .wmb-thankyou .woocommerce-customer-details address { @apply not-italic border-0 p-0 text-sm text-slate-600 leading-relaxed; }
-  .wmb-thankyou a { @apply text-amber-600; }
+  /* Scope link colour to WC's own tables only — never override button/CTA text colours. */
+  .wmb-thankyou .woocommerce-order-details a,
+  .wmb-thankyou .woocommerce-customer-details a { @apply text-amber-600; }
 
   /* ---------- GLOBAL WC NOTICES ---------- */
   .woocommerce-message,

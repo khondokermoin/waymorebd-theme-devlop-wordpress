@@ -128,49 +128,46 @@ defined( 'ABSPATH' ) || exit;
 				?>
 			</div>
 
-			<!-- Cross-sell: warmest re-buy moment -->
+			<!-- Cross-sell carousel: warmest re-buy moment (real product cards) -->
 			<?php
 			$purchased = array();
 			foreach ( $order->get_items() as $item ) {
 				$purchased[] = $item->get_product_id();
 			}
-			$suggestions = function_exists( 'isdb_best_sellers' ) ? isdb_best_sellers( 8 ) : array();
+			$suggestions = function_exists( 'isdb_best_sellers' ) ? isdb_best_sellers( 16 ) : array();
 			$cards       = array();
 			foreach ( $suggestions as $sp ) {
-				if ( $sp instanceof WC_Product && $sp->is_visible() && ! in_array( $sp->get_id(), $purchased, true ) ) {
+				if ( $sp instanceof WC_Product && $sp->is_visible() && $sp->is_in_stock() && ! in_array( $sp->get_id(), $purchased, true ) ) {
 					$cards[] = $sp;
 				}
-				if ( count( $cards ) >= 4 ) {
+				if ( count( $cards ) >= 12 ) {
 					break;
 				}
 			}
-			if ( $cards ) :
+			if ( $cards && function_exists( 'isdb_render_product_carousel' ) ) :
 				?>
 				<section class="mx-auto mt-14 max-w-5xl">
-					<h2 class="text-center text-xl font-bold text-brand-title">Complete your kitchen</h2>
-					<p class="mt-1 text-center text-sm text-slate-500">Popular picks other customers love.</p>
-					<div class="mt-6 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-						<?php foreach ( $cards as $cp ) : ?>
-							<a href="<?php echo esc_url( $cp->get_permalink() ); ?>" class="group rounded-2xl bg-white p-4 ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:shadow-lg">
-								<div class="overflow-hidden rounded-xl bg-brand-bg">
-									<?php echo $cp->get_image( 'woocommerce_thumbnail', array( 'class' => 'aspect-square w-full object-cover transition duration-500 group-hover:scale-105' ) ); ?>
-								</div>
-								<h3 class="mt-3 line-clamp-2 text-sm font-medium text-brand-title"><?php echo esc_html( $cp->get_name() ); ?></h3>
-								<div class="mt-1 font-bold text-brand-title"><?php echo wp_kses_post( $cp->get_price_html() ); ?></div>
-							</a>
-						<?php endforeach; ?>
+					<div class="text-center">
+						<h2 class="text-xl font-bold text-brand-title">Complete your kitchen</h2>
+						<p class="mt-1 text-sm text-slate-500">Popular picks other customers love — add to your next order.</p>
+					</div>
+					<div class="mt-6">
+						<?php isdb_render_product_carousel( $cards, 12, 5000 ); ?>
 					</div>
 				</section>
 			<?php endif; ?>
 
-			<!-- Support promise + continue shopping -->
-			<div class="mx-auto mt-14 flex max-w-3xl flex-col items-center gap-5 rounded-2xl bg-brand-dark p-8 text-center text-white sm:flex-row sm:text-left">
-				<svg class="h-10 w-10 flex-none text-brand-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V5l7-3z"/></svg>
-				<div class="flex-1">
-					<p class="font-bold">Need anything? We're here.</p>
-					<p class="mt-1 text-sm text-white/70">That's our Customer Support Promise — real humans, quick replies. Questions about your order? Just reach out.</p>
+			<!-- Post-purchase reassurance + next actions (high-contrast CTAs) -->
+			<div class="mx-auto mt-14 max-w-3xl overflow-hidden rounded-2xl bg-brand-dark p-8 text-center text-white">
+				<span class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-primary/15 text-brand-primary">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+				</span>
+				<p class="mt-4 text-lg font-bold">You're all set — we've got it from here.</p>
+				<p class="mx-auto mt-1 max-w-lg text-sm text-white/70">That's our Customer Support Promise — real humans, quick replies. We'll keep you posted as your order moves.</p>
+				<div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+					<a href="<?php echo esc_url( isdb_track_order_url() ); ?>" class="rounded-xl bg-brand-primary px-7 py-3 text-sm font-bold !text-white shadow-lg shadow-black/20 transition hover:bg-brand-hover">Track Your Order</a>
+					<a href="<?php echo esc_url( home_url( '/shop/' ) ); ?>" class="rounded-xl bg-white px-7 py-3 text-sm font-bold !text-brand-dark transition hover:bg-white/90">Continue Shopping</a>
 				</div>
-				<a href="<?php echo esc_url( home_url( '/shop/' ) ); ?>" class="flex-none rounded-xl bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover">Continue Shopping</a>
 			</div>
 
 		<?php endif; ?>
