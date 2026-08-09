@@ -222,8 +222,8 @@ $all_imgs  = array_filter( array_merge( array( $main_id ), $gallery ) );
 							</button>
 						</form>
 					<?php elseif ( $in_stock ) : ?>
-						<!-- Variable / grouped / external: keep WC's own form (variation JS is load-bearing) -->
-						<div class="wmb-wc-cart [&_.button]:!bg-amber-500 [&_.button]:!text-slate-900 [&_.button]:!rounded-xl [&_.button]:!px-8 [&_.button]:!py-4 [&_.button]:!font-bold [&_.button]:!shadow-lg">
+						<!-- Variable / grouped / external: WC form (variation JS is load-bearing); styled via .wmb-wc-cart + swatch override -->
+						<div class="wmb-wc-cart">
 							<?php woocommerce_template_single_add_to_cart(); ?>
 						</div>
 					<?php else : ?>
