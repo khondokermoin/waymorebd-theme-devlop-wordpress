@@ -269,18 +269,31 @@ $all_imgs  = array_filter( array_merge( array( $main_id ), $gallery ) );
 		<!-- TABS · custom, no WC hook. Description / Details / Reviews    -->
 		<!-- ============================================================ -->
 		<div class="mt-16" x-data="{ tab: 'desc' }">
-			<div class="flex flex-wrap gap-2 border-b border-slate-200">
-				<button @click="tab='desc'"    :class="tab==='desc'    ? 'border-amber-500 text-slate-900' : 'border-transparent text-slate-500'" class="border-b-2 px-4 py-3 text-sm font-semibold">Description</button>
-				<button @click="tab='details'" :class="tab==='details' ? 'border-amber-500 text-slate-900' : 'border-transparent text-slate-500'" class="border-b-2 px-4 py-3 text-sm font-semibold">Specifications</button>
-				<button @click="tab='reviews'" :class="tab==='reviews' ? 'border-amber-500 text-slate-900' : 'border-transparent text-slate-500'" class="border-b-2 px-4 py-3 text-sm font-semibold">Reviews (<?php echo esc_html( $review_count ); ?>)</button>
+			<!-- Pill tab bar -->
+			<div class="mb-4 flex flex-wrap gap-2">
+				<button @click="tab='desc'"
+					:class="tab==='desc' ? 'bg-brand-primary text-white shadow-sm' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:text-brand-primary'"
+					class="rounded-lg px-5 py-2.5 text-sm font-semibold transition">Description</button>
+				<button @click="tab='details'"
+					:class="tab==='details' ? 'bg-brand-primary text-white shadow-sm' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:text-brand-primary'"
+					class="rounded-lg px-5 py-2.5 text-sm font-semibold transition">Specifications</button>
+				<button @click="tab='reviews'"
+					:class="tab==='reviews' ? 'bg-brand-primary text-white shadow-sm' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:text-brand-primary'"
+					class="rounded-lg px-5 py-2.5 text-sm font-semibold transition">Customer Reviews (<?php echo esc_html( $review_count ); ?>)</button>
 			</div>
 
-			<div class="py-8">
-				<div x-show="tab==='desc'" class="prose prose-slate max-w-none">
-					<?php echo wp_kses_post( wpautop( $product->get_description() ) ); ?>
+			<!-- Content card -->
+			<div class="rounded-2xl bg-white p-6 ring-1 ring-slate-100 sm:p-8">
+
+				<div x-show="tab==='desc'">
+					<h3 class="mb-5 inline-block border-b-2 border-brand-primary pb-1.5 text-base font-bold text-slate-900">Product Details</h3>
+					<div class="prose prose-slate max-w-none prose-headings:text-slate-900 prose-strong:text-slate-900 prose-li:marker:text-brand-primary">
+						<?php echo wp_kses_post( wpautop( $product->get_description() ) ); ?>
+					</div>
 				</div>
 
 				<div x-show="tab==='details'" x-cloak>
+					<h3 class="mb-5 inline-block border-b-2 border-brand-primary pb-1.5 text-base font-bold text-slate-900">Specifications</h3>
 					<?php
 					$attributes = $product->get_attributes();
 					if ( $attributes ) : ?>
@@ -300,40 +313,32 @@ $all_imgs  = array_filter( array_merge( array( $main_id ), $gallery ) );
 							</tbody>
 						</table>
 					<?php else : ?>
-						<p class="text-slate-500">No additional specifications listed.</p>
+						<p class="text-slate-500">No additional specifications listed for this product.</p>
 					<?php endif; ?>
 				</div>
 
 				<div id="reviews" x-show="tab==='reviews'" x-cloak>
-					<?php comments_template(); // WC hooks its review form/list here — keep it functional ?>
+					<h3 class="mb-5 inline-block border-b-2 border-brand-primary pb-1.5 text-base font-bold text-slate-900">Customer Reviews</h3>
+					<?php comments_template(); // WC review form/list — kept functional ?>
 				</div>
 			</div>
 		</div>
 
 		<!-- ============================================================ -->
-		<!-- RELATED PRODUCTS · cross-sell, keeps session alive             -->
+		<!-- RELATED PRODUCTS · real product cards in an auto-moving carousel -->
 		<!-- ============================================================ -->
 		<?php
-		$related_ids = wc_get_related_products( $product->get_id(), 4 );
-		if ( $related_ids ) : ?>
-			<section class="mt-20">
-				<h2 class="text-xl font-bold text-slate-900">Complete your kitchen</h2>
-				<p class="mt-1 text-sm text-slate-500">Customers who chose this also loved these.</p>
-				<div class="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-6">
-					<?php foreach ( $related_ids as $rid ) :
-						$rp = wc_get_product( $rid );
-						if ( ! $rp ) {
-							continue;
-						} ?>
-						<a href="<?php echo esc_url( get_permalink( $rid ) ); ?>" class="group rounded-2xl bg-white p-4 ring-1 ring-slate-100 transition hover:shadow-lg">
-							<div class="aspect-square overflow-hidden rounded-xl bg-stone-50">
-								<?php echo $rp->get_image( 'woocommerce_thumbnail', array( 'class' => 'h-full w-full object-cover transition duration-500 group-hover:scale-105' ) ); ?>
-							</div>
-							<h3 class="mt-3 line-clamp-2 text-sm font-medium text-slate-800"><?php echo esc_html( $rp->get_name() ); ?></h3>
-							<div class="mt-1 font-bold text-slate-900"><?php echo $rp->get_price_html(); ?></div>
-						</a>
-					<?php endforeach; ?>
-				</div>
+		$related = array();
+		foreach ( wc_get_related_products( $product->get_id(), 12 ) as $rid ) {
+			$rp = wc_get_product( $rid );
+			if ( $rp instanceof WC_Product && $rp->is_visible() ) {
+				$related[] = $rp;
+			}
+		}
+		if ( $related ) : ?>
+			<section class="mt-16">
+				<?php isdb_section_head( 'Related Products', get_permalink( wc_get_page_id( 'shop' ) ) ?: home_url( '/shop/' ), 'More Products' ); ?>
+				<?php isdb_render_product_carousel( $related, 12, 5000 ); ?>
 			</section>
 		<?php endif; ?>
 

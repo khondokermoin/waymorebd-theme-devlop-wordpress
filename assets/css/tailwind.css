@@ -63,6 +63,28 @@
   .wmb-modal__icon { animation: wmb-pop .45s cubic-bezier(.18,.89,.32,1.28) both; }
   @keyframes wmb-pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
+  /* Dual-handle price range slider (shop filter) — two overlaid range inputs,
+     transparent tracks, only the thumbs catch pointer events. */
+  .wmb-range-body input[type="range"] {
+    position: absolute; top: 0; left: 0; width: 100%; height: 20px; margin: 0;
+    background: transparent; pointer-events: none;
+    -webkit-appearance: none; appearance: none;
+  }
+  .wmb-range-body input[type="range"]:focus { outline: none; }
+  .wmb-range-body input[type="range"]::-webkit-slider-runnable-track { background: transparent; border: 0; }
+  .wmb-range-body input[type="range"]::-moz-range-track { background: transparent; border: 0; }
+  .wmb-range-body input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; pointer-events: auto;
+    height: 18px; width: 18px; margin-top: 1px; border-radius: 9999px;
+    background: var(--brand-primary); border: 3px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.35); cursor: pointer;
+  }
+  .wmb-range-body input[type="range"]::-moz-range-thumb {
+    pointer-events: auto; height: 18px; width: 18px; border-radius: 9999px;
+    background: var(--brand-primary); border: 3px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.35); cursor: pointer;
+  }
+
   @media (max-width: 480px) {
     .wmb-step__circle { height: 38px; width: 38px; }
     .wmb-step:not(:first-child)::before { top: 19px; }

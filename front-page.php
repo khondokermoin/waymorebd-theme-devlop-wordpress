@@ -23,21 +23,7 @@ $on_sale_ids  = function_exists( 'wc_get_product_ids_on_sale' ) ? wc_get_product
 $reviews      = function_exists( 'isdb_recent_reviews' ) ? isdb_recent_reviews( 6 ) : array();
 $shop_url     = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' );
 
-/** Section header: title left, "VIEW ALL ITEMS →" right. */
-function isdb_section_head( $title, $link = '', $label = 'View all items' ) {
-	?>
-	<div class="section-head mb-4 flex items-end justify-between gap-4 border-b border-[#ddd] pb-2.5">
-		<h2 class="text-base font-bold tracking-tight text-brand-title sm:text-lg lg:text-xl"><?php echo esc_html( $title ); ?></h2>
-		<?php if ( $link ) : ?>
-			<a href="<?php echo esc_url( $link ); ?>"
-				class="group inline-flex flex-none items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-brand-primary transition hover:underline sm:text-xs">
-				<?php echo esc_html( $label ); ?>
-				<svg class="h-3.5 w-3.5 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-			</a>
-		<?php endif; ?>
-	</div>
-	<?php
-}
+/* isdb_section_head() now lives in functions.php (shared with single-product). */
 
 /** Grid of product cards from WC_Product[] (reuses content-product.php). */
 function isdb_render_product_grid( $products, $limit = 8 ) {
@@ -68,39 +54,57 @@ function isdb_render_product_grid( $products, $limit = 8 ) {
 
 <main id="site-main" class="bg-brand-bg text-brand-body">
 
-	<!-- ============================ HERO ============================ -->
+	<!-- ============================ HERO (auto-rotating carousel) ============================ -->
 	<?php
-	/*
-	 * MIDJOURNEY / DALL·E PROMPT (hero banner):
-	 * "Bangladeshi kitchen essentials flat-lay on a warm honey-toned background,
-	 *  mustard oil bottle, ghee tin and honey jar, soft studio light, vivid orange
-	 *  and cream palette, bold empty space on the left for headline text,
-	 *  photorealistic advertising banner, 16:7 --style raw --v 6"
-	 */
+	$hero_slides = array(
+		array( 'img' => get_theme_file_uri( 'assets/img/hero-1.svg' ), 'url' => $shop_url,              'alt' => 'Pure Mustard Oil & Ghee' ),
+		array( 'img' => get_theme_file_uri( 'assets/img/hero-2.svg' ), 'url' => isdb_deals_url(),        'alt' => 'Raw Natural Honey' ),
+		array( 'img' => get_theme_file_uri( 'assets/img/hero-3.svg' ), 'url' => isdb_new_arrivals_url(), 'alt' => 'Premium Nuts & Dates' ),
+	);
 	?>
 	<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
 		<div class="grid grid-cols-1 gap-3 lg:grid-cols-[1.9fr,1fr]">
-			<a href="<?php echo esc_url( $shop_url ); ?>" class="relative block overflow-hidden rounded-lg">
-				<img src="https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=1400&q=80"
-					alt="Way More BD kitchen essentials" class="h-[200px] w-full object-cover sm:h-[280px] lg:h-[330px]" />
-				<span class="absolute inset-0 bg-gradient-to-r from-brand-dark/80 via-brand-dark/40 to-transparent"></span>
-				<span class="absolute inset-y-0 left-0 flex max-w-md flex-col justify-center p-6 sm:p-10">
-					<span class="text-[11px] font-bold uppercase tracking-wider text-brand-primary">Your Trusted Kitchen Companion</span>
-					<span class="mt-2 text-2xl font-extrabold leading-tight text-white sm:text-3xl lg:text-4xl">Premium kitchenware,<br>honest prices.</span>
-					<span class="mt-4 inline-flex w-fit rounded-card bg-brand-primary px-6 py-2.5 text-sm font-bold text-white">Shop Now</span>
-				</span>
-			</a>
 
-			<a href="<?php echo esc_url( add_query_arg( 'on_sale', '1', $shop_url ) ); ?>" class="relative hidden overflow-hidden rounded-lg lg:block">
-				<img src="https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&w=800&q=80"
-					alt="Discount offer" class="h-[330px] w-full object-cover" />
-				<span class="absolute inset-0" style="background:linear-gradient(135deg,rgba(244,135,33,.92),rgba(244,135,33,.55));"></span>
-				<span class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-					<span class="text-sm font-bold uppercase tracking-wider text-white/90">Limited Time</span>
-					<span class="mt-1 text-5xl font-black text-white">10%</span>
-					<span class="text-xl font-extrabold text-white">OFF</span>
-					<span class="mt-3 rounded-card bg-white px-5 py-2 text-xs font-bold text-brand-primary">Shop the Sale</span>
-				</span>
+			<!-- Auto-rotating slider (Alpine: loops, autoplay, pause-on-hover, dots + arrows) -->
+			<div class="relative overflow-hidden rounded-lg"
+				x-data="{ i:0, n:<?php echo (int) count( $hero_slides ); ?>, t:null,
+					play(){ this.stop(); this.t = setInterval(() => this.go(this.i + 1), 6000); },
+					stop(){ if (this.t) { clearInterval(this.t); this.t = null; } },
+					go(k){ this.i = (k + this.n) % this.n; } }"
+				x-init="play()" @mouseenter="stop()" @mouseleave="play()">
+
+				<div class="flex transition-transform duration-500 ease-out" :style="'transform: translateX(-' + (i * 100) + '%)'">
+					<?php foreach ( $hero_slides as $s ) : ?>
+						<a href="<?php echo esc_url( $s['url'] ); ?>" class="w-full flex-none">
+							<img src="<?php echo esc_url( $s['img'] ); ?>" alt="<?php echo esc_attr( $s['alt'] ); ?>"
+								class="h-[180px] w-full object-cover sm:h-[260px] lg:h-[330px]" />
+						</a>
+					<?php endforeach; ?>
+				</div>
+
+				<!-- Arrows -->
+				<button type="button" @click="stop(); go(i - 1)" aria-label="Previous slide"
+					class="absolute left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-brand-title shadow-md transition hover:bg-white">
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+				</button>
+				<button type="button" @click="stop(); go(i + 1)" aria-label="Next slide"
+					class="absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-brand-title shadow-md transition hover:bg-white">
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+				</button>
+
+				<!-- Dots -->
+				<div class="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+					<template x-for="d in n" :key="d">
+						<button type="button" @click="stop(); go(d - 1)" :aria-label="'Go to slide ' + d"
+							class="h-2 rounded-full bg-white transition-all"
+							:class="i === (d - 1) ? 'w-6 opacity-100' : 'w-2 opacity-60 hover:opacity-90'"></button>
+					</template>
+				</div>
+			</div>
+
+			<!-- Right fixed banner -->
+			<a href="<?php echo esc_url( isdb_deals_url() ); ?>" class="hidden overflow-hidden rounded-lg lg:block">
+				<img src="<?php echo esc_url( get_theme_file_uri( 'assets/img/hero-side.svg' ) ); ?>" alt="Cash on Delivery nationwide" class="h-[330px] w-full object-cover" />
 			</a>
 		</div>
 	</section>
@@ -349,7 +353,7 @@ function isdb_render_product_grid( $products, $limit = 8 ) {
 	<?php if ( ! empty( $best_sellers ) ) : ?>
 		<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
 			<?php isdb_section_head( 'Just For You', $shop_url, 'View all products' ); ?>
-			<?php isdb_render_product_grid( $best_sellers, 10 ); ?>
+			<?php isdb_render_product_carousel( $best_sellers, 12, 5000 ); ?>
 		</section>
 	<?php endif; ?>
 
@@ -359,8 +363,8 @@ function isdb_render_product_grid( $products, $limit = 8 ) {
 	) ) : array();
 	if ( ! empty( $latest ) ) : ?>
 		<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
-			<?php isdb_section_head( 'New Arrivals', $shop_url, 'View all items' ); ?>
-			<?php isdb_render_product_grid( $latest, 10 ); ?>
+			<?php isdb_section_head( 'New Arrivals', isdb_new_arrivals_url(), 'View all items' ); ?>
+			<?php isdb_render_product_carousel( $latest, 12, 5500 ); ?>
 		</section>
 	<?php endif; ?>
 

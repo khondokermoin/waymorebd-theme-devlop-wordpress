@@ -295,6 +295,8 @@ function isdb_primary_nav( $variant = 'desktop' ) {
 	// Dynamic fallback: real product categories.
 	echo '<ul class="' . esc_attr( $ul_class ) . '">';
 	echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( home_url( '/shop/' ) ) . '">Shop All</a></li>';
+	echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( isdb_new_arrivals_url() ) . '">New Arrivals</a></li>';
+	echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( isdb_deals_url() ) . '">Deals</a></li>';
 	foreach ( isdb_top_categories( 5 ) as $term ) {
 		echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( get_term_link( $term ) ) . '">' . esc_html( $term->name ) . '</a></li>';
 	}
@@ -1306,9 +1308,9 @@ function isdb_buy_now_url( $product_id ) {
  *
  * @param string $extra_track_class
  */
-function isdb_carousel_start( $extra_track_class = '' ) {
+function isdb_carousel_start( $extra_track_class = '', $autoplay = 4500 ) {
 	?>
-	<div class="isdb-carousel relative">
+	<div class="isdb-carousel relative"<?php echo $autoplay ? ' data-autoplay="' . (int) $autoplay . '"' : ''; ?>>
 		<button type="button" class="isdb-car-prev absolute -left-3 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-brand-primary text-white shadow-md transition hover:bg-brand-hover disabled:pointer-events-none disabled:opacity-0" aria-label="Previous">
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
 		</button>
@@ -1325,6 +1327,75 @@ function isdb_carousel_end() {
 		<button type="button" class="isdb-car-next absolute -right-3 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-brand-primary text-white shadow-md transition hover:bg-brand-hover disabled:pointer-events-none disabled:opacity-0" aria-label="Next">
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
 		</button>
+
+		<!-- Pagination dots (built by the shared carousel JS) -->
+		<div class="isdb-car-dots mt-4 flex items-center justify-center gap-2"></div>
+	</div>
+	<?php
+}
+
+/**
+ * Product carousel — same shell as isdb_carousel_start/end, with each card in a
+ * fixed-width snap cell (~2 / 3 / 4 / 5 per view). Autoplay + dots come free
+ * from the shared carousel JS.
+ *
+ * @param WC_Product[] $products
+ * @param int          $limit
+ * @param int          $autoplay Milliseconds between auto-advances (0 = off).
+ */
+function isdb_render_product_carousel( $products, $limit = 12, $autoplay = 5000 ) {
+	global $product, $post;
+	$orig_product = $product;
+	$orig_post    = $post;
+
+	$valid = array();
+	foreach ( $products as $p ) {
+		if ( $p instanceof WC_Product && $p->is_visible() ) {
+			$valid[] = $p;
+		}
+		if ( count( $valid ) >= $limit ) {
+			break;
+		}
+	}
+	if ( empty( $valid ) ) {
+		return;
+	}
+
+	isdb_carousel_start( '', $autoplay );
+	foreach ( $valid as $p ) {
+		$post    = get_post( $p->get_id() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+		$product = $p;                        // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+		setup_postdata( $post );
+		echo '<div class="isdb-car-cell w-[46%] flex-none snap-start sm:w-[30%] md:w-[23%] lg:w-[18.5%] [&>li]:h-full">';
+		wc_get_template_part( 'content', 'product' );
+		echo '</div>';
+	}
+	isdb_carousel_end();
+
+	$product = $orig_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+	$post    = $orig_post;    // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+	wp_reset_postdata();
+}
+
+/**
+ * Section header: title left, an "action →" link right (orange underline rule).
+ * Shared by the homepage rails and the single-product related section.
+ *
+ * @param string $title
+ * @param string $link
+ * @param string $label
+ */
+function isdb_section_head( $title, $link = '', $label = 'View all items' ) {
+	?>
+	<div class="section-head mb-4 flex items-end justify-between gap-4 border-b border-[#ddd] pb-2.5">
+		<h2 class="text-base font-bold tracking-tight text-brand-title sm:text-lg lg:text-xl"><?php echo esc_html( $title ); ?></h2>
+		<?php if ( $link ) : ?>
+			<a href="<?php echo esc_url( $link ); ?>"
+				class="group inline-flex flex-none items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-brand-primary transition hover:underline sm:text-xs">
+				<?php echo esc_html( $label ); ?>
+				<svg class="h-3.5 w-3.5 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+			</a>
+		<?php endif; ?>
 	</div>
 	<?php
 }
@@ -1588,44 +1659,87 @@ jQuery(function ($) {
 		if (e.key === 'Escape') { $('.isdb-search-box').addClass('hidden'); }
 	});
 
-	/* ---------------- CAROUSELS (native scroll-snap + arrows) ----------------
-	   No Swiper needed: the track is a scroll-snap flex row, so touch/trackpad
-	   swiping is native and free. The arrows just scrollBy() one "page".      */
-	function syncArrows($car) {
+	/* --------- CAROUSELS (scroll-snap + arrows + dots + autoplay) ----------
+	   Native scroll-snap track (free touch/trackpad swipe). Arrows & dots
+	   scrollBy() one page; data-autoplay="ms" auto-advances and loops.       */
+	function carPages(track) {
+		var w = track.clientWidth;
+		var max = track.scrollWidth - w;
+		return max > 4 ? Math.round(max / w) + 1 : 1;
+	}
+
+	function syncCar($car) {
 		var track = $car.find('.isdb-car-track')[0];
 		if (!track) { return; }
-		var scrollable = track.scrollWidth - track.clientWidth > 4;
-		var atStart = track.scrollLeft <= 2;
-		var atEnd   = track.scrollLeft >= (track.scrollWidth - track.clientWidth - 2);
+		var w = track.clientWidth;
+		var max = track.scrollWidth - w;
+		var scrollable = max > 4;
+		var pages = carPages(track);
+		var active = Math.min(pages - 1, Math.round(track.scrollLeft / Math.max(1, w)));
 
 		$car.find('.isdb-car-prev, .isdb-car-next')
 			.toggleClass('hidden', !scrollable)
 			.toggleClass('sm:flex', scrollable);
-		$car.find('.isdb-car-prev').prop('disabled', atStart);
-		$car.find('.isdb-car-next').prop('disabled', atEnd);
+		$car.find('.isdb-car-prev').prop('disabled', track.scrollLeft <= 2);
+		$car.find('.isdb-car-next').prop('disabled', track.scrollLeft >= max - 2);
+
+		var $dots = $car.find('.isdb-car-dots');
+		if (!$dots.length) { return; }
+		if (!scrollable) { $dots.addClass('hidden').empty(); $dots.data('pages', 0); return; }
+		$dots.removeClass('hidden');
+		if ($dots.data('pages') !== pages) {
+			$dots.data('pages', pages).empty();
+			for (var d = 0; d < pages; d++) {
+				$dots.append('<button type="button" class="isdb-car-dot h-2 w-2 rounded-full bg-brand-line transition-all" data-page="' + d + '" aria-label="Go to page ' + (d + 1) + '"></button>');
+			}
+		}
+		$dots.children().each(function (idx) {
+			$(this).toggleClass('!w-6 !bg-brand-primary', idx === active)
+			       .toggleClass('bg-brand-line', idx !== active);
+		});
 	}
 
 	function initCarousels() {
 		$('.isdb-carousel').each(function () {
 			var $car = $(this);
 			var track = $car.find('.isdb-car-track')[0];
-			if (!track || $car.data('isdbInit')) { syncArrows($car); return; }
-			$car.data('isdbInit', true);
+			if (!track) { return; }
 
-			$car.find('.isdb-car-prev').on('click', function () {
-				track.scrollBy({ left: -Math.round(track.clientWidth * 0.85), behavior: 'smooth' });
-			});
-			$car.find('.isdb-car-next').on('click', function () {
-				track.scrollBy({ left: Math.round(track.clientWidth * 0.85), behavior: 'smooth' });
-			});
-			track.addEventListener('scroll', function () { syncArrows($car); }, { passive: true });
+			if (!$car.data('isdbInit')) {
+				$car.data('isdbInit', true);
 
-			syncArrows($car);
+				$car.find('.isdb-car-prev').on('click', function () {
+					track.scrollBy({ left: -track.clientWidth, behavior: 'smooth' });
+				});
+				$car.find('.isdb-car-next').on('click', function () {
+					track.scrollBy({ left: track.clientWidth, behavior: 'smooth' });
+				});
+				$car.on('click', '.isdb-car-dot', function () {
+					track.scrollTo({ left: $(this).data('page') * track.clientWidth, behavior: 'smooth' });
+				});
+				track.addEventListener('scroll', function () { syncCar($car); }, { passive: true });
+
+				var ms = parseInt($car.attr('data-autoplay'), 10);
+				if (ms && ms > 1200) {
+					var tick = function () {
+						var w = track.clientWidth;
+						var max = track.scrollWidth - w;
+						if (max <= 4) { return; }
+						track.scrollTo({ left: (track.scrollLeft >= max - 2) ? 0 : track.scrollLeft + w, behavior: 'smooth' });
+					};
+					var start = function () { $car.data('carTimer', setInterval(tick, ms)); };
+					var stop  = function () { clearInterval($car.data('carTimer')); };
+					start();
+					$car.on('mouseenter touchstart pointerdown', stop).on('mouseleave touchend', start);
+				}
+			}
+
+			syncCar($car);
 		});
 	}
 
 	initCarousels();
-	$(window).on('resize', function () { $('.isdb-carousel').each(function () { syncArrows($(this)); }); });
+	$(window).on('resize', function () { $('.isdb-carousel').each(function () { syncCar($(this)); }); });
 	// Re-sync after images load (scrollWidth changes as they paint).
 	$(window).on('load', initCarousels);
 	$(document.body).on('wc_fragments_refreshed', initCarousels);
@@ -1633,6 +1747,48 @@ jQuery(function ($) {
 JS
 	);
 }, 30 );
+
+/**
+ * Canonical shop-view URLs the theme guarantees to render products. Point the
+ * "New Arrivals" and "Deals/Offers" menu items at these.
+ *   New Arrivals -> {shop}?orderby=date   (newest first, WooCommerce native)
+ *   Deals        -> {shop}?on_sale=1       (handled by isdb_apply_shop_filters)
+ */
+function isdb_new_arrivals_url() {
+	$shop = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' );
+	return apply_filters( 'isdb_new_arrivals_url', add_query_arg( 'orderby', 'date', $shop ) );
+}
+function isdb_deals_url() {
+	$shop = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' );
+	return apply_filters( 'isdb_deals_url', add_query_arg( 'on_sale', '1', $shop ) );
+}
+
+/**
+ * A bare "New Arrivals" / "Deals" PAGE has no product loop, so it shows nothing.
+ * If a visitor lands on one (menu still points at the clean /new-arrivals/ URL),
+ * send them to the shop view that actually lists products.
+ */
+add_action( 'template_redirect', function () {
+	if ( is_admin() || ! is_page() ) {
+		return;
+	}
+	$slug = get_post_field( 'post_name', get_queried_object_id() );
+	$map  = array(
+		'new-arrivals'     => 'new',
+		'new-arrival'      => 'new',
+		'deals'            => 'deal',
+		'deals-offers'     => 'deal',
+		'deals-and-offers' => 'deal',
+		'deal-offers'      => 'deal',
+		'offers'           => 'deal',
+		'offer'            => 'deal',
+		'on-sale'          => 'deal',
+	);
+	if ( isset( $map[ $slug ] ) ) {
+		wp_safe_redirect( 'new' === $map[ $slug ] ? isdb_new_arrivals_url() : isdb_deals_url(), 302 );
+		exit;
+	}
+} );
 
 /* ------------------------------------------------------------------ *
  * 8. RAW SHOP FILTER ENGINE  (no plugin)

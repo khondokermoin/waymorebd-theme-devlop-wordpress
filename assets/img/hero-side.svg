@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 410" width="500" height="410" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Cash on Delivery nationwide">
+  <defs>
+    <linearGradient id="s1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b3b39"/>
+      <stop offset="1" stop-color="#041f1e"/>
+    </linearGradient>
+  </defs>
+  <rect width="500" height="410" fill="url(#s1)"/>
+  <circle cx="420" cy="70" r="120" fill="#f48721" opacity="0.16"/>
+  <circle cx="70" cy="360" r="90" fill="#f48721" opacity="0.12"/>
+  <g transform="translate(40,54)">
+    <rect x="0" y="0" width="92" height="60" rx="10" fill="#f48721"/>
+    <circle cx="46" cy="30" r="16" fill="#ffffff" opacity="0.95"/>
+    <text x="46" y="37" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="800" fill="#f48721">৳</text>
+  </g>
+  <text x="40" y="196" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" letter-spacing="2" fill="#f48721">NO RISK SHOPPING</text>
+  <text x="40" y="242" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="800" fill="#ffffff">Cash on</text>
+  <text x="40" y="288" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="800" fill="#ffffff">Delivery</text>
+  <text x="40" y="324" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#c9d6d4">Pay only when it arrives — nationwide.</text>
+  <rect x="40" y="344" width="150" height="44" rx="8" fill="#f48721"/>
+  <text x="115" y="372" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="800" fill="#ffffff">Shop All</text>
+</svg>
