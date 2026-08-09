@@ -1594,6 +1594,17 @@ jQuery(function ($) {
 		refreshCards();
 	});
 
+	// Self-heal a STALE cached mini-cart fragment: WooCommerce stores the mini
+	// cart HTML in the browser (localStorage), so after a template update the old
+	// markup (no pinned footer) can render inside the new drawer shell. If items
+	// are present but the new footer isn't, force one fragment refresh.
+	setTimeout(function () {
+		var $c = $('.widget_shopping_cart_content');
+		if ($c.length && $c.find('.woocommerce-mini-cart').length && !$c.find('.wmb-mini-foot').length) {
+			$(document.body).trigger('wc_fragment_refresh');
+		}
+	}, 800);
+
 	/* ---------------- LIVE SEARCH (type-ahead) ---------------- */
 	var timer = null, lastQ = '', xhr = null;
 
