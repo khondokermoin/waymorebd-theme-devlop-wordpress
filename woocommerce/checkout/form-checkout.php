@@ -137,12 +137,12 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 							x-transition:enter-start="opacity-0 -translate-y-1"
 							x-transition:enter-end="opacity-100 translate-y-0"
 							class="mt-3">
-							<form class="checkout_coupon woocommerce-form-coupon flex gap-2" method="post">
-								<input type="text" name="coupon_code" id="coupon_code" value="" placeholder="Enter Coupon"
-									class="wmb-field flex-1" />
+							<form class="checkout_coupon flex flex-col gap-2 sm:flex-row" method="post">
+								<input type="text" name="coupon_code" id="coupon_code" value="" placeholder="Enter coupon code"
+									class="input-text flex-1" />
 								<button type="submit" name="apply_coupon" value="<?php esc_attr_e( 'Apply coupon', 'woocommerce' ); ?>"
-									class="flex-none rounded-lg bg-brand-primary px-5 text-[13px] font-bold text-white transition hover:bg-brand-hover">
-									<?php esc_html_e( 'Apply coupon', 'woocommerce' ); ?>
+									class="flex-none rounded bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover">
+									<?php esc_html_e( 'Apply', 'woocommerce' ); ?>
 								</button>
 							</form>
 						</div>

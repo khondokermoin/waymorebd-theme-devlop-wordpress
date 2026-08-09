@@ -479,14 +479,40 @@ function isdb_simplify_checkout_fields( $fields ) {
 	}
 	if ( isset( $fields['billing']['billing_email'] ) ) {
 		$fields['billing']['billing_email']['required']    = false;
-		$fields['billing']['billing_email']['label']       = __( 'Email (optional)', 'isdb-custom' );
-		$fields['billing']['billing_email']['placeholder'] = __( 'example@gmail.com (optional)', 'isdb-custom' );
+		$fields['billing']['billing_email']['label']       = __( 'Email', 'isdb-custom' ); // WC appends "(optional)" itself.
+		$fields['billing']['billing_email']['placeholder'] = __( 'example@gmail.com', 'isdb-custom' );
 		$fields['billing']['billing_email']['class']       = array( 'form-row-last' );
 		$fields['billing']['billing_email']['priority']    = 30;
 	}
 
 	return $fields;
 }
+
+/**
+ * Address-field labels/visibility at the SOURCE — more reliable for the WC
+ * address group (country/address_1/city/state) than woocommerce_checkout_fields
+ * alone, which the country locale + AJAX re-render can partially override.
+ * The wmb-hidden-field class only hides inside .wmb-checkout, so country still
+ * shows on My-Account address forms.
+ */
+add_filter( 'woocommerce_default_address_fields', function ( $fields ) {
+	if ( isset( $fields['country'] ) ) {
+		$existing               = isset( $fields['country']['class'] ) ? (array) $fields['country']['class'] : array();
+		$fields['country']['class'] = array_merge( $existing, array( 'wmb-hidden-field' ) );
+	}
+	if ( isset( $fields['address_1'] ) ) {
+		$fields['address_1']['label']       = __( 'Address', 'isdb-custom' );
+		$fields['address_1']['placeholder'] = __( 'House / building / street / area', 'isdb-custom' );
+	}
+	if ( isset( $fields['city'] ) ) {
+		$fields['city']['label']    = __( 'Area / Thana', 'isdb-custom' );
+		$fields['city']['required'] = false;
+	}
+	if ( isset( $fields['state'] ) ) {
+		$fields['state']['label'] = __( 'District', 'isdb-custom' );
+	}
+	return $fields;
+}, 20 );
 
 // Default the checkout to Bangladesh so the hidden country field is valid.
 add_filter( 'default_checkout_billing_country', function () { return 'BD'; } );
@@ -1077,6 +1103,29 @@ function isdb_render_checkout_totals() {
 			<span class="text-lg font-extrabold text-brand-primary"><?php wc_cart_totals_order_total_html(); ?></span>
 		</div>
 		<?php do_action( 'woocommerce_review_order_after_order_total' ); ?>
+
+		<?php
+		// Loss-aversion: reinforce the win right at the decision point.
+		$checkout_savings = 0.0;
+		foreach ( WC()->cart->get_cart() as $ci ) {
+			$p = isset( $ci['data'] ) ? $ci['data'] : null;
+			if ( $p instanceof WC_Product ) {
+				$reg = (float) $p->get_regular_price();
+				$cur = (float) $p->get_price();
+				if ( $reg > $cur && $cur > 0 ) {
+					$checkout_savings += ( $reg - $cur ) * (int) $ci['quantity'];
+				}
+			}
+		}
+		if ( $checkout_savings > 0 ) :
+			?>
+			<div class="mt-1 flex items-center justify-between rounded-lg bg-emerald-50 px-3 py-2">
+				<span class="text-[13px] font-bold text-emerald-700">&#127881; You're saving</span>
+				<span class="text-[13px] font-extrabold text-emerald-700"><?php echo wp_kses_post( wc_price( $checkout_savings ) ); ?></span>
+			</div>
+			<?php
+		endif;
+		?>
 	</div>
 	<?php
 }

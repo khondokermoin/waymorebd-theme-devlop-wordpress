@@ -183,6 +183,9 @@
     padding: 12px 12px;
     transition: border-color .15s, box-shadow .15s;
   }
+  /* Uniform control height so text inputs, native selects and the coupon field all line up. */
+  .wmb-checkout .input-text,
+  .wmb-checkout select { min-height: 46px; }
   .wmb-checkout .input-text::placeholder,
   .wmb-checkout textarea::placeholder { @apply text-slate-400; }
   .wmb-checkout .input-text:focus,
