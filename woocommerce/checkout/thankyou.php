@@ -111,7 +111,7 @@ defined( 'ABSPATH' ) || exit;
 					<svg class="h-4 w-4 text-brand-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
 					Thank you<?php echo $first_name ? ', ' . esc_html( $first_name ) : ''; ?>!
 				</span>
-				<h1 class="mt-4 text-2xl font-extrabold tracking-tight sm:text-3xl">Track Your Order</h1>
+				<h1 class="mt-4 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Track Your Order</h1>
 				<p class="mt-2 text-sm text-white/70">Order <span class="font-bold text-white">#<?php echo esc_html( $order_no ); ?></span> · Placed on <?php echo esc_html( $placed_on ); ?></p>
 			</div>
 
