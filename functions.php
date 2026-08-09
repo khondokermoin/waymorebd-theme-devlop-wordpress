@@ -568,7 +568,7 @@ function isdb_simplify_checkout_fields( $fields ) {
 		// Full name (reuse first_name, full width).
 		if ( isset( $fields[ $g ][ "{$g}_first_name" ] ) ) {
 			$fields[ $g ][ "{$g}_first_name" ]['label']       = __( 'Full Name', 'isdb-custom' );
-			$fields[ $g ][ "{$g}_first_name" ]['placeholder'] = __( 'Your full name', 'isdb-custom' );
+			$fields[ $g ][ "{$g}_first_name" ]['placeholder'] = __( 'Full Name', 'isdb-custom' );
 			$fields[ $g ][ "{$g}_first_name" ]['class']       = array( 'form-row-wide' );
 			$fields[ $g ][ "{$g}_first_name" ]['priority']    = 10;
 		}
@@ -596,7 +596,7 @@ function isdb_simplify_checkout_fields( $fields ) {
 		}
 		if ( isset( $fields[ $g ][ "{$g}_city" ] ) ) {
 			$fields[ $g ][ "{$g}_city" ]['label']       = __( 'Area / Thana', 'isdb-custom' );
-			$fields[ $g ][ "{$g}_city" ]['placeholder'] = __( 'Area / Thana', 'isdb-custom' );
+			$fields[ $g ][ "{$g}_city" ]['placeholder'] = __( 'Area / Thana (optional)', 'isdb-custom' );
 			$fields[ $g ][ "{$g}_city" ]['required']    = false;
 			$fields[ $g ][ "{$g}_city" ]['class']       = array( 'form-row-last' );
 			$fields[ $g ][ "{$g}_city" ]['priority']    = 60;
@@ -607,16 +607,21 @@ function isdb_simplify_checkout_fields( $fields ) {
 	if ( isset( $fields['billing']['billing_phone'] ) ) {
 		$fields['billing']['billing_phone']['required']    = true;
 		$fields['billing']['billing_phone']['label']       = __( 'Phone Number', 'isdb-custom' );
-		$fields['billing']['billing_phone']['placeholder'] = __( '01XXXXXXXXX', 'isdb-custom' );
-		$fields['billing']['billing_phone']['class']       = array( 'form-row-first' );
+		$fields['billing']['billing_phone']['placeholder'] = __( 'Phone (01XXXXXXXXX)', 'isdb-custom' );
+		$fields['billing']['billing_phone']['class']       = array( 'form-row-last' );
 		$fields['billing']['billing_phone']['priority']    = 20;
 	}
 	if ( isset( $fields['billing']['billing_email'] ) ) {
 		$fields['billing']['billing_email']['required']    = false;
 		$fields['billing']['billing_email']['label']       = __( 'Email', 'isdb-custom' ); // WC appends "(optional)" itself.
-		$fields['billing']['billing_email']['placeholder'] = __( 'example@gmail.com', 'isdb-custom' );
-		$fields['billing']['billing_email']['class']       = array( 'form-row-last' );
+		$fields['billing']['billing_email']['placeholder'] = __( 'Email address (optional)', 'isdb-custom' );
+		$fields['billing']['billing_email']['class']       = array( 'form-row-wide' );
 		$fields['billing']['billing_email']['priority']    = 30;
+	}
+
+	// Billing "Full Name" sits beside Phone (2-up); shipping name stays full-width.
+	if ( isset( $fields['billing']['billing_first_name'] ) ) {
+		$fields['billing']['billing_first_name']['class'] = array( 'form-row-first' );
 	}
 
 	return $fields;
@@ -631,19 +636,26 @@ function isdb_simplify_checkout_fields( $fields ) {
  */
 add_filter( 'woocommerce_default_address_fields', function ( $fields ) {
 	if ( isset( $fields['country'] ) ) {
-		$existing               = isset( $fields['country']['class'] ) ? (array) $fields['country']['class'] : array();
-		$fields['country']['class'] = array_merge( $existing, array( 'wmb-hidden-field' ) );
+		$existing                      = isset( $fields['country']['class'] ) ? (array) $fields['country']['class'] : array();
+		$fields['country']['class']    = array_merge( $existing, array( 'wmb-hidden-field' ) );
+		$fields['country']['priority'] = 25;
 	}
 	if ( isset( $fields['address_1'] ) ) {
 		$fields['address_1']['label']       = __( 'Address', 'isdb-custom' );
-		$fields['address_1']['placeholder'] = __( 'House / building / street / area', 'isdb-custom' );
+		$fields['address_1']['placeholder'] = __( 'Full address — house, road, area', 'isdb-custom' );
+		$fields['address_1']['class']       = array( 'form-row-wide' );
+		$fields['address_1']['priority']    = 40;
+	}
+	if ( isset( $fields['state'] ) ) {
+		$fields['state']['label']    = __( 'District', 'isdb-custom' );
+		$fields['state']['class']    = array( 'form-row-first' );
+		$fields['state']['priority'] = 50;
 	}
 	if ( isset( $fields['city'] ) ) {
 		$fields['city']['label']    = __( 'Area / Thana', 'isdb-custom' );
 		$fields['city']['required'] = false;
-	}
-	if ( isset( $fields['state'] ) ) {
-		$fields['state']['label'] = __( 'District', 'isdb-custom' );
+		$fields['city']['class']    = array( 'form-row-last' );
+		$fields['city']['priority'] = 60;
 	}
 	return $fields;
 }, 20 );
