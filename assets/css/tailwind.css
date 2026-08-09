@@ -125,6 +125,11 @@
   .wmb-wc-cart .single_add_to_cart_button.wc-variation-selection-needed { opacity: .45; box-shadow: none; cursor: not-allowed; }
   .wmb-wc-cart .woocommerce-variation.single_variation:empty { display: none; }
 
+  /* Mini-cart drawer: keep the container a full-height flex column even after
+     WooCommerce's AJAX fragment replaces it (the class is reset on refresh), so
+     items scroll and the You-May-Also-Like + Total + Checkout footer stays pinned. */
+  .widget_shopping_cart_content { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+
   @media (max-width: 480px) {
     .wmb-step__circle { height: 38px; width: 38px; }
     .wmb-step:not(:first-child)::before { top: 19px; }

@@ -269,10 +269,8 @@ $is_logged   = is_user_logged_in();
 				</button>
 			</div>
 
-			<div class="flex-1 overflow-y-auto px-5 py-4">
-				<div class="widget_shopping_cart_content">
-					<?php if ( function_exists( 'woocommerce_mini_cart' ) ) { woocommerce_mini_cart(); } ?>
-				</div>
+			<div class="widget_shopping_cart_content flex min-h-0 flex-1 flex-col">
+				<?php if ( function_exists( 'woocommerce_mini_cart' ) ) { woocommerce_mini_cart(); } ?>
 			</div>
 		</div>
 	</div>
