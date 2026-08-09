@@ -18,7 +18,10 @@ if ( ! defined( 'ISDB_VERSION' ) ) {
  * REAL free-shipping minimum once your shipping zone is configured.
  */
 if ( ! defined( 'ISDB_FREE_SHIP_THRESHOLD' ) ) {
-	define( 'ISDB_FREE_SHIP_THRESHOLD', 0 );
+	// ⚠️ Set this to YOUR real free-shipping minimum, AND configure a matching
+	// WooCommerce → Settings → Shipping → Free Shipping (min order = this value),
+	// otherwise the bar promises free shipping you don't actually offer. 0 = off.
+	define( 'ISDB_FREE_SHIP_THRESHOLD', 1000 );
 }
 
 /** Official Way More BD social / contact endpoints. */
@@ -328,6 +331,122 @@ function isdb_free_shipping_progress() {
 		'pct'            => min( 100, ( $subtotal / $threshold ) * 100 ),
 		'reached'        => $remaining <= 0,
 	);
+}
+
+/* ------------------------------------------------------------------ *
+ * COOKIE CONSENT  (plugin-free, trust-first, cache-safe)
+ *   Rendered in the footer on every front-end view. A small vanilla-JS layer
+ *   shows it only when the visitor hasn't consented yet (the check runs
+ *   client-side, so it's safe with page caching), stores a 30-day cookie on
+ *   accept, and animates in/out. A subtle × dismisses for the current session.
+ * ------------------------------------------------------------------ */
+add_action( 'wp_footer', 'isdb_cookie_consent_banner', 100 );
+function isdb_cookie_consent_banner() {
+	if ( is_admin() ) {
+		return;
+	}
+	$policy = esc_url( home_url( '/privacy-policy/' ) );
+	?>
+	<div id="isdb-cookie" role="dialog" aria-live="polite" aria-label="Privacy and cookie notice">
+		<div class="isdb-cc-card">
+			<button type="button" class="isdb-cc-close isdb-cc-dismiss" aria-label="Dismiss">
+				<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+			</button>
+
+			<div class="isdb-cc-head">
+				<span class="isdb-cc-ico" aria-hidden="true">
+					<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+				</span>
+				<h2 class="isdb-cc-title">Your Privacy &amp; Security First</h2>
+			</div>
+
+			<p class="isdb-cc-body">We use essential cookies to ensure a highly secure, fast, and personalized shopping experience. Your data is protected and never sold.</p>
+
+			<span class="isdb-cc-secure">
+				<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+				256-bit encrypted &amp; never shared
+			</span>
+
+			<div class="isdb-cc-actions">
+				<button type="button" class="isdb-cc-accept">Accept &amp; Secure Session</button>
+				<a class="isdb-cc-link" href="<?php echo $policy; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already esc_url()'d. ?>">Read Privacy Policy</a>
+			</div>
+		</div>
+	</div>
+
+	<style>
+	#isdb-cookie{position:fixed;left:1rem;right:1rem;bottom:1rem;z-index:55;display:none;max-width:400px;
+		font-family:"Open Sans",ui-sans-serif,system-ui,sans-serif;opacity:0;transform:translateY(18px);
+		transition:opacity .38s cubic-bezier(.16,.84,.44,1),transform .38s cubic-bezier(.16,.84,.44,1);}
+	@media(min-width:640px){#isdb-cookie{right:auto;width:400px;left:1.25rem;bottom:1.25rem;}}
+	#isdb-cookie.isdb-cc-in{opacity:1;transform:translateY(0);}
+	#isdb-cookie.isdb-cc-out{opacity:0;transform:translateY(18px);}
+	#isdb-cookie *{box-sizing:border-box;}
+	#isdb-cookie .isdb-cc-card{position:relative;background:#fff;border:1px solid #ededed;border-radius:16px;
+		box-shadow:0 22px 48px -14px rgba(4,31,30,.30);padding:20px 20px 18px;}
+	#isdb-cookie .isdb-cc-close{position:absolute;top:10px;right:10px;width:28px;height:28px;border:0;background:transparent;
+		color:#9ca3af;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;}
+	#isdb-cookie .isdb-cc-close:hover{background:#f3f4f6;color:#374151;}
+	#isdb-cookie .isdb-cc-head{display:flex;align-items:center;gap:12px;padding-right:24px;}
+	#isdb-cookie .isdb-cc-ico{flex:none;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+		background:rgba(244,135,33,.12);color:#f48721;}
+	#isdb-cookie .isdb-cc-title{margin:0;font-size:15px;font-weight:800;color:#222831;letter-spacing:-.01em;line-height:1.3;}
+	#isdb-cookie .isdb-cc-body{margin:12px 0 0;font-size:13px;line-height:1.6;color:#4b5563;}
+	#isdb-cookie .isdb-cc-secure{display:inline-flex;align-items:center;gap:6px;margin-top:11px;font-size:11px;font-weight:700;color:#059669;}
+	#isdb-cookie .isdb-cc-actions{display:flex;align-items:center;gap:14px;margin-top:16px;flex-wrap:wrap;}
+	#isdb-cookie .isdb-cc-accept{flex:1 1 auto;min-width:180px;border:0;cursor:pointer;border-radius:10px;background:#f48721;color:#fff;
+		font-size:13.5px;font-weight:800;padding:12px 18px;box-shadow:0 8px 18px -6px rgba(244,135,33,.6);transition:background .15s ease,transform .08s ease;}
+	#isdb-cookie .isdb-cc-accept:hover{background:#e0761a;}
+	#isdb-cookie .isdb-cc-accept:active{transform:scale(.98);}
+	#isdb-cookie .isdb-cc-link{font-size:12.5px;font-weight:600;color:#6b7280;text-decoration:none;white-space:nowrap;}
+	#isdb-cookie .isdb-cc-link:hover{color:#f48721;text-decoration:underline;}
+	</style>
+
+	<script>
+	(function () {
+		var KEY = 'isdb_secure_cookie_consent';
+		var el  = document.getElementById('isdb-cookie');
+		if (!el) { return; }
+
+		function hasCookie(name) {
+			return document.cookie.split('; ').some(function (c) { return c.indexOf(name + '=') === 0; });
+		}
+		function setCookie(name, value, days) {
+			var d = new Date();
+			d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+			document.cookie = name + '=' + value + '; expires=' + d.toUTCString() + '; path=/; SameSite=Lax';
+		}
+		function remove() { if (el && el.parentNode) { el.parentNode.removeChild(el); } }
+
+		var dismissed = false;
+		try { dismissed = sessionStorage.getItem(KEY + '_dismissed') === '1'; } catch (e) {}
+		if (hasCookie(KEY) || dismissed) { remove(); return; }
+
+		setTimeout(function () {
+			el.style.display = 'block';
+			requestAnimationFrame(function () { el.classList.add('isdb-cc-in'); });
+		}, 900);
+
+		function hide() {
+			el.classList.remove('isdb-cc-in');
+			el.classList.add('isdb-cc-out');
+			setTimeout(remove, 380);
+		}
+
+		el.querySelector('.isdb-cc-accept').addEventListener('click', function () {
+			setCookie(KEY, 'secured', 30);
+			hide();
+		});
+		var x = el.querySelector('.isdb-cc-dismiss');
+		if (x) {
+			x.addEventListener('click', function () {
+				try { sessionStorage.setItem(KEY + '_dismissed', '1'); } catch (e) {}
+				hide();
+			});
+		}
+	})();
+	</script>
+	<?php
 }
 
 /**
