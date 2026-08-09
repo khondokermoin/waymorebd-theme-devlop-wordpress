@@ -213,10 +213,12 @@ function isdb_floating_cart() {
 	?>
 	<div class="isdb-floating-cart fixed right-0 top-1/2 z-40 -translate-y-1/2 <?php echo $count > 0 ? '' : 'hidden'; ?>">
 		<button type="button" onclick="window.dispatchEvent(new CustomEvent('isdb-open-cart'))"
-			class="flex flex-col items-center gap-0.5 rounded-l-card bg-brand-primary px-3 py-2.5 text-white shadow-lg transition hover:bg-brand-hover">
-			<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
-			<span class="whitespace-nowrap text-[11px] font-bold leading-tight"><?php echo esc_html( $count ); ?> Items</span>
-			<span class="whitespace-nowrap text-[11px] font-semibold leading-tight opacity-90"><?php echo wp_kses_post( isdb_cart_subtotal_html() ); ?></span>
+			class="flex flex-col items-stretch overflow-hidden rounded-l-2xl bg-brand-primary text-white shadow-lg ring-1 ring-black/5 transition hover:bg-brand-hover">
+			<span class="flex flex-col items-center gap-1 px-3 pb-2 pt-2.5">
+				<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
+				<span class="whitespace-nowrap text-[11px] font-semibold leading-none"><?php echo esc_html( $count ); ?> Items</span>
+			</span>
+			<span class="isdb-fc-price block whitespace-nowrap border-t border-white/25 bg-black/10 px-3 py-1.5 text-center text-[13px] font-extrabold leading-none"><?php echo wp_kses_post( isdb_cart_subtotal_html() ); ?></span>
 		</button>
 	</div>
 	<?php

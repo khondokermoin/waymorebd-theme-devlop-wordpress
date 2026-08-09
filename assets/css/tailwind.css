@@ -130,6 +130,11 @@
      items scroll and the You-May-Also-Like + Total + Checkout footer stays pinned. */
   .widget_shopping_cart_content { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
 
+  /* Floating cart pill: make the price crisp and the ৳ (Bengali Taka, a font
+     fallback that otherwise renders undersized) match the digits' size. */
+  .isdb-fc-price .woocommerce-Price-amount { font-weight: 800; white-space: nowrap; }
+  .isdb-fc-price .woocommerce-Price-currencySymbol { font-size: 1.12em; font-weight: 800; margin-inline-end: 1px; }
+
   @media (max-width: 480px) {
     .wmb-step__circle { height: 38px; width: 38px; }
     .wmb-step:not(:first-child)::before { top: 19px; }
