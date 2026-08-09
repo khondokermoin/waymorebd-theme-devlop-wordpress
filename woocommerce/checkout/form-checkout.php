@@ -29,6 +29,7 @@
  * Overrides: wp-content/plugins/woocommerce/templates/checkout/form-checkout.php
  *
  * @package isdb-custom
+ * @version 9.4.0
  * @var WC_Checkout $checkout
  */
 

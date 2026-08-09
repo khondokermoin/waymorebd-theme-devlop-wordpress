@@ -7,6 +7,7 @@
  * Overrides: wp-content/plugins/woocommerce/templates/myaccount/my-account.php
  *
  * @package isdb-custom
+ * @version 3.5.0
  */
 
 defined( 'ABSPATH' ) || exit;

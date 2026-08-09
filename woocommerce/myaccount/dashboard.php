@@ -9,6 +9,7 @@
  * Overrides: wp-content/plugins/woocommerce/templates/myaccount/dashboard.php
  *
  * @package isdb-custom
+ * @version 4.4.0
  */
 
 defined( 'ABSPATH' ) || exit;

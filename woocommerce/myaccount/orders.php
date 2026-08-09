@@ -15,6 +15,7 @@
  * Overrides: wp-content/plugins/woocommerce/templates/myaccount/orders.php
  *
  * @package isdb-custom
+ * @version 9.5.0
  * @var WP_Query $customer_orders
  * @var bool     $has_orders
  * @var int      $current_page

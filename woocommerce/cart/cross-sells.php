@@ -10,6 +10,7 @@
  * Overrides: wp-content/plugins/woocommerce/templates/cart/cross-sells.php
  *
  * @package isdb-custom
+ * @version 9.6.0
  * @var WC_Product[] $cross_sells
  */
 

@@ -15,6 +15,7 @@
  * Overrides: wp-content/plugins/woocommerce/templates/checkout/review-order.php
  *
  * @package isdb-custom
+ * @version 11.0.0
  */
 
 defined( 'ABSPATH' ) || exit;

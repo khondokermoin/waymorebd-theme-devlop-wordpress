@@ -14,6 +14,7 @@
  * Overrides: wp-content/plugins/woocommerce/templates/cart/mini-cart.php
  *
  * @package isdb-custom
+ * @version 11.0.0
  */
 
 defined( 'ABSPATH' ) || exit;

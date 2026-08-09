@@ -21,6 +21,7 @@
  * Overrides: wp-content/plugins/woocommerce/templates/myaccount/form-login.php
  *
  * @package isdb-custom
+ * @version 9.9.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -210,7 +211,7 @@ $ico_mail   = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25
 				</span>
 				<span class="inline-flex items-center gap-1.5">
 					<svg class="h-4 w-4 text-brand-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H9v3h2v7h3v-7h2.5l.5-3h-3V9.5c0-.3.2-.5.5-.5H14z"/></svg>
-					<a href="<?php echo esc_url( defined( 'ISDB_FACEBOOK_URL' ) ? ISDB_FACEBOOK_URL : 'https://www.facebook.com/waymore.bd' ); ?>" target="_blank" rel="noopener noreferrer" class="transition hover:text-brand-primary">Message us on Facebook</a>
+					<a href="<?php echo esc_url( function_exists( 'isdb_opt' ) ? isdb_opt( 'isdb_facebook', defined( 'ISDB_FACEBOOK_URL' ) ? ISDB_FACEBOOK_URL : '' ) : '' ); ?>" target="_blank" rel="noopener noreferrer" class="transition hover:text-brand-primary">Message us on Facebook</a>
 				</span>
 			</div>
 		</div>

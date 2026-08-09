@@ -13,11 +13,13 @@ defined( 'ABSPATH' ) || exit;
 
 get_header();
 
-$phone_display = '+880 1868 662477';
-$phone_tel     = '+8801868662477';
-$email         = 'info.waymore.bd@gmail.com';
-$fb_url        = defined( 'ISDB_FACEBOOK_URL' ) ? ISDB_FACEBOOK_URL : 'https://www.facebook.com/waymore.bd';
-$address       = 'New Market, Dhaka, Bangladesh';
+// Pulled from the Customizer (Theme Options) so the contact page always
+// matches the site-wide contact details — no per-template hardcoding.
+$phone_display = function_exists( 'isdb_phone' ) ? isdb_phone() : '';
+$phone_tel     = preg_replace( '/[^0-9+]/', '', $phone_display ); // digits only; template prefixes tel:
+$email         = function_exists( 'isdb_email' ) ? isdb_email() : '';
+$fb_url        = function_exists( 'isdb_opt' ) ? isdb_opt( 'isdb_facebook', defined( 'ISDB_FACEBOOK_URL' ) ? ISDB_FACEBOOK_URL : '' ) : '';
+$address       = function_exists( 'isdb_address' ) ? isdb_address() : '';
 
 $cards = array(
 	array(

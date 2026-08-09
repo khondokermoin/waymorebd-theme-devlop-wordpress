@@ -10,6 +10,7 @@
  * Overrides: wp-content/plugins/woocommerce/templates/checkout/form-billing.php
  *
  * @package isdb-custom
+ * @version 3.6.0
  * @var WC_Checkout $checkout
  */
 

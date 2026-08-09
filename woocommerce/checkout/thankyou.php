@@ -14,6 +14,7 @@
  * Overrides: wp-content/plugins/woocommerce/templates/checkout/thankyou.php
  *
  * @package isdb-custom
+ * @version 8.1.0
  * @var WC_Order $order
  */
 
@@ -34,7 +35,7 @@ defined( 'ABSPATH' ) || exit;
 					<svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.7 3.9a2 2 0 00-3.4 0z"/></svg>
 				</span>
 				<h1 class="mt-4 text-2xl font-bold text-brand-title">Payment didn't go through</h1>
-				<p class="mt-2 text-brand-body">No charge was made. Please try again — your cart is safe.</p>
+				<p class="mt-2 text-brand-body"><?php esc_html_e( 'No charge was made. Please try again — your cart is safe.', 'isdb-custom' ); ?></p>
 				<div class="mt-6 flex flex-wrap justify-center gap-3">
 					<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="rounded-card bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover"><?php esc_html_e( 'Pay again', 'woocommerce' ); ?></a>
 					<?php if ( is_user_logged_in() ) : ?>
@@ -66,39 +67,39 @@ defined( 'ABSPATH' ) || exit;
 						@keydown.escape.window="open=false"
 						x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90 translate-y-3" x-transition:enter-end="opacity-100 scale-100 translate-y-0">
 
-						<button type="button" @click="open=false" aria-label="Close" class="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
+						<button type="button" @click="open=false" aria-label="<?php esc_attr_e( 'Close', 'isdb-custom' ); ?>" class="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
 							<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
 						</button>
 
 						<div class="px-7 pb-7 pt-9">
 							<span class="inline-flex items-center gap-1.5 rounded-full bg-brand-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-primary">
-								<span class="h-1.5 w-1.5 rounded-full bg-brand-primary"></span> Confirmed
+								<span class="h-1.5 w-1.5 rounded-full bg-brand-primary"></span> <?php esc_html_e( 'Confirmed', 'isdb-custom' ); ?>
 							</span>
 
 							<span class="wmb-modal__icon mx-auto mt-5 flex h-24 w-24 items-center justify-center rounded-full bg-brand-primary/10">
 								<svg class="h-14 w-14 text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
 							</span>
 
-							<h2 class="mt-5 text-2xl font-extrabold text-brand-title">Order Placed!</h2>
-							<p class="mt-2 text-sm leading-relaxed text-brand-body">Your order has been received and is being processed. A confirmation is on its way.</p>
+							<h2 class="mt-5 text-2xl font-extrabold text-brand-title"><?php esc_html_e( 'Order Placed!', 'isdb-custom' ); ?></h2>
+							<p class="mt-2 text-sm leading-relaxed text-brand-body"><?php esc_html_e( 'Your order has been received and is being processed. A confirmation is on its way.', 'isdb-custom' ); ?></p>
 
 							<div class="mt-5 divide-y divide-slate-100 rounded-xl border border-slate-100 bg-brand-bg text-left">
 								<div class="flex items-center justify-between px-4 py-2.5">
-									<span class="text-[13px] text-slate-500">Order No</span>
+									<span class="text-[13px] text-slate-500"><?php esc_html_e( 'Order No', 'isdb-custom' ); ?></span>
 									<span class="text-[13px] font-bold text-brand-title">#<?php echo esc_html( $order_no ); ?></span>
 								</div>
 								<div class="flex items-center justify-between px-4 py-2.5">
-									<span class="text-[13px] text-slate-500">Total</span>
+									<span class="text-[13px] text-slate-500"><?php esc_html_e( 'Total', 'isdb-custom' ); ?></span>
 									<span class="text-[13px] font-bold text-brand-title"><?php echo wp_kses_post( $total_html ); ?></span>
 								</div>
 								<div class="flex items-center justify-between px-4 py-2.5">
-									<span class="text-[13px] text-slate-500">Placed on</span>
+									<span class="text-[13px] text-slate-500"><?php esc_html_e( 'Placed on', 'isdb-custom' ); ?></span>
 									<span class="text-[13px] font-bold text-brand-title"><?php echo esc_html( $placed_on ); ?></span>
 								</div>
 							</div>
 
 							<button type="button" @click="open=false" class="mt-6 w-full rounded-xl bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover">
-								View Order Tracker
+								<?php esc_html_e( 'View Order Tracker', 'isdb-custom' ); ?>
 							</button>
 						</div>
 					</div>
@@ -109,10 +110,10 @@ defined( 'ABSPATH' ) || exit;
 			<div class="mx-auto max-w-3xl overflow-hidden rounded-2xl bg-brand-dark px-6 py-8 text-center text-white sm:px-10">
 				<span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/90">
 					<svg class="h-4 w-4 text-brand-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-					Thank you<?php echo $first_name ? ', ' . esc_html( $first_name ) : ''; ?>!
+					<?php esc_html_e( 'Thank you', 'isdb-custom' ); ?><?php echo $first_name ? ', ' . esc_html( $first_name ) : ''; ?>!
 				</span>
-				<h1 class="mt-4 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Track Your Order</h1>
-				<p class="mt-2 text-sm text-white/70">Order <span class="font-bold text-white">#<?php echo esc_html( $order_no ); ?></span> · Placed on <?php echo esc_html( $placed_on ); ?></p>
+				<h1 class="mt-4 text-2xl font-extrabold tracking-tight text-white sm:text-3xl"><?php esc_html_e( 'Track Your Order', 'isdb-custom' ); ?></h1>
+				<p class="mt-2 text-sm text-white/70"><?php esc_html_e( 'Order', 'isdb-custom' ); ?> <span class="font-bold text-white">#<?php echo esc_html( $order_no ); ?></span> · <?php esc_html_e( 'Placed on', 'isdb-custom' ); ?> <?php echo esc_html( $placed_on ); ?></p>
 			</div>
 
 			<!-- ═══════════════ TRACKER BODY (shared) ═══════════════ -->
@@ -148,8 +149,8 @@ defined( 'ABSPATH' ) || exit;
 				?>
 				<section class="mx-auto mt-14 max-w-5xl">
 					<div class="text-center">
-						<h2 class="text-xl font-bold text-brand-title">Complete your kitchen</h2>
-						<p class="mt-1 text-sm text-slate-500">Popular picks other customers love — add to your next order.</p>
+						<h2 class="text-xl font-bold text-brand-title"><?php esc_html_e( 'Complete your kitchen', 'isdb-custom' ); ?></h2>
+						<p class="mt-1 text-sm text-slate-500"><?php esc_html_e( 'Popular picks other customers love — add to your next order.', 'isdb-custom' ); ?></p>
 					</div>
 					<div class="mt-6">
 						<?php isdb_render_product_carousel( $cards, 12, 5000 ); ?>
@@ -165,8 +166,8 @@ defined( 'ABSPATH' ) || exit;
 				<p class="mt-4 text-lg font-bold">You're all set — we've got it from here.</p>
 				<p class="mx-auto mt-1 max-w-lg text-sm text-white/70">That's our Customer Support Promise — real humans, quick replies. We'll keep you posted as your order moves.</p>
 				<div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-					<a href="<?php echo esc_url( isdb_track_order_url() ); ?>" class="rounded-xl bg-brand-primary px-7 py-3 text-sm font-bold !text-white shadow-lg shadow-black/20 transition hover:bg-brand-hover">Track Your Order</a>
-					<a href="<?php echo esc_url( home_url( '/shop/' ) ); ?>" class="rounded-xl bg-white px-7 py-3 text-sm font-bold !text-brand-dark transition hover:bg-white/90">Continue Shopping</a>
+					<a href="<?php echo esc_url( isdb_track_order_url() ); ?>" class="rounded-xl bg-brand-primary px-7 py-3 text-sm font-bold !text-white shadow-lg shadow-black/20 transition hover:bg-brand-hover"><?php esc_html_e( 'Track Your Order', 'isdb-custom' ); ?></a>
+					<a href="<?php echo esc_url( home_url( '/shop/' ) ); ?>" class="rounded-xl bg-white px-7 py-3 text-sm font-bold !text-brand-dark transition hover:bg-white/90"><?php esc_html_e( 'Continue Shopping', 'isdb-custom' ); ?></a>
 				</div>
 			</div>
 

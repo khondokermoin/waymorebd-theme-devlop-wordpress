@@ -20,6 +20,7 @@
  * Overrides: wp-content/plugins/woocommerce/templates/content-product.php
  *
  * @package isdb-custom
+ * @version 9.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -59,13 +60,13 @@ $simple_add = $product->is_type( 'simple' ) && $product->is_purchasable() && $pr
 
 	<!-- Badges -->
 	<?php if ( $is_bestseller ) : ?>
-		<span class="absolute left-2 top-2 z-20 rounded bg-brand-primary px-2 py-1 text-[10px] font-semibold leading-none text-white">Best Selling</span>
+		<span class="absolute left-2 top-2 z-20 rounded bg-brand-primary px-2 py-1 text-[10px] font-semibold leading-none text-white"><?php esc_html_e( 'Best Selling', 'isdb-custom' ); ?></span>
 	<?php endif; ?>
 	<?php if ( $discount > 0 ) : ?>
-		<span class="absolute right-2 top-2 z-20 rounded bg-[#22c55e] px-2 py-1 text-[10px] font-semibold leading-none text-white">Save <?php echo esc_html( $discount ); ?>%</span>
+		<span class="absolute right-2 top-2 z-20 rounded bg-[#22c55e] px-2 py-1 text-[10px] font-semibold leading-none text-white"><?php printf( esc_html__( 'Save %s%%', 'isdb-custom' ), esc_html( $discount ) ); ?></span>
 	<?php endif; ?>
 	<?php if ( ! $product->is_in_stock() ) : ?>
-		<span class="absolute left-2 top-9 z-20 rounded bg-brand-dark px-2 py-1 text-[10px] font-semibold leading-none text-white">Stock Out</span>
+		<span class="absolute left-2 top-9 z-20 rounded bg-brand-dark px-2 py-1 text-[10px] font-semibold leading-none text-white"><?php esc_html_e( 'Stock Out', 'isdb-custom' ); ?></span>
 	<?php endif; ?>
 
 	<div>
@@ -112,7 +113,7 @@ $simple_add = $product->is_type( 'simple' ) && $product->is_purchasable() && $pr
 					class="isdb-qty-btn isdb-step-minus flex w-11 flex-none items-center justify-center bg-brand-primary text-white transition hover:bg-brand-hover"
 					data-key="<?php echo esc_attr( $cart_key ); ?>"
 					data-qty="<?php echo esc_attr( max( 0, $cart_qty - 1 ) ); ?>"
-					aria-label="Decrease quantity">
+					aria-label="<?php esc_attr_e( 'Decrease quantity', 'isdb-custom' ); ?>">
 					<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14"/></svg>
 				</button>
 
@@ -122,7 +123,7 @@ $simple_add = $product->is_type( 'simple' ) && $product->is_purchasable() && $pr
 					class="isdb-qty-btn isdb-step-plus flex w-11 flex-none items-center justify-center bg-brand-primary text-white transition hover:bg-brand-hover"
 					data-key="<?php echo esc_attr( $cart_key ); ?>"
 					data-qty="<?php echo esc_attr( $cart_qty + 1 ); ?>"
-					aria-label="Increase quantity">
+					aria-label="<?php esc_attr_e( 'Increase quantity', 'isdb-custom' ); ?>">
 					<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
 				</button>
 			</div>

@@ -8,6 +8,7 @@
  * Sorting (?orderby=) is handled by WooCommerce core.
  *
  * @package isdb-custom
+ * @version 8.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -19,7 +20,7 @@ global $wp_query, $wp;
 $term        = ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) ? get_queried_object() : null;
 $page_title  = woocommerce_page_title( false );
 $description  = $term && ! empty( $term->description ) ? $term->description : get_the_archive_description();
-$form_action = esc_url( strtok( $_SERVER['REQUEST_URI'], '?' ) );
+$form_action = esc_url( strtok( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '', '?' ) );
 $clear_url   = $form_action;
 
 // Active filter state (for pre-checking the UI).

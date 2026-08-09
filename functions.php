@@ -72,6 +72,9 @@ function isdb_ssl_badge_url() {
  * ------------------------------------------------------------------ */
 add_action( 'after_setup_theme', function () {
 
+	// Load translations from /languages (ships with isdb-custom.pot).
+	load_theme_textdomain( 'isdb-custom', get_template_directory() . '/languages' );
+
 	// Hand template control to this theme (REQUIRED for WC overrides).
 	add_theme_support( 'woocommerce' );
 
@@ -87,8 +90,11 @@ add_action( 'after_setup_theme', function () {
 	add_theme_support( 'html5', array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script' ) );
 
 	register_nav_menus( array(
-		'primary' => __( 'Primary Menu', 'isdb-custom' ),
-		'footer'  => __( 'Footer Menu', 'isdb-custom' ),
+		'primary'            => __( 'Primary Menu', 'isdb-custom' ),
+		'footer_information' => __( 'Footer — Information', 'isdb-custom' ),
+		'footer_shop'        => __( 'Footer — Shop By', 'isdb-custom' ),
+		'footer_support'     => __( 'Footer — Support', 'isdb-custom' ),
+		'footer_policy'      => __( 'Footer — Consumer Policy', 'isdb-custom' ),
 	) );
 } );
 
@@ -120,23 +126,28 @@ add_action( 'wp_enqueue_scripts', function () {
 	 * pick up rebuilds without a manual cache bust.
 	 */
 	// Brand typeface — Open Sans (matches the design system).
-	wp_enqueue_style(
-		'isdb-fonts',
-		'https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap',
-		array(),
-		null
-	);
+	// Self-hosted (no Google CDN): GDPR-safe, offline-safe, marketplace-compliant.
+	$isdb_font_dep = array();
+	$fonts_css     = get_theme_file_path( 'assets/css/fonts.css' );
+	if ( file_exists( $fonts_css ) ) {
+		wp_enqueue_style( 'isdb-fonts', get_theme_file_uri( 'assets/css/fonts.css' ), array(), (string) filemtime( $fonts_css ) );
+		$isdb_font_dep = array( 'isdb-fonts' );
+	}
 
 	$app_css = get_theme_file_path( 'assets/css/app.css' );
 	if ( file_exists( $app_css ) ) {
-		wp_enqueue_style( 'isdb-tailwind', get_theme_file_uri( 'assets/css/app.css' ), array( 'isdb-fonts' ), (string) filemtime( $app_css ) );
+		wp_enqueue_style( 'isdb-tailwind', get_theme_file_uri( 'assets/css/app.css' ), $isdb_font_dep, (string) filemtime( $app_css ) );
 	}
 
 	// Theme header block (x-cloak, FOUC guard).
 	wp_enqueue_style( 'isdb-style', get_stylesheet_uri(), array( 'isdb-tailwind' ), ISDB_VERSION );
 
-	// ALPINE.JS (product tabs, gallery reactivity). `defer` is required by Alpine.
-	wp_enqueue_script( 'alpinejs', 'https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js', array(), '3.14.1', array( 'in_footer' => true, 'strategy' => 'defer' ) );
+	// ALPINE.JS (product tabs, gallery reactivity). Bundled locally (no CDN);
+	// `defer` is required by Alpine. Falls back gracefully if the file is absent.
+	$alpine_js = get_theme_file_path( 'assets/js/alpine.min.js' );
+	if ( file_exists( $alpine_js ) ) {
+		wp_enqueue_script( 'alpinejs', get_theme_file_uri( 'assets/js/alpine.min.js' ), array(), '3.14.1', array( 'in_footer' => true, 'strategy' => 'defer' ) );
+	}
 
 	// Theme JS (only loaded if the file exists — safe on fresh scaffold).
 	$app_js = get_theme_file_path( 'assets/js/app.js' );
@@ -299,13 +310,13 @@ function isdb_primary_nav( $variant = 'desktop' ) {
 
 	// Dynamic fallback: real product categories.
 	echo '<ul class="' . esc_attr( $ul_class ) . '">';
-	echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( home_url( '/shop/' ) ) . '">Shop All</a></li>';
-	echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( isdb_new_arrivals_url() ) . '">New Arrivals</a></li>';
-	echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( isdb_deals_url() ) . '">Deals</a></li>';
+	echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( home_url( '/shop/' ) ) . '">' . esc_html__( 'Shop All', 'isdb-custom' ) . '</a></li>';
+	echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( isdb_new_arrivals_url() ) . '">' . esc_html__( 'New Arrivals', 'isdb-custom' ) . '</a></li>';
+	echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( isdb_deals_url() ) . '">' . esc_html__( 'Deals', 'isdb-custom' ) . '</a></li>';
 	foreach ( isdb_top_categories( 5 ) as $term ) {
 		echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( get_term_link( $term ) ) . '">' . esc_html( $term->name ) . '</a></li>';
 	}
-	echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( home_url( '/about-us/' ) ) . '">About Us</a></li>';
+	echo '<li><a class="' . esc_attr( $a_class ) . '" href="' . esc_url( home_url( '/about-us/' ) ) . '">' . esc_html__( 'About Us', 'isdb-custom' ) . '</a></li>';
 	echo '</ul>';
 }
 
@@ -1018,12 +1029,12 @@ function isdb_track_lookup_allowed() {
 function isdb_find_trackable_order( $number, $contact = '' ) {
 	$digits = preg_replace( '/\D+/', '', (string) $number );
 	if ( '' === $digits ) {
-		return array( 'order' => null, 'error' => 'Please enter a valid order number.' );
+		return array( 'order' => null, 'error' => __( 'Please enter a valid order number.', 'isdb-custom' ) );
 	}
 
 	$order = wc_get_order( (int) $digits );
 	if ( ! $order instanceof WC_Order ) {
-		return array( 'order' => null, 'error' => 'No order found with that number. Please check and try again.' );
+		return array( 'order' => null, 'error' => __( 'No order found with that number. Please check and try again.', 'isdb-custom' ) );
 	}
 
 	// Owner shortcut — logged-in customer viewing their own order.
@@ -1034,7 +1045,7 @@ function isdb_find_trackable_order( $number, $contact = '' ) {
 	// Guest: require a matching phone or email.
 	$contact = trim( (string) $contact );
 	if ( '' === $contact ) {
-		return array( 'order' => null, 'error' => 'Enter the phone number used on the order to view it.' );
+		return array( 'order' => null, 'error' => __( 'Enter the phone number used on the order to view it.', 'isdb-custom' ) );
 	}
 
 	if ( is_email( $contact ) ) {
@@ -1049,7 +1060,7 @@ function isdb_find_trackable_order( $number, $contact = '' ) {
 	}
 
 	if ( ! $match ) {
-		return array( 'order' => null, 'error' => 'The details don\'t match our records. Please check the phone/email used on the order.' );
+		return array( 'order' => null, 'error' => __( 'The details don\'t match our records. Please check the phone/email used on the order.', 'isdb-custom' ) );
 	}
 
 	return array( 'order' => $order, 'error' => '' );
@@ -1078,11 +1089,11 @@ function isdb_render_order_tracker( $order ) {
 	$total_html   = $order->get_formatted_order_total();
 
 	$steps = array(
-		array( 'label' => 'Order Placed', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12A2.25 2.25 0 0118.628 21H5.372a2.25 2.25 0 01-2.24-2.493l1.264-12A2.25 2.25 0 016.632 6h10.736a2.25 2.25 0 012.24 2.007z"/>' ),
-		array( 'label' => 'Confirmed', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>' ),
-		array( 'label' => 'Packed', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/>' ),
-		array( 'label' => 'On the Way', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>' ),
-		array( 'label' => 'Delivered', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>' ),
+		array( 'label' => __( 'Order Placed', 'isdb-custom' ), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12A2.25 2.25 0 0118.628 21H5.372a2.25 2.25 0 01-2.24-2.493l1.264-12A2.25 2.25 0 016.632 6h10.736a2.25 2.25 0 012.24 2.007z"/>' ),
+		array( 'label' => __( 'Confirmed', 'isdb-custom' ), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>' ),
+		array( 'label' => __( 'Packed', 'isdb-custom' ), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/>' ),
+		array( 'label' => __( 'On the Way', 'isdb-custom' ), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>' ),
+		array( 'label' => __( 'Delivered', 'isdb-custom' ), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>' ),
 	);
 	$last_index = count( $steps ) - 1;
 	$fill_pct   = $last_index > 0 ? min( 100, ( $current / $last_index ) * 100 ) : 0;
@@ -1092,7 +1103,7 @@ function isdb_render_order_tracker( $order ) {
 		<div class="mb-6 flex items-center justify-between">
 			<h2 class="flex items-center gap-2 text-base font-bold text-brand-title">
 				<svg class="h-5 w-5 text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-				Order Timeline
+				<?php esc_html_e( 'Order Timeline', 'isdb-custom' ); ?>
 			</h2>
 			<?php if ( $is_cancelled ) : ?>
 				<span class="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-rose-600"><?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?></span>
@@ -1124,7 +1135,7 @@ function isdb_render_order_tracker( $order ) {
 	<div class="mx-auto mt-6 grid max-w-3xl gap-6 lg:grid-cols-[1fr,320px] lg:items-start">
 
 		<section class="rounded-2xl border border-slate-100 bg-white p-6">
-			<h2 class="mb-4 text-base font-bold text-brand-title">Products</h2>
+			<h2 class="mb-4 text-base font-bold text-brand-title"><?php esc_html_e( 'Products', 'isdb-custom' ); ?></h2>
 			<ul class="divide-y divide-slate-100">
 				<?php foreach ( $order->get_items() as $item ) :
 					$product   = $item->get_product();
@@ -1135,7 +1146,7 @@ function isdb_render_order_tracker( $order ) {
 						<div class="flex-none overflow-hidden rounded-lg bg-brand-bg"><?php echo wp_kses_post( $thumb ); ?></div>
 						<div class="min-w-0 flex-1">
 							<p class="truncate text-sm font-semibold text-brand-title"><?php echo esc_html( $item->get_name() ); ?></p>
-							<p class="mt-0.5 text-xs text-slate-500">Qty: <?php echo esc_html( $item->get_quantity() ); ?></p>
+							<p class="mt-0.5 text-xs text-slate-500"><?php printf( esc_html__( 'Qty: %s', 'isdb-custom' ), esc_html( $item->get_quantity() ) ); ?></p>
 						</div>
 						<span class="flex-none text-sm font-bold text-brand-title"><?php echo wp_kses_post( $line_html ); ?></span>
 					</li>
@@ -1145,70 +1156,70 @@ function isdb_render_order_tracker( $order ) {
 
 		<div class="space-y-6">
 			<section class="rounded-2xl border border-slate-100 bg-white p-6">
-				<h2 class="mb-4 text-base font-bold text-brand-title">Order Summary</h2>
+				<h2 class="mb-4 text-base font-bold text-brand-title"><?php esc_html_e( 'Order Summary', 'isdb-custom' ); ?></h2>
 				<dl class="space-y-2.5 text-sm">
 					<div class="flex items-center justify-between">
-						<dt class="text-slate-500">Subtotal</dt>
+						<dt class="text-slate-500"><?php esc_html_e( 'Subtotal', 'isdb-custom' ); ?></dt>
 						<dd class="font-semibold text-brand-title"><?php echo wp_kses_post( wc_price( $order->get_subtotal() ) ); ?></dd>
 					</div>
 					<?php if ( $discount_raw > 0 ) : ?>
 						<div class="flex items-center justify-between">
-							<dt class="text-slate-500">Discount</dt>
+							<dt class="text-slate-500"><?php esc_html_e( 'Discount', 'isdb-custom' ); ?></dt>
 							<dd class="font-semibold text-emerald-600">&minus;<?php echo wp_kses_post( wc_price( $discount_raw ) ); ?></dd>
 						</div>
 					<?php endif; ?>
 					<div class="flex items-center justify-between">
-						<dt class="text-slate-500">Delivery Fee</dt>
-						<dd class="font-semibold text-brand-title"><?php echo $ship_raw > 0 ? wp_kses_post( wc_price( $ship_raw ) ) : '<span class="text-emerald-600">Free</span>'; ?></dd>
+						<dt class="text-slate-500"><?php esc_html_e( 'Delivery Fee', 'isdb-custom' ); ?></dt>
+						<dd class="font-semibold text-brand-title"><?php echo $ship_raw > 0 ? wp_kses_post( wc_price( $ship_raw ) ) : '<span class="text-emerald-600">' . esc_html__( 'Free', 'isdb-custom' ) . '</span>'; ?></dd>
 					</div>
 					<div class="flex items-center justify-between border-t border-slate-100 pt-2.5">
-						<dt class="font-bold text-brand-title">Grand Total</dt>
+						<dt class="font-bold text-brand-title"><?php esc_html_e( 'Grand Total', 'isdb-custom' ); ?></dt>
 						<dd class="text-base font-extrabold text-brand-primary"><?php echo wp_kses_post( $total_html ); ?></dd>
 					</div>
 					<div class="flex items-center justify-between">
-						<dt class="text-slate-500">Total Paid</dt>
+						<dt class="text-slate-500"><?php esc_html_e( 'Total Paid', 'isdb-custom' ); ?></dt>
 						<dd class="font-semibold text-brand-title"><?php echo wp_kses_post( wc_price( $paid_raw ) ); ?></dd>
 					</div>
 					<div class="flex items-center justify-between">
-						<dt class="text-slate-500">Amount Due</dt>
+						<dt class="text-slate-500"><?php esc_html_e( 'Amount Due', 'isdb-custom' ); ?></dt>
 						<dd class="font-bold <?php echo $due_raw > 0 ? 'text-rose-600' : 'text-emerald-600'; ?>"><?php echo wp_kses_post( wc_price( $due_raw ) ); ?></dd>
 					</div>
 				</dl>
 
 				<div class="mt-4 flex items-center justify-between rounded-xl bg-brand-bg px-3.5 py-2.5">
-					<span class="text-xs font-medium text-slate-500">Payment Status</span>
+					<span class="text-xs font-medium text-slate-500"><?php esc_html_e( 'Payment Status', 'isdb-custom' ); ?></span>
 					<span class="inline-flex items-center gap-1.5 text-xs font-bold <?php echo $is_paid ? 'text-emerald-600' : 'text-amber-600'; ?>">
 						<span class="h-1.5 w-1.5 rounded-full <?php echo $is_paid ? 'bg-emerald-500' : 'bg-amber-500'; ?>"></span>
-						<?php echo $is_paid ? 'Paid' : 'Payment Pending'; ?>
+						<?php echo $is_paid ? esc_html__( 'Paid', 'isdb-custom' ) : esc_html__( 'Payment Pending', 'isdb-custom' ); ?>
 					</span>
 				</div>
 
 				<?php if ( $due_raw > 0 && $order->needs_payment() ) : ?>
 					<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="mt-3 block rounded-xl border border-brand-primary px-4 py-2.5 text-center text-sm font-bold text-brand-primary transition hover:bg-brand-primary hover:text-white">
-						Pay Remaining Amount
+						<?php esc_html_e( 'Pay Remaining Amount', 'isdb-custom' ); ?>
 					</a>
 				<?php endif; ?>
 			</section>
 
 			<section class="rounded-2xl border border-slate-100 bg-white p-6">
-				<h2 class="mb-4 text-base font-bold text-brand-title">Shipping Details</h2>
+				<h2 class="mb-4 text-base font-bold text-brand-title"><?php esc_html_e( 'Shipping Details', 'isdb-custom' ); ?></h2>
 				<dl class="space-y-3 text-sm">
 					<div>
-						<dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Customer</dt>
+						<dt class="text-xs font-medium uppercase tracking-wide text-slate-400"><?php esc_html_e( 'Customer', 'isdb-custom' ); ?></dt>
 						<dd class="mt-0.5 font-semibold text-brand-title"><?php echo esc_html( $order->get_formatted_billing_full_name() ); ?></dd>
 					</div>
 					<?php if ( $order->get_billing_phone() ) : ?>
 						<div>
-							<dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Phone</dt>
+							<dt class="text-xs font-medium uppercase tracking-wide text-slate-400"><?php esc_html_e( 'Phone', 'isdb-custom' ); ?></dt>
 							<dd class="mt-0.5 font-semibold text-brand-title"><?php echo esc_html( $order->get_billing_phone() ); ?></dd>
 						</div>
 					<?php endif; ?>
 					<div>
-						<dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Delivery Address</dt>
+						<dt class="text-xs font-medium uppercase tracking-wide text-slate-400"><?php esc_html_e( 'Delivery Address', 'isdb-custom' ); ?></dt>
 						<dd class="mt-0.5 leading-relaxed text-brand-body"><?php echo wp_kses_post( $order->get_formatted_billing_address() ?: '&mdash;' ); ?></dd>
 					</div>
 					<div>
-						<dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Payment Method</dt>
+						<dt class="text-xs font-medium uppercase tracking-wide text-slate-400"><?php esc_html_e( 'Payment Method', 'isdb-custom' ); ?></dt>
 						<dd class="mt-0.5 font-semibold text-brand-title"><?php echo esc_html( $order->get_payment_method_title() ); ?></dd>
 					</div>
 				</dl>
@@ -1246,7 +1257,7 @@ function isdb_render_checkout_totals() {
 	?>
 	<div class="wmb-order-totals space-y-2.5 text-sm">
 		<div class="flex items-center justify-between">
-			<span class="text-brand-body">Sub total</span>
+			<span class="text-brand-body"><?php esc_html_e( 'Sub total', 'isdb-custom' ); ?></span>
 			<span class="font-semibold text-brand-title"><?php wc_cart_totals_subtotal_html(); ?></span>
 		</div>
 
@@ -1264,7 +1275,7 @@ function isdb_render_checkout_totals() {
 			</div>
 		<?php else : ?>
 			<div class="flex items-center justify-between">
-				<span class="text-brand-body">Delivery cost</span>
+				<span class="text-brand-body"><?php esc_html_e( 'Delivery cost', 'isdb-custom' ); ?></span>
 				<span class="font-semibold text-brand-title"><?php echo esc_html( wc_price( 0 ) ); ?></span>
 			</div>
 		<?php endif; ?>
@@ -1279,7 +1290,7 @@ function isdb_render_checkout_totals() {
 
 		<?php do_action( 'woocommerce_review_order_before_order_total' ); ?>
 		<div class="flex items-center justify-between border-t border-[#e0e0e0] pt-3">
-			<span class="text-base font-bold text-brand-title">Total</span>
+			<span class="text-base font-bold text-brand-title"><?php esc_html_e( 'Total', 'isdb-custom' ); ?></span>
 			<span class="text-lg font-extrabold text-brand-primary"><?php wc_cart_totals_order_total_html(); ?></span>
 		</div>
 		<?php do_action( 'woocommerce_review_order_after_order_total' ); ?>
@@ -1300,7 +1311,7 @@ function isdb_render_checkout_totals() {
 		if ( $checkout_savings > 0 ) :
 			?>
 			<div class="mt-1 flex items-center justify-between rounded-lg bg-emerald-50 px-3 py-2">
-				<span class="text-[13px] font-bold text-emerald-700">&#127881; You're saving</span>
+				<span class="text-[13px] font-bold text-emerald-700">&#127881; <?php esc_html_e( 'You\'re saving', 'isdb-custom' ); ?></span>
 				<span class="text-[13px] font-extrabold text-emerald-700"><?php echo wp_kses_post( wc_price( $checkout_savings ) ); ?></span>
 			</div>
 			<?php
@@ -1656,6 +1667,12 @@ function isdb_product_brand_label( $product ) {
 add_action( 'wp_ajax_isdb_live_search', 'isdb_live_search' );
 add_action( 'wp_ajax_nopriv_isdb_live_search', 'isdb_live_search' );
 function isdb_live_search() {
+	// Lightweight anti-scraping nonce. Soft-fail: degrade to empty results
+	// rather than wp_die(), so a stale cached nonce never throws a 403 at users.
+	if ( ! check_ajax_referer( 'isdb-frontend', 'nonce', false ) ) {
+		wp_send_json_success( array( 'items' => array(), 'more' => '' ) );
+	}
+
 	$term = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
 
 	if ( mb_strlen( $term ) < 2 || ! function_exists( 'wc_get_products' ) ) {
@@ -1695,6 +1712,10 @@ function isdb_live_search() {
 add_action( 'wp_ajax_isdb_cart_state', 'isdb_cart_state' );
 add_action( 'wp_ajax_nopriv_isdb_cart_state', 'isdb_cart_state' );
 function isdb_cart_state() {
+	// Same lightweight nonce as live search; soft-fail to an empty map.
+	if ( ! check_ajax_referer( 'isdb-frontend', 'nonce', false ) ) {
+		wp_send_json_success( array( 'items' => array() ) );
+	}
 	wp_send_json_success( array( 'items' => isdb_cart_qty_map() ) );
 }
 
@@ -1754,6 +1775,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	wp_localize_script( 'isdb-qty', 'isdbQty', array(
 		'ajax'       => admin_url( 'admin-ajax.php' ),
 		'nonce'      => wp_create_nonce( 'isdb-checkout-qty' ),
+		'snonce'     => wp_create_nonce( 'isdb-frontend' ),
 		'isCheckout' => ( function_exists( 'is_checkout' ) && is_checkout() ) ? 1 : 0,
 	) );
 	wp_add_inline_script( 'isdb-qty', <<<'JS'
@@ -1762,7 +1784,7 @@ jQuery(function ($) {
 
 	function refreshCards() {
 		// Swap "Add to cart" <-> stepper on product cards using live cart state.
-		$.post(isdbQty.ajax, { action: 'isdb_cart_state' }).done(function (res) {
+		$.post(isdbQty.ajax, { action: 'isdb_cart_state', nonce: isdbQty.snonce }).done(function (res) {
 			if (!res || !res.success) { return; }
 			var items = res.data.items || {};
 			$('.isdb-cart-ctl').each(function () {
@@ -1879,7 +1901,7 @@ jQuery(function ($) {
 			lastQ = q;
 			if (xhr && xhr.readyState !== 4) { xhr.abort(); }
 			$box.removeClass('hidden').html('<li class="px-4 py-4 text-center text-[13px] text-slate-500">Searching&hellip;</li>');
-			xhr = $.get(isdbQty.ajax, { action: 'isdb_live_search', q: q }).done(function (res) {
+			xhr = $.get(isdbQty.ajax, { action: 'isdb_live_search', q: q, nonce: isdbQty.snonce }).done(function (res) {
 				if (res && res.success) { render($box, res.data, q); }
 			});
 		}, 300); // debounce
@@ -2108,4 +2130,278 @@ function isdb_apply_shop_filters( $q ) {
 	if ( ! empty( $tax_query ) ) {
 		$q->set( 'tax_query', $tax_query );
 	}
+}
+
+/* ------------------------------------------------------------------ *
+ * 9. THEME OPTIONS  (Appearance -> Customize -> Theme Options)
+ *    Contact details, social links, mobile-app links and the newsletter
+ *    toggle are all editable in the Customizer. Every front-end use reads
+ *    get_theme_mod() through the helpers below, so buyers configure the
+ *    theme in the UI - no code edits, nothing hardcoded.
+ * ------------------------------------------------------------------ */
+
+/** String option getter. */
+function isdb_opt( $key, $default = '' ) {
+	return get_theme_mod( $key, $default );
+}
+
+/** Boolean option getter (checkbox). */
+function isdb_opt_bool( $key, $default = false ) {
+	return (bool) get_theme_mod( $key, $default );
+}
+
+/** Store phone number (display form). */
+function isdb_phone() {
+	return isdb_opt( 'isdb_phone', '+880 1868 662477' );
+}
+
+/** Store phone as a tel: href (keeps digits and a leading +). */
+function isdb_phone_tel() {
+	$raw = preg_replace( '/[^0-9+]/', '', isdb_phone() );
+	return $raw ? 'tel:' . $raw : '';
+}
+
+/** Store contact email. */
+function isdb_email() {
+	return isdb_opt( 'isdb_email', 'info.waymore.bd@gmail.com' );
+}
+
+/** Store address (single line). */
+function isdb_address() {
+	return isdb_opt( 'isdb_address', 'New Market, Dhaka, Bangladesh' );
+}
+
+/**
+ * Social links that are actually set. Facebook defaults to the brand page
+ * (ISDB_FACEBOOK_URL); Instagram & YouTube stay empty until configured, so
+ * their icons are hidden until the store owner adds a URL.
+ *
+ * @return array<int,array{key:string,label:string,url:string,path:string}>
+ */
+function isdb_social_links() {
+	$fb_default = defined( 'ISDB_FACEBOOK_URL' ) ? ISDB_FACEBOOK_URL : '';
+	$defs = array(
+		'facebook'  => array( 'Facebook', isdb_opt( 'isdb_facebook', $fb_default ), 'M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z' ),
+		'instagram' => array( 'Instagram', isdb_opt( 'isdb_instagram', '' ), 'M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0Zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227a3.81 3.81 0 0 1-.9 1.382 3.744 3.744 0 0 1-1.38.896c-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421a3.716 3.716 0 0 1-1.379-.9 3.644 3.644 0 0 1-.9-1.38c-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03Zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162ZM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4Zm7.846-10.405a1.441 1.441 0 0 1-2.88 0 1.44 1.44 0 0 1 2.88 0Z' ),
+		'youtube'   => array( 'YouTube', isdb_opt( 'isdb_youtube', '' ), 'M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814ZM9.545 15.568V8.432L15.818 12l-6.273 3.568Z' ),
+	);
+	$out = array();
+	foreach ( $defs as $key => $d ) {
+		if ( ! empty( $d[1] ) ) {
+			$out[] = array( 'key' => $key, 'label' => $d[0], 'url' => $d[1], 'path' => $d[2] );
+		}
+	}
+	return $out;
+}
+
+/** Checkbox sanitizer for the Customizer. */
+function isdb_sanitize_checkbox( $checked ) {
+	return ( isset( $checked ) && true === (bool) $checked );
+}
+
+/** Register the "Theme Options" panel and its settings. */
+add_action( 'customize_register', 'isdb_customize_register' );
+function isdb_customize_register( $wp_customize ) {
+
+	$wp_customize->add_panel( 'isdb_theme_options', array(
+		'title'    => __( 'Theme Options', 'isdb-custom' ),
+		'priority' => 30,
+	) );
+
+	/* ---- Contact Information ---- */
+	$wp_customize->add_section( 'isdb_contact', array(
+		'title' => __( 'Contact Information', 'isdb-custom' ),
+		'panel' => 'isdb_theme_options',
+	) );
+	$wp_customize->add_setting( 'isdb_phone', array(
+		'default'           => '+880 1868 662477',
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'isdb_phone', array(
+		'label'   => __( 'Phone Number', 'isdb-custom' ),
+		'section' => 'isdb_contact',
+		'type'    => 'text',
+	) );
+	$wp_customize->add_setting( 'isdb_email', array(
+		'default'           => 'info.waymore.bd@gmail.com',
+		'sanitize_callback' => 'sanitize_email',
+	) );
+	$wp_customize->add_control( 'isdb_email', array(
+		'label'   => __( 'Email Address', 'isdb-custom' ),
+		'section' => 'isdb_contact',
+		'type'    => 'email',
+	) );
+	$wp_customize->add_setting( 'isdb_address', array(
+		'default'           => 'New Market, Dhaka, Bangladesh',
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'isdb_address', array(
+		'label'   => __( 'Address', 'isdb-custom' ),
+		'section' => 'isdb_contact',
+		'type'    => 'text',
+	) );
+
+	/* ---- Social Media ---- */
+	$wp_customize->add_section( 'isdb_social', array(
+		'title' => __( 'Social Media', 'isdb-custom' ),
+		'panel' => 'isdb_theme_options',
+	) );
+	$isdb_social_fields = array(
+		'isdb_facebook'  => __( 'Facebook URL', 'isdb-custom' ),
+		'isdb_instagram' => __( 'Instagram URL', 'isdb-custom' ),
+		'isdb_youtube'   => __( 'YouTube URL', 'isdb-custom' ),
+	);
+	foreach ( $isdb_social_fields as $isdb_key => $isdb_label ) {
+		$isdb_default = ( 'isdb_facebook' === $isdb_key && defined( 'ISDB_FACEBOOK_URL' ) ) ? ISDB_FACEBOOK_URL : '';
+		$wp_customize->add_setting( $isdb_key, array(
+			'default'           => $isdb_default,
+			'sanitize_callback' => 'esc_url_raw',
+		) );
+		$wp_customize->add_control( $isdb_key, array(
+			'label'       => $isdb_label,
+			'section'     => 'isdb_social',
+			'type'        => 'url',
+			'description' => __( 'Leave empty to hide this icon.', 'isdb-custom' ),
+		) );
+	}
+
+	/* ---- Mobile App Links ---- */
+	$wp_customize->add_section( 'isdb_apps', array(
+		'title' => __( 'Mobile App Links', 'isdb-custom' ),
+		'panel' => 'isdb_theme_options',
+	) );
+	$wp_customize->add_setting( 'isdb_google_play', array(
+		'default'           => '',
+		'sanitize_callback' => 'esc_url_raw',
+	) );
+	$wp_customize->add_control( 'isdb_google_play', array(
+		'label'       => __( 'Google Play URL', 'isdb-custom' ),
+		'section'     => 'isdb_apps',
+		'type'        => 'url',
+		'description' => __( 'Leave empty to hide the badge.', 'isdb-custom' ),
+	) );
+	$wp_customize->add_setting( 'isdb_app_store', array(
+		'default'           => '',
+		'sanitize_callback' => 'esc_url_raw',
+	) );
+	$wp_customize->add_control( 'isdb_app_store', array(
+		'label'       => __( 'App Store URL', 'isdb-custom' ),
+		'section'     => 'isdb_apps',
+		'type'        => 'url',
+		'description' => __( 'Leave empty to hide the badge.', 'isdb-custom' ),
+	) );
+
+	/* ---- Newsletter ---- */
+	$wp_customize->add_section( 'isdb_newsletter', array(
+		'title' => __( 'Newsletter', 'isdb-custom' ),
+		'panel' => 'isdb_theme_options',
+	) );
+	$wp_customize->add_setting( 'isdb_newsletter_enable', array(
+		'default'           => true,
+		'sanitize_callback' => 'isdb_sanitize_checkbox',
+	) );
+	$wp_customize->add_control( 'isdb_newsletter_enable', array(
+		'label'   => __( 'Show newsletter signup in the footer', 'isdb-custom' ),
+		'section' => 'isdb_newsletter',
+		'type'    => 'checkbox',
+	) );
+}
+
+/* ------------------------------------------------------------------ *
+ * 9a. DYNAMIC FOOTER MENUS
+ *     Each footer column is a nav-menu location. Until the owner assigns a
+ *     menu, isdb_footer_menu_fallback() renders the curated default links,
+ *     so the footer looks complete out of the box.
+ * ------------------------------------------------------------------ */
+
+/** Curated default links per footer column (used when no menu is assigned). */
+function isdb_footer_default_links( $location ) {
+	$shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' );
+
+	switch ( $location ) {
+		case 'footer_information':
+			return array(
+				array( 'label' => __( 'About us', 'isdb-custom' ), 'url' => home_url( '/about-us/' ) ),
+				array( 'label' => __( 'Contact us', 'isdb-custom' ), 'url' => home_url( '/contact/' ) ),
+				array( 'label' => __( 'Company Information', 'isdb-custom' ), 'url' => home_url( '/company-information/' ) ),
+				array( 'label' => __( 'Our Stories', 'isdb-custom' ), 'url' => home_url( '/our-stories/' ) ),
+				array( 'label' => __( 'Terms & Conditions', 'isdb-custom' ), 'url' => home_url( '/terms-and-conditions/' ) ),
+				array( 'label' => __( 'Privacy Policy', 'isdb-custom' ), 'url' => home_url( '/privacy-policy/' ) ),
+				array( 'label' => __( 'Careers', 'isdb-custom' ), 'url' => home_url( '/careers/' ) ),
+			);
+
+		case 'footer_shop':
+			$links = array();
+			if ( function_exists( 'isdb_top_categories' ) ) {
+				foreach ( isdb_top_categories( 5 ) as $term ) {
+					$links[] = array( 'label' => $term->name, 'url' => get_term_link( $term ) );
+				}
+			}
+			$links[] = array( 'label' => __( 'All Products', 'isdb-custom' ), 'url' => $shop_url );
+			$links[] = array( 'label' => __( 'On Sale', 'isdb-custom' ), 'url' => add_query_arg( 'on_sale', '1', $shop_url ) );
+			return $links;
+
+		case 'footer_support':
+			return array(
+				array( 'label' => __( 'Support Center', 'isdb-custom' ), 'url' => home_url( '/support/' ) ),
+				array( 'label' => __( 'How to Order', 'isdb-custom' ), 'url' => home_url( '/how-to-order/' ) ),
+				array( 'label' => __( 'Order Tracking', 'isdb-custom' ), 'url' => function_exists( 'isdb_track_order_url' ) ? isdb_track_order_url() : home_url( '/track-order/' ) ),
+				array( 'label' => __( 'Payment', 'isdb-custom' ), 'url' => home_url( '/payment/' ) ),
+				array( 'label' => __( 'Shipping', 'isdb-custom' ), 'url' => home_url( '/shipping-policy/' ) ),
+				array( 'label' => __( 'FAQ', 'isdb-custom' ), 'url' => home_url( '/faq/' ) ),
+			);
+
+		case 'footer_policy':
+			return array(
+				array( 'label' => __( 'Happy Return', 'isdb-custom' ), 'url' => home_url( '/return-refund-policy/' ) ),
+				array( 'label' => __( 'Refund Policy', 'isdb-custom' ), 'url' => home_url( '/return-refund-policy/' ) ),
+				array( 'label' => __( 'Exchange', 'isdb-custom' ), 'url' => home_url( '/exchange/' ) ),
+				array( 'label' => __( 'Cancellation', 'isdb-custom' ), 'url' => home_url( '/cancellation/' ) ),
+				array( 'label' => __( 'Pre-Order', 'isdb-custom' ), 'url' => home_url( '/pre-order/' ) ),
+				array( 'label' => __( 'Extra Discount', 'isdb-custom' ), 'url' => add_query_arg( 'on_sale', '1', $shop_url ) ),
+			);
+	}
+	return array();
+}
+
+/**
+ * wp_nav_menu fallback: renders the curated default links for a footer column
+ * with the same Tailwind classes as an assigned menu.
+ *
+ * @param array $args wp_nav_menu args (theme_location, menu_class, echo...).
+ * @return string
+ */
+function isdb_footer_menu_fallback( $args ) {
+	$location = isset( $args['theme_location'] ) ? $args['theme_location'] : '';
+	$links    = isdb_footer_default_links( $location );
+	if ( empty( $links ) ) {
+		return '';
+	}
+	$class = isset( $args['menu_class'] ) ? $args['menu_class'] : '';
+	$html  = '<ul class="' . esc_attr( $class ) . '">';
+	foreach ( $links as $link ) {
+		$html .= '<li><a href="' . esc_url( $link['url'] ) . '">' . esc_html( $link['label'] ) . '</a></li>';
+	}
+	$html .= '</ul>';
+
+	if ( empty( $args['echo'] ) ) {
+		return $html;
+	}
+	echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_url()/esc_html() above.
+	return '';
+}
+
+/**
+ * Render one footer column menu (assigned nav menu, or curated fallback).
+ *
+ * @param string $location Registered footer menu location.
+ */
+function isdb_footer_menu( $location ) {
+	wp_nav_menu( array(
+		'theme_location' => $location,
+		'container'      => false,
+		'menu_class'     => 'mt-4 space-y-2.5 text-sm [&_a]:text-brand-body [&_a]:transition [&_a:hover]:text-brand-primary',
+		'depth'          => 1,
+		'fallback_cb'    => 'isdb_footer_menu_fallback',
+	) );
 }

@@ -15,6 +15,7 @@
  *   .single_variation_wrap + do_action hooks          (price + add-to-cart button)
  *
  * @package isdb-custom
+ * @version 10.9.0
  * @var array      $available_variations
  * @var array      $attributes
  * @var WC_Product $product

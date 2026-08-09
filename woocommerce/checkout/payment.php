@@ -15,6 +15,7 @@
  * Overrides: wp-content/plugins/woocommerce/templates/checkout/payment.php
  *
  * @package isdb-custom
+ * @version 10.9.0
  * @var array $available_gateways
  */
 

@@ -9,6 +9,7 @@
  * Overrides: wp-content/plugins/woocommerce/templates/cart/cart-totals.php
  *
  * @package isdb-custom
+ * @version 2.3.6
  */
 
 defined( 'ABSPATH' ) || exit;

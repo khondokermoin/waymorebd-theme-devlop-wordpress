@@ -1,0 +1,619 @@
+# Copyright (C) 2026 Way More BD
+# This file is distributed under the GNU General Public License v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: ISDB Custom (isdb-custom) 1.0.0\n"
+"Report-Msgid-Bugs-To: https://waymorebd.com/\n"
+"POT-Creation-Date: 2026-08-09T00:00:00+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Domain: isdb-custom\n"
+
+msgid "Customer Support"
+msgstr ""
+
+msgid "Real humans, quick replies"
+msgstr ""
+
+msgid "Secure Checkout"
+msgstr ""
+
+msgid "100% SSL encrypted"
+msgstr ""
+
+msgid "Easy 7-Day Returns"
+msgstr ""
+
+msgid "Hassle-free replacements"
+msgstr ""
+
+msgid "Cash on Delivery"
+msgstr ""
+
+msgid "Pay only when it arrives"
+msgstr ""
+
+msgid "Your Trusted Kitchen Companion."
+msgstr ""
+
+msgid "Authentic kitchenware, honest pricing, and a promise to make every order right."
+msgstr ""
+
+msgid "Information"
+msgstr ""
+
+msgid "Shop By"
+msgstr ""
+
+msgid "Support"
+msgstr ""
+
+msgid "Consumer Policy"
+msgstr ""
+
+msgid "Newsletter"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Your email"
+msgstr ""
+
+msgid "Join"
+msgstr ""
+
+msgid "Download App on Mobile :"
+msgstr ""
+
+msgid "Get it on"
+msgstr ""
+
+msgid "Google Play"
+msgstr ""
+
+msgid "Download on the"
+msgstr ""
+
+msgid "App Store"
+msgstr ""
+
+msgid "Accepted payment methods"
+msgstr ""
+
+msgid "Secure payment verified"
+msgstr ""
+
+msgid "Pay With"
+msgstr ""
+
+msgid "256-bit SSL secured"
+msgstr ""
+
+msgid "Scroll to top"
+msgstr ""
+
+msgid "Primary Menu"
+msgstr ""
+
+msgid "Footer — Information"
+msgstr ""
+
+msgid "Footer — Shop By"
+msgstr ""
+
+msgid "Footer — Support"
+msgstr ""
+
+msgid "Footer — Consumer Policy"
+msgstr ""
+
+msgid "Shop All"
+msgstr ""
+
+msgid "New Arrivals"
+msgstr ""
+
+msgid "Deals"
+msgstr ""
+
+msgid "About Us"
+msgstr ""
+
+msgid "Full Name"
+msgstr ""
+
+msgid "Address"
+msgstr ""
+
+msgid "House no. / building / street / area"
+msgstr ""
+
+msgid "District"
+msgstr ""
+
+msgid "Select District"
+msgstr ""
+
+msgid "Area / Thana"
+msgstr ""
+
+msgid "Area / Thana (optional)"
+msgstr ""
+
+msgid "Phone Number"
+msgstr ""
+
+msgid "Phone (01XXXXXXXXX)"
+msgstr ""
+
+msgid "Email (optional)"
+msgstr ""
+
+msgid "Full address — house, road, area"
+msgstr ""
+
+msgid "Please enter a valid order number."
+msgstr ""
+
+msgid "No order found with that number. Please check and try again."
+msgstr ""
+
+msgid "Enter the phone number used on the order to view it."
+msgstr ""
+
+msgid "The details don't match our records. Please check the phone/email used on the order."
+msgstr ""
+
+msgid "Order Placed"
+msgstr ""
+
+msgid "Confirmed"
+msgstr ""
+
+msgid "Packed"
+msgstr ""
+
+msgid "On the Way"
+msgstr ""
+
+msgid "Delivered"
+msgstr ""
+
+msgid "Order Timeline"
+msgstr ""
+
+msgid "Products"
+msgstr ""
+
+msgid "Qty: %s"
+msgstr ""
+
+msgid "Order Summary"
+msgstr ""
+
+msgid "Subtotal"
+msgstr ""
+
+msgid "Discount"
+msgstr ""
+
+msgid "Delivery Fee"
+msgstr ""
+
+msgid "Free"
+msgstr ""
+
+msgid "Grand Total"
+msgstr ""
+
+msgid "Total Paid"
+msgstr ""
+
+msgid "Amount Due"
+msgstr ""
+
+msgid "Payment Status"
+msgstr ""
+
+msgid "Paid"
+msgstr ""
+
+msgid "Payment Pending"
+msgstr ""
+
+msgid "Pay Remaining Amount"
+msgstr ""
+
+msgid "Shipping Details"
+msgstr ""
+
+msgid "Customer"
+msgstr ""
+
+msgid "Phone"
+msgstr ""
+
+msgid "Delivery Address"
+msgstr ""
+
+msgid "Payment Method"
+msgstr ""
+
+msgid "Sub total"
+msgstr ""
+
+msgid "Delivery cost"
+msgstr ""
+
+msgid "Total"
+msgstr ""
+
+msgid "You're saving"
+msgstr ""
+
+msgid "Theme Options"
+msgstr ""
+
+msgid "Contact Information"
+msgstr ""
+
+msgid "Email Address"
+msgstr ""
+
+msgid "Social Media"
+msgstr ""
+
+msgid "Facebook URL"
+msgstr ""
+
+msgid "Instagram URL"
+msgstr ""
+
+msgid "YouTube URL"
+msgstr ""
+
+msgid "Leave empty to hide this icon."
+msgstr ""
+
+msgid "Mobile App Links"
+msgstr ""
+
+msgid "Google Play URL"
+msgstr ""
+
+msgid "Leave empty to hide the badge."
+msgstr ""
+
+msgid "App Store URL"
+msgstr ""
+
+msgid "Show newsletter signup in the footer"
+msgstr ""
+
+msgid "About us"
+msgstr ""
+
+msgid "Contact us"
+msgstr ""
+
+msgid "Company Information"
+msgstr ""
+
+msgid "Our Stories"
+msgstr ""
+
+msgid "Terms & Conditions"
+msgstr ""
+
+msgid "Privacy Policy"
+msgstr ""
+
+msgid "Careers"
+msgstr ""
+
+msgid "All Products"
+msgstr ""
+
+msgid "On Sale"
+msgstr ""
+
+msgid "Support Center"
+msgstr ""
+
+msgid "How to Order"
+msgstr ""
+
+msgid "Order Tracking"
+msgstr ""
+
+msgid "Payment"
+msgstr ""
+
+msgid "Shipping"
+msgstr ""
+
+msgid "FAQ"
+msgstr ""
+
+msgid "Happy Return"
+msgstr ""
+
+msgid "Refund Policy"
+msgstr ""
+
+msgid "Exchange"
+msgstr ""
+
+msgid "Cancellation"
+msgstr ""
+
+msgid "Pre-Order"
+msgstr ""
+
+msgid "Extra Discount"
+msgstr ""
+
+msgid "Menu"
+msgstr ""
+
+msgid "Search products"
+msgstr ""
+
+msgid "Search in…"
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Track"
+msgstr ""
+
+msgid "Order"
+msgstr ""
+
+msgid "Account"
+msgstr ""
+
+msgid "Sign In"
+msgstr ""
+
+msgid "Wishlist"
+msgstr ""
+
+msgid "Open cart"
+msgstr ""
+
+msgid "Cart"
+msgstr ""
+
+msgid "Logout"
+msgstr ""
+
+msgid "Welcome"
+msgstr ""
+
+msgid "Sign In / Register"
+msgstr ""
+
+msgid "Close menu"
+msgstr ""
+
+msgid "Track Order"
+msgstr ""
+
+msgid "Categories"
+msgstr ""
+
+msgid "Quick Links"
+msgstr ""
+
+msgid "FAQs"
+msgstr ""
+
+msgid "Shopping cart"
+msgstr ""
+
+msgid "Shopping Cart"
+msgstr ""
+
+msgid "Close cart"
+msgstr ""
+
+msgid "Too many attempts. Please try again in a few minutes."
+msgstr ""
+
+msgid "Breadcrumb"
+msgstr ""
+
+msgid "Home"
+msgstr ""
+
+msgid "Live Order Tracking"
+msgstr ""
+
+msgid "Track Your Order"
+msgstr ""
+
+msgid "Real-time updates on your shipment progress. Enter the order number and the phone number used at checkout."
+msgstr ""
+
+msgid "Order Number"
+msgstr ""
+
+msgid "e.g. 12345"
+msgstr ""
+
+msgid "Phone or Email"
+msgstr ""
+
+msgid "(used on the order)"
+msgstr ""
+
+msgid "01XXXXXXXXX"
+msgstr ""
+
+msgid "Enter your order details above"
+msgstr ""
+
+msgid "You'll find the order number in your confirmation on the thank-you page or in your email."
+msgstr ""
+
+msgid "Or view all your orders in"
+msgstr ""
+
+msgid "My Account"
+msgstr ""
+
+msgid "Deals & Offers"
+msgstr ""
+
+msgid "Default sorting"
+msgstr ""
+
+msgid "Most popular"
+msgstr ""
+
+msgid "Top rated"
+msgstr ""
+
+msgid "Newest"
+msgstr ""
+
+msgid "Price: low to high"
+msgstr ""
+
+msgid "Price: high to low"
+msgstr ""
+
+msgid "No active deals right now"
+msgstr ""
+
+msgid "No products match your filters"
+msgstr ""
+
+msgid "Check back soon — new offers drop regularly. To feature a product here, set a Sale price on it in WooCommerce."
+msgstr ""
+
+msgid "Try widening your price range or clearing a filter."
+msgstr ""
+
+msgid "item"
+msgid_plural "items"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Shipping Address"
+msgstr ""
+
+msgid "Billing Address"
+msgstr ""
+
+msgid "Different from shipping?"
+msgstr ""
+
+msgid "Best Selling"
+msgstr ""
+
+msgid "Save %s%%"
+msgstr ""
+
+msgid "Stock Out"
+msgstr ""
+
+msgid "Decrease quantity"
+msgstr ""
+
+msgid "Increase quantity"
+msgstr ""
+
+msgid "Login"
+msgstr ""
+
+msgid "Create Account"
+msgstr ""
+
+msgid "Account Menu"
+msgstr ""
+
+msgid "High demand — selling fast this week"
+msgstr ""
+
+msgid "Rated %s out of 5"
+msgstr ""
+
+msgid "%s verified review"
+msgid_plural "%s verified reviews"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "You save %s%%"
+msgstr ""
+
+msgid "Only %s left in stock"
+msgstr ""
+
+msgid "Order soon"
+msgstr ""
+
+msgid "In stock & ready to ship"
+msgstr ""
+
+msgid "Add to Cart"
+msgstr ""
+
+msgid "Currently Unavailable"
+msgstr ""
+
+msgid "SSL encrypted"
+msgstr ""
+
+msgid "Pay when you get it"
+msgstr ""
+
+msgid "Easy Returns"
+msgstr ""
+
+msgid "7-day replacement"
+msgstr ""
+
+msgid "Support Promise"
+msgstr ""
+
+msgid "Real humans, fast"
+msgstr ""
+
+msgid "Way More BD — Customer Support Promise"
+msgstr ""
+
+msgid "Your trusted kitchen companion. Authentic products, honest pricing, and a team that answers. Not satisfied? We make it right."
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Specifications"
+msgstr ""
+
+msgid "Customer Reviews (%s)"
+msgstr ""
+
+msgid "Product Details"
+msgstr ""
+
+msgid "No additional specifications listed for this product."
+msgstr ""
+
+msgid "Customer Reviews"
+msgstr ""
+
+msgid "Related Products"
+msgstr ""
+
+msgid "More Products"
+msgstr ""
+

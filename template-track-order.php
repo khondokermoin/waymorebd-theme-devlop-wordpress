@@ -23,7 +23,7 @@ $req_contact = isset( $_GET['contact'] ) ? sanitize_text_field( wp_unslash( $_GE
 if ( '' === $req_number ) {
 	$result = null;
 } elseif ( ! isdb_track_lookup_allowed() ) {
-	$result = array( 'order' => null, 'error' => 'Too many attempts. Please try again in a few minutes.' );
+	$result = array( 'order' => null, 'error' => __( 'Too many attempts. Please try again in a few minutes.', 'isdb-custom' ) );
 } else {
 	$result = isdb_find_trackable_order( $req_number, $req_contact );
 }
@@ -35,11 +35,11 @@ $order  = ( $result && $result['order'] instanceof WC_Order ) ? $result['order']
 	<!-- Breadcrumb strip (matches page.php, bg = site background) -->
 	<section class="border-b border-black/5 bg-brand-bg">
 		<div class="mx-auto max-w-7xl px-4 py-2.5 sm:px-6 lg:px-8">
-			<nav class="text-[13px] text-slate-500" aria-label="Breadcrumb">
+			<nav class="text-[13px] text-slate-500" aria-label="<?php esc_attr_e( 'Breadcrumb', 'isdb-custom' ); ?>">
 				<div class="flex flex-wrap items-center">
-					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="hover:text-brand-primary">Home</a>
+					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="hover:text-brand-primary"><?php esc_html_e( 'Home', 'isdb-custom' ); ?></a>
 					<span class="mx-2 text-slate-300">/</span>
-					<span class="text-brand-title">Track Order</span>
+					<span class="text-brand-title"><?php esc_html_e( 'Track Order', 'isdb-custom' ); ?></span>
 				</div>
 			</nav>
 		</div>
@@ -51,31 +51,31 @@ $order  = ( $result && $result['order'] instanceof WC_Order ) ? $result['order']
 		<div class="grid items-center gap-6 rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 lg:grid-cols-[1fr,minmax(300px,380px)]">
 			<div>
 				<span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-brand-primary">
-					<span class="h-1.5 w-1.5 rounded-full bg-brand-primary"></span> Live Order Tracking
+					<span class="h-1.5 w-1.5 rounded-full bg-brand-primary"></span> <?php esc_html_e( 'Live Order Tracking', 'isdb-custom' ); ?>
 				</span>
-				<h1 class="mt-3 text-2xl font-extrabold tracking-tight text-brand-title sm:text-3xl">Track Your Order</h1>
-				<p class="mt-2 text-sm text-slate-500">Real-time updates on your shipment progress. Enter the order number and the phone number used at checkout.</p>
+				<h1 class="mt-3 text-2xl font-extrabold tracking-tight text-brand-title sm:text-3xl"><?php esc_html_e( 'Track Your Order', 'isdb-custom' ); ?></h1>
+				<p class="mt-2 text-sm text-slate-500"><?php esc_html_e( 'Real-time updates on your shipment progress. Enter the order number and the phone number used at checkout.', 'isdb-custom' ); ?></p>
 				<?php if ( $order ) : ?>
-					<p class="mt-4 text-sm text-slate-500">Order Number</p>
+					<p class="mt-4 text-sm text-slate-500"><?php esc_html_e( 'Order Number', 'isdb-custom' ); ?></p>
 					<p class="text-lg font-extrabold text-brand-primary">#<?php echo esc_html( $order->get_order_number() ); ?></p>
 				<?php endif; ?>
 			</div>
 
 			<form method="get" class="space-y-3 rounded-xl bg-brand-bg p-4">
 				<div>
-					<label for="track-order-no" class="mb-1 block text-xs font-semibold text-brand-title">Order Number</label>
+					<label for="track-order-no" class="mb-1 block text-xs font-semibold text-brand-title"><?php esc_html_e( 'Order Number', 'isdb-custom' ); ?></label>
 					<input id="track-order-no" type="text" name="order" value="<?php echo esc_attr( $req_number ); ?>" required
-						placeholder="e.g. 12345"
+						placeholder="<?php esc_attr_e( 'e.g. 12345', 'isdb-custom' ); ?>"
 						class="w-full rounded-lg border border-brand-line bg-white px-3.5 py-2.5 text-sm text-brand-title placeholder:text-slate-400 focus:border-brand-primary focus:outline-none focus:ring-0" />
 				</div>
 				<div>
-					<label for="track-contact" class="mb-1 block text-xs font-semibold text-brand-title">Phone or Email <span class="font-normal text-slate-400">(used on the order)</span></label>
+					<label for="track-contact" class="mb-1 block text-xs font-semibold text-brand-title"><?php esc_html_e( 'Phone or Email', 'isdb-custom' ); ?> <span class="font-normal text-slate-400"><?php esc_html_e( '(used on the order)', 'isdb-custom' ); ?></span></label>
 					<input id="track-contact" type="text" name="contact" value="<?php echo esc_attr( $req_contact ); ?>"
-						placeholder="01XXXXXXXXX"
+						placeholder="<?php esc_attr_e( '01XXXXXXXXX', 'isdb-custom' ); ?>"
 						class="w-full rounded-lg border border-brand-line bg-white px-3.5 py-2.5 text-sm text-brand-title placeholder:text-slate-400 focus:border-brand-primary focus:outline-none focus:ring-0" />
 				</div>
 				<button type="submit" class="w-full rounded-lg bg-brand-primary px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-hover">
-					Track Order
+					<?php esc_html_e( 'Track Order', 'isdb-custom' ); ?>
 				</button>
 			</form>
 		</div>
@@ -97,8 +97,8 @@ $order  = ( $result && $result['order'] instanceof WC_Order ) ? $result['order']
 				<span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-primary/10 text-brand-primary">
 					<svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg>
 				</span>
-				<h2 class="mt-4 text-base font-bold text-brand-title">Enter your order details above</h2>
-				<p class="mx-auto mt-1 max-w-md text-sm text-slate-500">You'll find the order number in your confirmation on the thank-you page or in your email. <?php if ( is_user_logged_in() ) : ?>Or view all your orders in <a class="font-semibold text-brand-primary hover:underline" href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>">My Account</a>.<?php endif; ?></p>
+				<h2 class="mt-4 text-base font-bold text-brand-title"><?php esc_html_e( 'Enter your order details above', 'isdb-custom' ); ?></h2>
+				<p class="mx-auto mt-1 max-w-md text-sm text-slate-500"><?php esc_html_e( 'You\'ll find the order number in your confirmation on the thank-you page or in your email.', 'isdb-custom' ); ?> <?php if ( is_user_logged_in() ) : ?><?php esc_html_e( 'Or view all your orders in', 'isdb-custom' ); ?> <a class="font-semibold text-brand-primary hover:underline" href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>"><?php esc_html_e( 'My Account', 'isdb-custom' ); ?></a>.<?php endif; ?></p>
 			</div>
 		<?php endif; ?>
 
