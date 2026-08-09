@@ -26,27 +26,27 @@ $shop_url   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink
 ?>
 
 <!-- Progress steps: Cart → Details → Payment (commitment + goal-gradient) -->
-<nav class="mb-7 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wide sm:gap-3 sm:text-xs" aria-label="Checkout progress">
+<nav class="mb-7 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wide sm:gap-3 sm:text-xs" aria-label="<?php esc_attr_e( 'Checkout progress', 'isdb-custom' ); ?>">
 	<span class="flex items-center gap-2 text-brand-primary">
-		<span class="flex h-6 w-6 items-center justify-center rounded-full bg-brand-primary text-white">1</span> Cart
+		<span class="flex h-6 w-6 items-center justify-center rounded-full bg-brand-primary text-white">1</span> <?php esc_html_e( 'Cart', 'isdb-custom' ); ?>
 	</span>
 	<span class="h-px w-6 bg-slate-300 sm:w-10"></span>
 	<span class="flex items-center gap-2 text-slate-400">
-		<span class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-slate-500">2</span> Details
+		<span class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-slate-500">2</span> <?php esc_html_e( 'Details', 'isdb-custom' ); ?>
 	</span>
 	<span class="h-px w-6 bg-slate-300 sm:w-10"></span>
 	<span class="flex items-center gap-2 text-slate-400">
-		<span class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-slate-500">3</span> Payment
+		<span class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-slate-500">3</span> <?php esc_html_e( 'Payment', 'isdb-custom' ); ?>
 	</span>
 </nav>
 
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
 	<h1 class="text-2xl font-extrabold tracking-tight text-brand-title sm:text-3xl">
-		Your Cart <span class="text-base font-semibold text-slate-400">(<?php echo esc_html( $cart_count ); ?> <?php echo esc_html( _n( 'item', 'items', $cart_count, 'isdb-custom' ) ); ?>)</span>
+		<?php esc_html_e( 'Your Cart', 'isdb-custom' ); ?> <span class="text-base font-semibold text-slate-400">(<?php echo esc_html( $cart_count ); ?> <?php echo esc_html( _n( 'item', 'items', $cart_count, 'isdb-custom' ) ); ?>)</span>
 	</h1>
 	<a href="<?php echo esc_url( $shop_url ); ?>" class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-primary transition hover:underline">
 		<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-		Continue shopping
+		<?php esc_html_e( 'Continue shopping', 'isdb-custom' ); ?>
 	</a>
 </div>
 
@@ -111,14 +111,14 @@ $shop_url   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink
 								<?php if ( $low_stock ) : ?>
 									<p class="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-rose-600">
 										<span class="relative flex h-1.5 w-1.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-500"></span></span>
-										Only <?php echo esc_html( $sq ); ?> left — order soon
+										<?php printf( esc_html__( 'Only %s left — order soon', 'isdb-custom' ), esc_html( $sq ) ); ?>
 									</p>
 								<?php endif; ?>
 
 								<div class="mt-3 flex items-center gap-4">
 									<!-- Quantity stepper (auto-updates; keeps cart[key][qty]) -->
 									<div class="wmb-qty inline-flex items-center overflow-hidden rounded-lg border border-[#ddd] [&_.quantity]:contents [&_input.qty]:h-9 [&_input.qty]:w-12 [&_input.qty]:border-0 [&_input.qty]:bg-transparent [&_input.qty]:p-0 [&_input.qty]:text-center [&_input.qty]:text-sm [&_input.qty]:font-bold [&_input.qty]:text-brand-title [&_input.qty]:focus:ring-0">
-										<button type="button" class="wmb-qminus flex h-9 w-9 flex-none items-center justify-center text-brand-title transition hover:bg-brand-soft hover:text-brand-primary" aria-label="Decrease quantity">
+										<button type="button" class="wmb-qminus flex h-9 w-9 flex-none items-center justify-center text-brand-title transition hover:bg-brand-soft hover:text-brand-primary" aria-label="<?php esc_attr_e( 'Decrease quantity', 'isdb-custom' ); ?>">
 											<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14"/></svg>
 										</button>
 										<?php
@@ -139,7 +139,7 @@ $shop_url   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink
 										}
 										echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key, $cart_item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 										?>
-										<button type="button" class="wmb-qplus flex h-9 w-9 flex-none items-center justify-center text-brand-title transition hover:bg-brand-soft hover:text-brand-primary" aria-label="Increase quantity">
+										<button type="button" class="wmb-qplus flex h-9 w-9 flex-none items-center justify-center text-brand-title transition hover:bg-brand-soft hover:text-brand-primary" aria-label="<?php esc_attr_e( 'Increase quantity', 'isdb-custom' ); ?>">
 											<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
 										</button>
 									</div>
@@ -169,7 +169,7 @@ $shop_url   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink
 									<?php echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</span>
 								<?php if ( $item_save > 0 ) : ?>
-									<span class="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">Save <?php echo wp_kses_post( wc_price( $item_save ) ); ?></span>
+									<span class="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700"><?php esc_html_e( 'Save', 'isdb-custom' ); ?> <?php echo wp_kses_post( wc_price( $item_save ) ); ?></span>
 								<?php endif; ?>
 							</div>
 						</div>

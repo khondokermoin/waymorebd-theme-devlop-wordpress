@@ -43,7 +43,7 @@ $orig_product = $product;
 $orig_post    = $post;
 ?>
 <div class="cross-sells">
-	<h2>You may also like</h2>
+	<h2><?php esc_html_e( 'You may also like', 'isdb-custom' ); ?></h2>
 	<ul class="products columns-4">
 		<?php foreach ( $cross_sells as $cross_sell ) :
 			$post    = get_post( $cross_sell->get_id() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride

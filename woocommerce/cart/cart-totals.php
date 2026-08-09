@@ -33,15 +33,21 @@ foreach ( WC()->cart->get_cart() as $ci ) {
 
 	<?php do_action( 'woocommerce_before_cart_totals' ); ?>
 
-	<h2 class="text-lg font-bold text-brand-title">Order Summary</h2>
+	<h2 class="text-lg font-bold text-brand-title"><?php esc_html_e( 'Order Summary', 'isdb-custom' ); ?></h2>
 
 	<?php // GOAL-GRADIENT: only if a real free-shipping threshold is configured. ?>
 	<?php if ( $free_ship ) : ?>
 		<div class="mt-4 rounded-xl bg-brand-bg p-3">
 			<?php if ( $free_ship['reached'] ) : ?>
-				<p class="text-sm font-semibold text-emerald-700">✓ You've unlocked FREE shipping!</p>
+				<p class="text-sm font-semibold text-emerald-700">✓ <?php esc_html_e( 'You\'ve unlocked FREE shipping!', 'isdb-custom' ); ?></p>
 			<?php else : ?>
-				<p class="text-sm text-brand-body">You're <span class="font-bold text-brand-title"><?php echo wp_kses_post( $free_ship['remaining_html'] ); ?></span> away from FREE shipping</p>
+				<p class="text-sm text-brand-body"><?php
+					printf(
+						/* translators: %s: remaining amount until free shipping */
+						esc_html__( 'You\'re %s away from FREE shipping', 'isdb-custom' ),
+						'<span class="font-bold text-brand-title">' . wp_kses_post( $free_ship['remaining_html'] ) . '</span>'
+					);
+				?></p>
 			<?php endif; ?>
 			<div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200">
 				<div class="h-full rounded-full bg-brand-primary transition-all" style="width: <?php echo esc_attr( $free_ship['pct'] ); ?>%"></div>
@@ -51,7 +57,7 @@ foreach ( WC()->cart->get_cart() as $ci ) {
 
 	<div class="mt-4 space-y-3 text-sm">
 		<div class="flex items-center justify-between">
-			<span class="text-slate-500">Subtotal</span>
+			<span class="text-slate-500"><?php esc_html_e( 'Subtotal', 'isdb-custom' ); ?></span>
 			<span class="font-semibold text-brand-title"><?php wc_cart_totals_subtotal_html(); ?></span>
 		</div>
 
@@ -124,7 +130,7 @@ foreach ( WC()->cart->get_cart() as $ci ) {
 		<div class="mt-3 flex items-center justify-between rounded-xl bg-emerald-50 px-3.5 py-2.5">
 			<span class="inline-flex items-center gap-1.5 text-sm font-bold text-emerald-700">
 				<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0l-3.5-3.5a1 1 0 011.4-1.4l2.8 2.8 6.8-6.8a1 1 0 011.4 0z" clip-rule="evenodd"/></svg>
-				You're saving
+				<?php esc_html_e( 'You\'re saving', 'isdb-custom' ); ?>
 			</span>
 			<span class="text-sm font-extrabold text-emerald-700"><?php echo wp_kses_post( wc_price( $cart_savings ) ); ?></span>
 		</div>
@@ -139,15 +145,21 @@ foreach ( WC()->cart->get_cart() as $ci ) {
 	<div class="mt-4 space-y-2.5">
 		<p class="flex items-center gap-2 text-[13px] font-medium text-brand-body">
 			<svg class="h-4 w-4 flex-none text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-			<span><strong class="font-bold text-brand-title">No payment now</strong> — pay Cash on Delivery.</span>
+			<span><?php
+				printf(
+					/* translators: %s: bold "No payment now" phrase */
+					esc_html__( '%s — pay Cash on Delivery.', 'isdb-custom' ),
+					'<strong class="font-bold text-brand-title">' . esc_html__( 'No payment now', 'isdb-custom' ) . '</strong>'
+				);
+			?></span>
 		</p>
 		<p class="flex items-center gap-2 text-[13px] font-medium text-brand-body">
 			<svg class="h-4 w-4 flex-none text-emerald-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
-			<span>256-bit SSL secure checkout.</span>
+			<span><?php esc_html_e( '256-bit SSL secure checkout.', 'isdb-custom' ); ?></span>
 		</p>
 		<p class="flex items-center gap-2 text-[13px] font-medium text-brand-body">
 			<svg class="h-4 w-4 flex-none text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
-			<span>Easy 7-day returns &amp; replacements.</span>
+			<span><?php esc_html_e( 'Easy 7-day returns & replacements.', 'isdb-custom' ); ?></span>
 		</p>
 	</div>
 

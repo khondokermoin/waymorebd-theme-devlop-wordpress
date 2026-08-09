@@ -360,9 +360,9 @@ function isdb_cookie_consent_banner() {
 	}
 	$policy = esc_url( home_url( '/privacy-policy/' ) );
 	?>
-	<div id="isdb-cookie" role="dialog" aria-live="polite" aria-label="Privacy and cookie notice">
+	<div id="isdb-cookie" role="dialog" aria-live="polite" aria-label="<?php esc_attr_e( 'Privacy and cookie notice', 'isdb-custom' ); ?>">
 		<div class="isdb-cc-card">
-			<button type="button" class="isdb-cc-close isdb-cc-dismiss" aria-label="Dismiss">
+			<button type="button" class="isdb-cc-close isdb-cc-dismiss" aria-label="<?php esc_attr_e( 'Dismiss', 'isdb-custom' ); ?>">
 				<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
 			</button>
 
@@ -370,19 +370,19 @@ function isdb_cookie_consent_banner() {
 				<span class="isdb-cc-ico" aria-hidden="true">
 					<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
 				</span>
-				<h2 class="isdb-cc-title">Your Privacy &amp; Security First</h2>
+				<h2 class="isdb-cc-title"><?php esc_html_e( 'Your Privacy & Security First', 'isdb-custom' ); ?></h2>
 			</div>
 
-			<p class="isdb-cc-body">We use essential cookies to ensure a highly secure, fast, and personalized shopping experience. Your data is protected and never sold.</p>
+			<p class="isdb-cc-body"><?php esc_html_e( 'We use essential cookies to ensure a highly secure, fast, and personalized shopping experience. Your data is protected and never sold.', 'isdb-custom' ); ?></p>
 
 			<span class="isdb-cc-secure">
 				<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
-				256-bit encrypted &amp; never shared
+				<?php esc_html_e( '256-bit encrypted & never shared', 'isdb-custom' ); ?>
 			</span>
 
 			<div class="isdb-cc-actions">
-				<button type="button" class="isdb-cc-accept">Accept &amp; Secure Session</button>
-				<a class="isdb-cc-link" href="<?php echo $policy; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already esc_url()'d. ?>">Read Privacy Policy</a>
+				<button type="button" class="isdb-cc-accept"><?php esc_html_e( 'Accept & Secure Session', 'isdb-custom' ); ?></button>
+				<a class="isdb-cc-link" href="<?php echo $policy; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already esc_url()'d. ?>"><?php esc_html_e( 'Read Privacy Policy', 'isdb-custom' ); ?></a>
 			</div>
 		</div>
 	</div>

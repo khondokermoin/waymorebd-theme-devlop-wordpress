@@ -50,12 +50,12 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	<?php // Guest prompt bar — mirrors the reference's "Have any account?" strip. ?>
 	<?php if ( ! is_user_logged_in() ) : ?>
 		<div class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-card border border-[#e0e0e0] bg-white px-4 py-3">
-			<span class="text-[14px] text-brand-body">Have any account? please login or register</span>
+			<span class="text-[14px] text-brand-body"><?php esc_html_e( 'Have any account? please login or register', 'isdb-custom' ); ?></span>
 			<span class="flex flex-none gap-2">
 				<a href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>"
-					class="rounded-card border border-[#ddd] px-5 py-2 text-[13px] font-semibold text-brand-title transition hover:border-brand-primary hover:text-brand-primary">Login</a>
+					class="rounded-card border border-[#ddd] px-5 py-2 text-[13px] font-semibold text-brand-title transition hover:border-brand-primary hover:text-brand-primary"><?php esc_html_e( 'Login', 'isdb-custom' ); ?></a>
 				<a href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>"
-					class="rounded-card bg-brand-primary px-5 py-2 text-[13px] font-semibold text-white transition hover:bg-brand-hover">Register</a>
+					class="rounded-card bg-brand-primary px-5 py-2 text-[13px] font-semibold text-white transition hover:bg-brand-hover"><?php esc_html_e( 'Register', 'isdb-custom' ); ?></a>
 			</span>
 		</div>
 	<?php endif; ?>
@@ -71,7 +71,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 				<!-- Order review (items) -->
 				<section class="rounded-card border border-[#e0e0e0] bg-white p-4 sm:p-5">
-					<h2 class="wmb-sec-head">Order review</h2>
+					<h2 class="wmb-sec-head"><?php esc_html_e( 'Order review', 'isdb-custom' ); ?></h2>
 					<?php
 					do_action( 'woocommerce_checkout_before_order_review' );
 
@@ -116,7 +116,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 				<!-- 1. Payment method (methods only; place order is at the bottom) -->
 				<section class="rounded-card border border-[#e0e0e0] bg-white p-4 sm:p-5">
-					<h2 id="order_review_heading" class="wmb-sec-head">Payment method</h2>
+					<h2 id="order_review_heading" class="wmb-sec-head"><?php esc_html_e( 'Payment method', 'isdb-custom' ); ?></h2>
 					<div id="order_review" class="woocommerce-checkout-review-order">
 						<?php
 						if ( function_exists( 'woocommerce_checkout_payment' ) ) {
@@ -130,7 +130,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 				<?php if ( wc_coupons_enabled() ) : ?>
 					<section class="rounded-card border border-[#e0e0e0] bg-white p-4 sm:p-5" x-data="{ open:false }">
 						<button type="button" @click="open = !open" class="flex w-full items-center justify-between">
-							<span class="wmb-sec-head !mb-0">Have any coupon or gift voucher?</span>
+							<span class="wmb-sec-head !mb-0"><?php esc_html_e( 'Have any coupon or gift voucher?', 'isdb-custom' ); ?></span>
 							<svg class="h-4 w-4 text-slate-400 transition" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
 						</button>
 						<div x-show="open" x-cloak
@@ -139,7 +139,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 							x-transition:enter-end="opacity-100 translate-y-0"
 							class="mt-3">
 							<form class="checkout_coupon flex flex-col gap-2 sm:flex-row" method="post">
-								<input type="text" name="coupon_code" id="coupon_code" value="" placeholder="Enter coupon code"
+								<input type="text" name="coupon_code" id="coupon_code" value="" placeholder="<?php esc_attr_e( 'Enter coupon code', 'isdb-custom' ); ?>"
 									class="input-text flex-1" />
 								<button type="submit" name="apply_coupon" value="<?php esc_attr_e( 'Apply coupon', 'woocommerce' ); ?>"
 									class="flex-none rounded bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover">
@@ -161,7 +161,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 				if ( ! empty( $order_fields ) ) :
 					?>
 					<section class="woocommerce-additional-fields rounded-card border border-[#e0e0e0] bg-white p-4 sm:p-5">
-						<h2 class="wmb-sec-head">Special notes <span class="text-[12px] font-normal text-slate-500">(Optional)</span></h2>
+						<h2 class="wmb-sec-head"><?php esc_html_e( 'Special notes', 'isdb-custom' ); ?> <span class="text-[12px] font-normal text-slate-500"><?php esc_html_e( '(Optional)', 'isdb-custom' ); ?></span></h2>
 						<?php do_action( 'woocommerce_before_order_notes', $checkout ); ?>
 						<div class="woocommerce-additional-fields__field-wrapper wmb-notes">
 							<?php foreach ( $order_fields as $key => $field ) : ?>
@@ -194,7 +194,13 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 				<div class="flex items-start gap-2.5 rounded-card border border-[#e0e0e0] bg-white p-3.5">
 					<svg class="h-5 w-5 flex-none text-emerald-600" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
 					<p class="m-0 text-[11px] leading-relaxed text-slate-500">
-						Secured with 256-bit SSL encryption. <span class="font-semibold text-brand-title">Cash on Delivery</span> available — pay only when your order arrives.
+						<?php
+						printf(
+							/* translators: %s: bold "Cash on Delivery" phrase */
+							esc_html__( 'Secured with 256-bit SSL encryption. %s available — pay only when your order arrives.', 'isdb-custom' ),
+							'<span class="font-semibold text-brand-title">' . esc_html__( 'Cash on Delivery', 'isdb-custom' ) . '</span>'
+						);
+						?>
 					</p>
 				</div>
 			</div>

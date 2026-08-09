@@ -58,9 +58,9 @@ $lead = has_excerpt( get_queried_object_id() ) ? get_the_excerpt() : '';
 	<!-- Breadcrumb strip (bg = site background) -->
 	<section class="border-b border-black/5 bg-brand-bg">
 		<div class="mx-auto max-w-7xl px-4 py-2.5 sm:px-6 lg:px-8">
-			<nav class="text-[13px] text-slate-500" aria-label="Breadcrumb">
+			<nav class="text-[13px] text-slate-500" aria-label="<?php esc_attr_e( 'Breadcrumb', 'isdb-custom' ); ?>">
 				<div class="flex flex-wrap items-center">
-					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="hover:text-brand-primary">Home</a>
+					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="hover:text-brand-primary"><?php esc_html_e( 'Home', 'isdb-custom' ); ?></a>
 					<span class="mx-2 text-slate-300">/</span>
 					<span class="text-brand-title"><?php the_title(); ?></span>
 				</div>
@@ -76,7 +76,7 @@ $lead = has_excerpt( get_queried_object_id() ) ? get_the_excerpt() : '';
 				<svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
 			</span>
 			<span class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-primary">
-				<span class="h-1.5 w-1.5 rounded-full bg-brand-primary"></span> We're Here for You
+				<span class="h-1.5 w-1.5 rounded-full bg-brand-primary"></span> <?php esc_html_e( 'We\'re Here for You', 'isdb-custom' ); ?>
 			</span>
 			<h1 class="mt-4 text-3xl font-extrabold tracking-tight text-brand-title sm:text-4xl"><?php the_title(); ?></h1>
 			<?php if ( $lead ) : ?>
@@ -117,19 +117,19 @@ $lead = has_excerpt( get_queried_object_id() ) ? get_the_excerpt() : '';
 		<div class="mt-4 flex flex-col items-center justify-between gap-2 rounded-2xl border border-slate-100 bg-white px-6 py-4 text-center sm:flex-row sm:text-left">
 			<span class="flex items-center gap-2 text-sm font-semibold text-brand-title">
 				<svg class="h-5 w-5 text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-				Support Hours
+				<?php esc_html_e( 'Support Hours', 'isdb-custom' ); ?>
 			</span>
-			<span class="text-sm text-slate-500">Every day · 9:00 AM – 10:00 PM (BST). We usually reply within a few hours.</span>
+			<span class="text-sm text-slate-500"><?php esc_html_e( 'Every day · 9:00 AM – 10:00 PM (BST). We usually reply within a few hours.', 'isdb-custom' ); ?></span>
 		</div>
 
 		<!-- CTA band -->
 		<div class="mt-12 flex flex-col items-center gap-5 rounded-2xl bg-brand-dark p-8 text-center text-white sm:flex-row sm:text-left">
 			<svg class="h-10 w-10 flex-none text-brand-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V5l7-3z"/></svg>
 			<div class="flex-1">
-				<p class="font-bold">Prefer to shop while you wait?</p>
-				<p class="mt-1 text-sm text-white/70">Browse our latest kitchen &amp; home essentials — Cash on Delivery available across Bangladesh.</p>
+				<p class="font-bold"><?php esc_html_e( 'Prefer to shop while you wait?', 'isdb-custom' ); ?></p>
+				<p class="mt-1 text-sm text-white/70"><?php esc_html_e( 'Browse our latest kitchen & home essentials — Cash on Delivery available across Bangladesh.', 'isdb-custom' ); ?></p>
 			</div>
-			<a href="<?php echo esc_url( home_url( '/shop/' ) ); ?>" class="flex-none rounded-xl bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover">Shop Now</a>
+			<a href="<?php echo esc_url( home_url( '/shop/' ) ); ?>" class="flex-none rounded-xl bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover"><?php esc_html_e( 'Shop Now', 'isdb-custom' ); ?></a>
 		</div>
 
 	</div>

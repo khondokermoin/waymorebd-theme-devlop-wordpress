@@ -55,7 +55,7 @@ get_header( $isolate ? 'checkout' : '' );
 	<section class="border-b border-black/5 bg-brand-bg">
 		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 <?php echo $show_title ? 'py-3.5' : 'py-2.5'; ?>">
 			<?php if ( function_exists( 'woocommerce_breadcrumb' ) ) : ?>
-				<nav class="text-[13px] text-slate-500 <?php echo $show_title ? 'mb-1' : ''; ?>" aria-label="Breadcrumb">
+				<nav class="text-[13px] text-slate-500 <?php echo $show_title ? 'mb-1' : ''; ?>" aria-label="<?php esc_attr_e( 'Breadcrumb', 'isdb-custom' ); ?>">
 					<?php woocommerce_breadcrumb( array(
 						'delimiter'   => '<span class="mx-2 text-slate-300">/</span>',
 						'wrap_before' => '<div class="flex flex-wrap items-center">',

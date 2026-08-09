@@ -32,9 +32,15 @@ $free_ship = function_exists( 'isdb_free_shipping_progress' ) ? isdb_free_shippi
 		<?php if ( $free_ship ) : ?>
 			<div class="mb-3 rounded-card bg-brand-bg p-3">
 				<?php if ( $free_ship['reached'] ) : ?>
-					<p class="m-0 text-[13px] font-semibold text-emerald-700">✓ You've unlocked FREE shipping!</p>
+					<p class="m-0 text-[13px] font-semibold text-emerald-700">✓ <?php esc_html_e( 'You\'ve unlocked FREE shipping!', 'isdb-custom' ); ?></p>
 				<?php else : ?>
-					<p class="m-0 text-[13px] text-brand-body">You're <span class="font-bold text-brand-title"><?php echo wp_kses_post( $free_ship['remaining_html'] ); ?></span> from free shipping</p>
+					<p class="m-0 text-[13px] text-brand-body"><?php
+						printf(
+							/* translators: %s: remaining amount until free shipping */
+							esc_html__( 'You\'re %s from free shipping', 'isdb-custom' ),
+							'<span class="font-bold text-brand-title">' . wp_kses_post( $free_ship['remaining_html'] ) . '</span>'
+						);
+					?></p>
 				<?php endif; ?>
 				<div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
 					<div class="h-full rounded-full bg-brand-primary transition-all" style="width: <?php echo esc_attr( $free_ship['pct'] ); ?>%"></div>
@@ -74,7 +80,7 @@ $free_ship = function_exists( 'isdb_free_shipping_progress' ) ? isdb_free_shippi
 							</a>
 
 							<?php if ( $is_gift ) : ?>
-								<span class="mt-1 inline-block rounded bg-brand-primary px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">Gift</span>
+								<span class="mt-1 inline-block rounded bg-brand-primary px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white"><?php esc_html_e( 'Gift', 'isdb-custom' ); ?></span>
 							<?php endif; ?>
 
 							<?php
@@ -94,7 +100,7 @@ $free_ship = function_exists( 'isdb_free_shipping_progress' ) ? isdb_free_shippi
 											class="isdb-qty-btn flex h-6 w-6 items-center justify-center text-brand-title transition hover:bg-brand-soft hover:text-brand-primary"
 											data-key="<?php echo esc_attr( $cart_item_key ); ?>"
 											data-qty="<?php echo esc_attr( $qty - 1 ); ?>"
-											aria-label="Decrease quantity">
+											aria-label="<?php esc_attr_e( 'Decrease quantity', 'isdb-custom' ); ?>">
 											<svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14"/></svg>
 										</button>
 										<span class="min-w-[1.5rem] px-0.5 text-center text-[12px] font-semibold text-brand-title"><?php echo esc_html( $qty ); ?></span>
@@ -103,7 +109,7 @@ $free_ship = function_exists( 'isdb_free_shipping_progress' ) ? isdb_free_shippi
 											data-key="<?php echo esc_attr( $cart_item_key ); ?>"
 											data-qty="<?php echo esc_attr( $qty + 1 ); ?>"
 											<?php disabled( $at_max ); ?>
-											aria-label="Increase quantity">
+											aria-label="<?php esc_attr_e( 'Increase quantity', 'isdb-custom' ); ?>">
 											<svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
 										</button>
 									</div>
@@ -162,7 +168,7 @@ $free_ship = function_exists( 'isdb_free_shipping_progress' ) ? isdb_free_shippi
 		}
 		if ( $rail ) : ?>
 			<div class="mb-4">
-				<p class="m-0 mb-2.5 text-[13px] font-bold text-brand-title">You May Also Like</p>
+				<p class="m-0 mb-2.5 text-[13px] font-bold text-brand-title"><?php esc_html_e( 'You May Also Like', 'isdb-custom' ); ?></p>
 				<div class="-mx-1 flex snap-x gap-2.5 overflow-x-auto px-1 pb-1">
 					<?php foreach ( $rail as $rp ) : ?>
 						<div class="w-[140px] flex-none snap-start rounded-card border border-[#e0e0e0] bg-white p-2">
@@ -176,7 +182,7 @@ $free_ship = function_exists( 'isdb_free_shipping_progress' ) ? isdb_free_shippi
 							<a href="?add-to-cart=<?php echo esc_attr( $rp->get_id() ); ?>"
 								data-quantity="1" data-product_id="<?php echo esc_attr( $rp->get_id() ); ?>"
 								class="add_to_cart_button ajax_add_to_cart mt-1.5 flex items-center justify-center gap-1 rounded border border-brand-primary bg-white py-1 text-[11px] font-semibold text-brand-primary transition hover:bg-brand-primary hover:text-white">
-								+ Add
+								+ <?php esc_html_e( 'Add', 'isdb-custom' ); ?>
 							</a>
 						</div>
 					<?php endforeach; ?>
@@ -186,17 +192,17 @@ $free_ship = function_exists( 'isdb_free_shipping_progress' ) ? isdb_free_shippi
 
 		<!-- Total + checkout -->
 		<div class="flex items-center justify-between border-t border-[#e0e0e0] pt-3">
-			<span class="text-sm font-semibold text-brand-title">Total:</span>
+			<span class="text-sm font-semibold text-brand-title"><?php esc_html_e( 'Total:', 'isdb-custom' ); ?></span>
 			<span class="text-lg font-extrabold text-brand-title"><?php echo wp_kses_post( isdb_cart_subtotal_html() ); ?></span>
 		</div>
 
 		<a href="<?php echo esc_url( wc_get_checkout_url() ); ?>"
 			class="mt-3 block rounded-card bg-brand-primary py-3 text-center text-sm font-bold uppercase tracking-wide text-white transition hover:bg-brand-hover">
-			Checkout
+			<?php esc_html_e( 'Checkout', 'isdb-custom' ); ?>
 		</a>
 		<a href="<?php echo esc_url( wc_get_cart_url() ); ?>"
 			class="mt-2 block rounded-card border border-[#ddd] py-2.5 text-center text-[13px] font-semibold text-brand-title transition hover:bg-brand-bg">
-			View Cart
+			<?php esc_html_e( 'View Cart', 'isdb-custom' ); ?>
 		</a>
 	</div>
 
@@ -206,11 +212,11 @@ $free_ship = function_exists( 'isdb_free_shipping_progress' ) ? isdb_free_shippi
 		<span class="flex h-16 w-16 items-center justify-center rounded-full bg-brand-bg text-slate-400">
 			<svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
 		</span>
-		<p class="mt-4 text-base font-semibold text-brand-title">Your cart is empty</p>
-		<p class="mt-1 text-sm text-slate-500">Let's find something for your kitchen.</p>
+		<p class="mt-4 text-base font-semibold text-brand-title"><?php esc_html_e( 'Your cart is empty', 'isdb-custom' ); ?></p>
+		<p class="mt-1 text-sm text-slate-500"><?php esc_html_e( 'Let\'s find something for your kitchen.', 'isdb-custom' ); ?></p>
 		<a href="<?php echo esc_url( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' ) ); ?>"
 			class="mt-6 rounded-card bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover">
-			Browse Products
+			<?php esc_html_e( 'Browse Products', 'isdb-custom' ); ?>
 		</a>
 	</div>
 

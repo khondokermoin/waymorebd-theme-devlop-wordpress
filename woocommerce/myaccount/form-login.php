@@ -51,8 +51,8 @@ $ico_mail   = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25
 					<svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo esc_attr( $ico_user ); ?>"/></svg>
 				</span>
 				<div>
-					<h1 class="m-0 text-2xl font-extrabold tracking-tight text-brand-title sm:text-[28px]">Sign in</h1>
-					<p class="m-0 mt-0.5 text-sm text-slate-500">Access your account securely</p>
+					<h1 class="m-0 text-2xl font-extrabold tracking-tight text-brand-title sm:text-[28px]"><?php esc_html_e( 'Sign in', 'isdb-custom' ); ?></h1>
+					<p class="m-0 mt-0.5 text-sm text-slate-500"><?php esc_html_e( 'Access your account securely', 'isdb-custom' ); ?></p>
 				</div>
 			</div>
 
@@ -61,7 +61,7 @@ $ico_mail   = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25
 
 				<!-- ══════════ LOGIN ══════════ -->
 				<div class="rounded-xl bg-[#f7f7f7] p-5 sm:p-6" x-data="{ show:false }">
-					<h2 class="m-0 mb-4 text-base font-bold text-brand-title">Login With Credentials</h2>
+					<h2 class="m-0 mb-4 text-base font-bold text-brand-title"><?php esc_html_e( 'Login With Credentials', 'isdb-custom' ); ?></h2>
 
 					<form class="woocommerce-form woocommerce-form-login login" method="post" novalidate>
 
@@ -72,7 +72,7 @@ $ico_mail   = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25
 							<span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
 								<svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo esc_attr( $ico_user ); ?>"/></svg>
 							</span>
-							<input type="text" class="woocommerce-Input woocommerce-Input--text input-text wmb-field pl-11" name="username" id="username" autocomplete="username" placeholder="Email or username" value="<?php echo ( ! empty( $_POST['username'] ) && is_string( $_POST['username'] ) ) ? esc_attr( wp_unslash( $_POST['username'] ) ) : ''; ?>" required aria-required="true" /><?php // @codingStandardsIgnoreLine ?>
+							<input type="text" class="woocommerce-Input woocommerce-Input--text input-text wmb-field pl-11" name="username" id="username" autocomplete="username" placeholder="<?php esc_attr_e( 'Email or username', 'isdb-custom' ); ?>" value="<?php echo ( ! empty( $_POST['username'] ) && is_string( $_POST['username'] ) ) ? esc_attr( wp_unslash( $_POST['username'] ) ) : ''; ?>" required aria-required="true" /><?php // @codingStandardsIgnoreLine ?>
 						</p>
 
 						<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide relative m-0 mb-3">
@@ -80,8 +80,8 @@ $ico_mail   = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25
 							<span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
 								<svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo esc_attr( $ico_lock ); ?>"/></svg>
 							</span>
-							<input class="woocommerce-Input woocommerce-Input--text input-text wmb-field px-11" :type="show ? 'text' : 'password'" type="password" name="password" id="password" autocomplete="current-password" placeholder="Password" required aria-required="true" />
-							<button type="button" @click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-brand-primary" :aria-label="show ? 'Hide password' : 'Show password'">
+							<input class="woocommerce-Input woocommerce-Input--text input-text wmb-field px-11" :type="show ? 'text' : 'password'" type="password" name="password" id="password" autocomplete="current-password" placeholder="<?php esc_attr_e( 'Password', 'isdb-custom' ); ?>" required aria-required="true" />
+							<button type="button" @click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-brand-primary" :aria-label="show ? '<?php echo esc_js( __( 'Hide password', 'isdb-custom' ) ); ?>' : '<?php echo esc_js( __( 'Show password', 'isdb-custom' ) ); ?>'">
 								<svg x-show="!show" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo esc_attr( $eye_open ); ?>"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
 								<svg x-show="show" x-cloak class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo esc_attr( $eye_closed ); ?>"/></svg>
 							</button>
@@ -115,13 +115,13 @@ $ico_mail   = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25
 					<!-- OR divider -->
 					<div class="flex items-center justify-center lg:flex-col">
 						<span class="h-px w-full bg-slate-200 lg:h-full lg:w-px"></span>
-						<span class="mx-3 flex h-11 w-11 flex-none items-center justify-center rounded-full border border-slate-200 bg-white text-[11px] font-bold uppercase text-slate-400 lg:mx-0 lg:my-3">OR</span>
+						<span class="mx-3 flex h-11 w-11 flex-none items-center justify-center rounded-full border border-slate-200 bg-white text-[11px] font-bold uppercase text-slate-400 lg:mx-0 lg:my-3"><?php esc_html_e( 'OR', 'isdb-custom' ); ?></span>
 						<span class="h-px w-full bg-slate-200 lg:h-full lg:w-px"></span>
 					</div>
 
 					<!-- ══════════ REGISTER ══════════ -->
 					<div class="rounded-xl bg-[#f7f7f7] p-5 sm:p-6" x-data="{ show:false }">
-						<h2 class="m-0 mb-4 text-base font-bold text-brand-title">Create a New Account</h2>
+						<h2 class="m-0 mb-4 text-base font-bold text-brand-title"><?php esc_html_e( 'Create a New Account', 'isdb-custom' ); ?></h2>
 
 						<form method="post" class="woocommerce-form woocommerce-form-register register" <?php do_action( 'woocommerce_register_form_tag' ); ?>>
 
@@ -133,7 +133,7 @@ $ico_mail   = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25
 									<span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
 										<svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo esc_attr( $ico_user ); ?>"/></svg>
 									</span>
-									<input type="text" class="woocommerce-Input woocommerce-Input--text input-text wmb-field pl-11" name="username" id="reg_username" autocomplete="username" placeholder="Username" value="<?php echo ( ! empty( $_POST['username'] ) ) ? esc_attr( wp_unslash( $_POST['username'] ) ) : ''; ?>" required aria-required="true" /><?php // @codingStandardsIgnoreLine ?>
+									<input type="text" class="woocommerce-Input woocommerce-Input--text input-text wmb-field pl-11" name="username" id="reg_username" autocomplete="username" placeholder="<?php esc_attr_e( 'Username', 'isdb-custom' ); ?>" value="<?php echo ( ! empty( $_POST['username'] ) ) ? esc_attr( wp_unslash( $_POST['username'] ) ) : ''; ?>" required aria-required="true" /><?php // @codingStandardsIgnoreLine ?>
 								</p>
 							<?php endif; ?>
 
@@ -142,7 +142,7 @@ $ico_mail   = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25
 								<span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
 									<svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo esc_attr( $ico_mail ); ?>"/></svg>
 								</span>
-								<input type="email" class="woocommerce-Input woocommerce-Input--text input-text wmb-field pl-11" name="email" id="reg_email" autocomplete="email" placeholder="Email address" value="<?php echo ( ! empty( $_POST['email'] ) ) ? esc_attr( wp_unslash( $_POST['email'] ) ) : ''; ?>" required aria-required="true" /><?php // @codingStandardsIgnoreLine ?>
+								<input type="email" class="woocommerce-Input woocommerce-Input--text input-text wmb-field pl-11" name="email" id="reg_email" autocomplete="email" placeholder="<?php esc_attr_e( 'Email address', 'isdb-custom' ); ?>" value="<?php echo ( ! empty( $_POST['email'] ) ) ? esc_attr( wp_unslash( $_POST['email'] ) ) : ''; ?>" required aria-required="true" /><?php // @codingStandardsIgnoreLine ?>
 							</p>
 
 							<?php if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) : ?>
@@ -151,8 +151,8 @@ $ico_mail   = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25
 									<span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
 										<svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo esc_attr( $ico_lock ); ?>"/></svg>
 									</span>
-									<input type="password" class="woocommerce-Input woocommerce-Input--text input-text wmb-field px-11" :type="show ? 'text' : 'password'" name="password" id="reg_password" autocomplete="new-password" placeholder="Password" required aria-required="true" />
-									<button type="button" @click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-brand-primary" :aria-label="show ? 'Hide password' : 'Show password'">
+									<input type="password" class="woocommerce-Input woocommerce-Input--text input-text wmb-field px-11" :type="show ? 'text' : 'password'" name="password" id="reg_password" autocomplete="new-password" placeholder="<?php esc_attr_e( 'Password', 'isdb-custom' ); ?>" required aria-required="true" />
+									<button type="button" @click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-brand-primary" :aria-label="show ? '<?php echo esc_js( __( 'Hide password', 'isdb-custom' ) ); ?>' : '<?php echo esc_js( __( 'Show password', 'isdb-custom' ) ); ?>'">
 										<svg x-show="!show" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo esc_attr( $eye_open ); ?>"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
 										<svg x-show="show" x-cloak class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo esc_attr( $eye_closed ); ?>"/></svg>
 									</button>
@@ -182,7 +182,7 @@ $ico_mail   = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25
 				<div class="mt-7">
 					<div class="mx-auto flex max-w-md items-center gap-3">
 						<span class="h-px flex-1 bg-slate-200"></span>
-						<span class="text-[13px] text-slate-500">or continue with</span>
+						<span class="text-[13px] text-slate-500"><?php esc_html_e( 'or continue with', 'isdb-custom' ); ?></span>
 						<span class="h-px flex-1 bg-slate-200"></span>
 					</div>
 					<div class="wmb-social mt-4 flex justify-center">
@@ -192,9 +192,14 @@ $ico_mail   = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25
 			<?php endif; ?>
 
 			<p class="mt-7 text-center text-[13px] text-slate-500">
-				By continuing you agree to our
-				<a href="<?php echo esc_url( home_url( '/terms-and-conditions/' ) ); ?>" class="font-medium text-brand-primary hover:underline">Terms</a> and
-				<a href="<?php echo esc_url( home_url( '/privacy-policy/' ) ); ?>" class="font-medium text-brand-primary hover:underline">Privacy Policy</a>.
+				<?php
+				printf(
+					/* translators: 1: Terms & Conditions link, 2: Privacy Policy link */
+					esc_html__( 'By continuing you agree to our %1$s and %2$s.', 'isdb-custom' ),
+					'<a href="' . esc_url( home_url( '/terms-and-conditions/' ) ) . '" class="font-medium text-brand-primary hover:underline">' . esc_html__( 'Terms', 'isdb-custom' ) . '</a>',
+					'<a href="' . esc_url( home_url( '/privacy-policy/' ) ) . '" class="font-medium text-brand-primary hover:underline">' . esc_html__( 'Privacy Policy', 'isdb-custom' ) . '</a>'
+				);
+				?>
 			</p>
 		</div>
 
@@ -203,15 +208,15 @@ $ico_mail   = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25
 			<div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[12px] text-slate-500">
 				<span class="inline-flex items-center gap-1.5">
 					<svg class="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
-					256-bit SSL secured
+					<?php esc_html_e( '256-bit SSL secured', 'isdb-custom' ); ?>
 				</span>
 				<span class="inline-flex items-center gap-1.5">
 					<svg class="h-4 w-4 text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-					Cash on Delivery
+					<?php esc_html_e( 'Cash on Delivery', 'isdb-custom' ); ?>
 				</span>
 				<span class="inline-flex items-center gap-1.5">
 					<svg class="h-4 w-4 text-brand-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H9v3h2v7h3v-7h2.5l.5-3h-3V9.5c0-.3.2-.5.5-.5H14z"/></svg>
-					<a href="<?php echo esc_url( function_exists( 'isdb_opt' ) ? isdb_opt( 'isdb_facebook', defined( 'ISDB_FACEBOOK_URL' ) ? ISDB_FACEBOOK_URL : '' ) : '' ); ?>" target="_blank" rel="noopener noreferrer" class="transition hover:text-brand-primary">Message us on Facebook</a>
+					<a href="<?php echo esc_url( function_exists( 'isdb_opt' ) ? isdb_opt( 'isdb_facebook', defined( 'ISDB_FACEBOOK_URL' ) ? ISDB_FACEBOOK_URL : '' ) : '' ); ?>" target="_blank" rel="noopener noreferrer" class="transition hover:text-brand-primary"><?php esc_html_e( 'Message us on Facebook', 'isdb-custom' ); ?></a>
 				</span>
 			</div>
 		</div>

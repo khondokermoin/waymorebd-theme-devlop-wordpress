@@ -78,7 +78,7 @@ $orderby_hidden = esc_attr( $current_orderby );
 		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3.5">
 			<div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
 				<h1 class="text-xl font-bold tracking-tight text-brand-title sm:text-2xl"><?php echo esc_html( $page_title ); ?></h1>
-				<nav class="text-[13px] text-slate-500" aria-label="Breadcrumb">
+				<nav class="text-[13px] text-slate-500" aria-label="<?php esc_attr_e( 'Breadcrumb', 'isdb-custom' ); ?>">
 					<?php woocommerce_breadcrumb( array(
 						'delimiter'   => '<span class="mx-2 text-slate-300">/</span>',
 						'wrap_before' => '<div class="flex flex-wrap items-center">',
@@ -101,8 +101,8 @@ $orderby_hidden = esc_attr( $current_orderby );
 			<!-- ============================================================ -->
 			<aside :class="filters ? 'fixed inset-0 z-[60] overflow-y-auto bg-white p-5 lg:static lg:z-auto lg:bg-transparent lg:p-0' : 'hidden lg:block'">
 				<div class="mb-4 flex items-center justify-between lg:hidden">
-					<span class="text-lg font-bold">Filters</span>
-					<button @click="filters=false" class="rounded-lg p-1.5 text-slate-400 hover:bg-stone-100" aria-label="Close filters">
+					<span class="text-lg font-bold"><?php esc_html_e( 'Filters', 'isdb-custom' ); ?></span>
+					<button @click="filters=false" class="rounded-lg p-1.5 text-slate-400 hover:bg-stone-100" aria-label="<?php esc_attr_e( 'Close filters', 'isdb-custom' ); ?>">
 						<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
 					</button>
 				</div>
@@ -113,7 +113,7 @@ $orderby_hidden = esc_attr( $current_orderby );
 					<!-- Categories -->
 					<?php if ( ! empty( $filter_cats ) ) : ?>
 						<fieldset class="rounded-card border border-[#e0e0e0] bg-white p-4">
-							<legend class="mb-1 border-b-2 border-brand-primary pb-1 text-[13px] font-bold uppercase tracking-wide text-brand-title">Filter by Category</legend>
+							<legend class="mb-1 border-b-2 border-brand-primary pb-1 text-[13px] font-bold uppercase tracking-wide text-brand-title"><?php esc_html_e( 'Filter by Category', 'isdb-custom' ); ?></legend>
 							<div class="mt-3 space-y-2">
 								<?php foreach ( $filter_cats as $fc ) : ?>
 									<label class="flex items-center gap-2.5 text-sm text-slate-600">
@@ -129,7 +129,7 @@ $orderby_hidden = esc_attr( $current_orderby );
 
 					<!-- Price (dual-handle range slider) -->
 					<fieldset class="rounded-card border border-[#e0e0e0] bg-white p-4">
-						<legend class="mb-1 border-b-2 border-brand-primary pb-1 text-[13px] font-bold uppercase tracking-wide text-brand-title">Price Range</legend>
+						<legend class="mb-1 border-b-2 border-brand-primary pb-1 text-[13px] font-bold uppercase tracking-wide text-brand-title"><?php esc_html_e( 'Price Range', 'isdb-custom' ); ?></legend>
 						<div class="wmb-range mt-4"
 							x-data="{
 								floor: <?php echo (int) $price_floor; ?>, ceil: <?php echo (int) $price_ceil; ?>,
@@ -146,8 +146,8 @@ $orderby_hidden = esc_attr( $current_orderby );
 							<div class="wmb-range-body relative h-5">
 								<div class="absolute left-0 right-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-slate-200"></div>
 								<div class="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-brand-primary" :style="fill()"></div>
-								<input type="range" :min="floor" :max="ceil" step="1" x-model.number="lo" @input="fixLo()" aria-label="Minimum price" />
-								<input type="range" :min="floor" :max="ceil" step="1" x-model.number="hi" @input="fixHi()" aria-label="Maximum price" />
+								<input type="range" :min="floor" :max="ceil" step="1" x-model.number="lo" @input="fixLo()" aria-label="<?php esc_attr_e( 'Minimum price', 'isdb-custom' ); ?>" />
+								<input type="range" :min="floor" :max="ceil" step="1" x-model.number="hi" @input="fixHi()" aria-label="<?php esc_attr_e( 'Maximum price', 'isdb-custom' ); ?>" />
 							</div>
 							<input type="hidden" name="min_price" :value="lo" />
 							<input type="hidden" name="max_price" :value="hi" />
@@ -156,7 +156,7 @@ $orderby_hidden = esc_attr( $current_orderby );
 
 					<!-- Rating -->
 					<fieldset class="rounded-card border border-[#e0e0e0] bg-white p-4">
-						<legend class="mb-1 border-b-2 border-brand-primary pb-1 text-[13px] font-bold uppercase tracking-wide text-brand-title">Customer Rating</legend>
+						<legend class="mb-1 border-b-2 border-brand-primary pb-1 text-[13px] font-bold uppercase tracking-wide text-brand-title"><?php esc_html_e( 'Customer Rating', 'isdb-custom' ); ?></legend>
 						<div class="mt-3 space-y-2">
 							<?php foreach ( array( 4, 3, 2 ) as $r ) : ?>
 								<label class="flex items-center gap-2.5 text-sm text-slate-600">
@@ -166,7 +166,7 @@ $orderby_hidden = esc_attr( $current_orderby );
 											<svg class="h-4 w-4 <?php echo $i < $r ? '' : 'text-slate-200'; ?>" fill="currentColor" viewBox="0 0 20 20"><path d="M9.05 2.93c.3-.92 1.6-.92 1.9 0l1.28 3.94a1 1 0 00.95.69h4.15c.97 0 1.37 1.24.59 1.81l-3.36 2.44a1 1 0 00-.36 1.12l1.28 3.94c.3.92-.75 1.69-1.54 1.12l-3.36-2.44a1 1 0 00-1.18 0l-3.36 2.44c-.78.57-1.83-.2-1.54-1.12l1.28-3.94a1 1 0 00-.36-1.12L2.33 9.37c-.78-.57-.38-1.81.59-1.81h4.15a1 1 0 00.95-.69l1.28-3.94z"/></svg>
 										<?php endfor; ?>
 									</span>
-									<span class="text-xs text-slate-400">&amp; up</span>
+									<span class="text-xs text-slate-400"><?php esc_html_e( '& up', 'isdb-custom' ); ?></span>
 								</label>
 							<?php endforeach; ?>
 						</div>
@@ -174,23 +174,23 @@ $orderby_hidden = esc_attr( $current_orderby );
 
 					<!-- Availability toggles -->
 					<fieldset class="rounded-card border border-[#e0e0e0] bg-white p-4">
-						<legend class="mb-1 border-b-2 border-brand-primary pb-1 text-[13px] font-bold uppercase tracking-wide text-brand-title">Product Flag</legend>
+						<legend class="mb-1 border-b-2 border-brand-primary pb-1 text-[13px] font-bold uppercase tracking-wide text-brand-title"><?php esc_html_e( 'Product Flag', 'isdb-custom' ); ?></legend>
 						<div class="mt-3 space-y-2">
 							<label class="flex items-center gap-2.5 text-sm text-slate-600">
 								<input type="checkbox" name="instock" value="1" <?php checked( $sel_stock ); ?> class="h-4 w-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500" />
-								In stock only
+								<?php esc_html_e( 'In stock only', 'isdb-custom' ); ?>
 							</label>
 							<label class="flex items-center gap-2.5 text-sm text-slate-600">
 								<input type="checkbox" name="on_sale" value="1" <?php checked( $sel_sale ); ?> class="h-4 w-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500" />
-								On sale
+								<?php esc_html_e( 'On sale', 'isdb-custom' ); ?>
 							</label>
 						</div>
 					</fieldset>
 
 					<div class="flex flex-col gap-2 border-t border-slate-100 pt-5">
-						<button type="submit" class="rounded-xl bg-slate-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-slate-800">Apply Filters</button>
+						<button type="submit" class="rounded-xl bg-slate-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-slate-800"><?php esc_html_e( 'Apply Filters', 'isdb-custom' ); ?></button>
 						<?php if ( $has_filters ) : ?>
-							<a href="<?php echo esc_url( $clear_url ); ?>" class="rounded-xl px-6 py-2.5 text-center text-sm font-semibold text-slate-500 transition hover:bg-stone-100">Clear all</a>
+							<a href="<?php echo esc_url( $clear_url ); ?>" class="rounded-xl px-6 py-2.5 text-center text-sm font-semibold text-slate-500 transition hover:bg-stone-100"><?php esc_html_e( 'Clear all', 'isdb-custom' ); ?></a>
 						<?php endif; ?>
 					</div>
 				</form>
@@ -204,11 +204,11 @@ $orderby_hidden = esc_attr( $current_orderby );
 				<div class="mb-6 flex items-center gap-3">
 					<button @click="filters=true" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 lg:hidden">
 						<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M6 12h12M10 18h4"/></svg>
-						Filters
+						<?php esc_html_e( 'Filters', 'isdb-custom' ); ?>
 					</button>
 
 					<div class="ml-auto flex items-center gap-2">
-						<label class="sr-only" for="isdb-orderby">Sort by</label>
+						<label class="sr-only" for="isdb-orderby"><?php esc_html_e( 'Sort by', 'isdb-custom' ); ?></label>
 						<select id="isdb-orderby"
 							onchange="var u=new URL(location);u.searchParams.set('orderby',this.value);u.searchParams.delete('paged');location=u"
 							class="rounded-xl border-slate-200 bg-white py-2 pl-3 pr-8 text-sm font-semibold text-slate-700 focus:border-amber-500 focus:ring-amber-500">
@@ -237,14 +237,14 @@ $orderby_hidden = esc_attr( $current_orderby );
 						'format'    => '?paged=%#%',
 						'current'   => max( 1, get_query_var( 'paged' ) ),
 						'total'     => $wp_query->max_num_pages,
-						'prev_text' => '&lsaquo; Prev',
-						'next_text' => 'Next &rsaquo;',
+						'prev_text' => '&lsaquo; ' . esc_html__( 'Prev', 'isdb-custom' ),
+						'next_text' => esc_html__( 'Next', 'isdb-custom' ) . ' &rsaquo;',
 						'type'      => 'plain',
 						'end_size'  => 1,
 						'mid_size'  => 1,
 					) );
 					if ( $html ) : ?>
-						<nav class="mt-12 flex justify-center [&_.page-numbers]:mx-0.5 [&_.page-numbers]:inline-flex [&_.page-numbers]:h-10 [&_.page-numbers]:min-w-[2.5rem] [&_.page-numbers]:items-center [&_.page-numbers]:justify-center [&_.page-numbers]:rounded-lg [&_.page-numbers]:border [&_.page-numbers]:border-slate-200 [&_.page-numbers]:bg-white [&_.page-numbers]:px-3 [&_.page-numbers]:text-sm [&_.page-numbers]:font-semibold [&_.page-numbers]:text-slate-600 [&_.current]:!border-amber-500 [&_.current]:!bg-amber-500 [&_.current]:!text-slate-900" aria-label="Pagination">
+						<nav class="mt-12 flex justify-center [&_.page-numbers]:mx-0.5 [&_.page-numbers]:inline-flex [&_.page-numbers]:h-10 [&_.page-numbers]:min-w-[2.5rem] [&_.page-numbers]:items-center [&_.page-numbers]:justify-center [&_.page-numbers]:rounded-lg [&_.page-numbers]:border [&_.page-numbers]:border-slate-200 [&_.page-numbers]:bg-white [&_.page-numbers]:px-3 [&_.page-numbers]:text-sm [&_.page-numbers]:font-semibold [&_.page-numbers]:text-slate-600 [&_.current]:!border-amber-500 [&_.current]:!bg-amber-500 [&_.current]:!text-slate-900" aria-label="<?php esc_attr_e( 'Pagination', 'isdb-custom' ); ?>">
 							<?php echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						</nav>
 					<?php endif; ?>
@@ -258,7 +258,7 @@ $orderby_hidden = esc_attr( $current_orderby );
 						<h2 class="mt-4 text-lg font-bold text-slate-900"><?php echo $sel_sale ? esc_html__( 'No active deals right now', 'isdb-custom' ) : esc_html__( 'No products match your filters', 'isdb-custom' ); ?></h2>
 						<p class="mt-1 text-sm text-slate-500"><?php echo $sel_sale ? esc_html__( 'Check back soon — new offers drop regularly. To feature a product here, set a Sale price on it in WooCommerce.', 'isdb-custom' ) : esc_html__( 'Try widening your price range or clearing a filter.', 'isdb-custom' ); ?></p>
 						<?php if ( $has_filters ) : ?>
-							<a href="<?php echo esc_url( $clear_url ); ?>" class="mt-6 inline-block rounded-xl bg-amber-500 px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-amber-400">Clear all filters</a>
+							<a href="<?php echo esc_url( $clear_url ); ?>" class="mt-6 inline-block rounded-xl bg-amber-500 px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-amber-400"><?php esc_html_e( 'Clear all filters', 'isdb-custom' ); ?></a>
 						<?php endif; ?>
 					</div>
 				<?php endif; ?>

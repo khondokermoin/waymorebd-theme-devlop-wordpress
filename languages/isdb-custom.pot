@@ -13,6 +13,12 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Domain: isdb-custom\n"
 
+msgid "All rights reserved."
+msgstr ""
+
+msgid "256-bit SSL secured"
+msgstr ""
+
 msgid "Customer Support"
 msgstr ""
 
@@ -91,10 +97,129 @@ msgstr ""
 msgid "Pay With"
 msgstr ""
 
-msgid "256-bit SSL secured"
+msgid "Scroll to top"
 msgstr ""
 
-msgid "Scroll to top"
+msgid "Pure Mustard Oil & Ghee"
+msgstr ""
+
+msgid "Raw Natural Honey"
+msgstr ""
+
+msgid "Premium Nuts & Dates"
+msgstr ""
+
+msgid "Previous slide"
+msgstr ""
+
+msgid "Next slide"
+msgstr ""
+
+msgid "Go to slide"
+msgstr ""
+
+msgid "Cash on Delivery nationwide"
+msgstr ""
+
+msgid "Authentic Products"
+msgstr ""
+
+msgid "Sourced & verified"
+msgstr ""
+
+msgid "Fast Delivery"
+msgstr ""
+
+msgid "Nationwide, quick"
+msgstr ""
+
+msgid "Pay when it arrives"
+msgstr ""
+
+msgid "Support Promise"
+msgstr ""
+
+msgid "Real humans, fast"
+msgstr ""
+
+msgid "Featured Categories"
+msgstr ""
+
+msgid "Top Selling Products"
+msgstr ""
+
+msgid "Best Selling"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Add to Cart"
+msgstr ""
+
+msgid "Buy now"
+msgstr ""
+
+msgid "Our Brands"
+msgstr ""
+
+msgid "See all"
+msgstr ""
+
+msgid "Exclusive Combo Deals"
+msgstr ""
+
+msgid "View All Combos"
+msgstr ""
+
+msgid "Combo Offer"
+msgstr ""
+
+msgid "Save %s%%"
+msgstr ""
+
+msgid "View Details"
+msgstr ""
+
+msgid "Just For You"
+msgstr ""
+
+msgid "View all products"
+msgstr ""
+
+msgid "New Arrivals"
+msgstr ""
+
+msgid "View all items"
+msgstr ""
+
+msgid "Limited-time savings"
+msgstr ""
+
+msgid "On Sale Now — while stocks last"
+msgstr ""
+
+msgid "%s product currently discounted."
+msgid_plural "%s products currently discounted."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Shop the Sale"
+msgstr ""
+
+msgid "What Our Customers Say"
+msgstr ""
+
+msgid "Verified purchase"
+msgstr ""
+
+msgid "The Way More BD Promise"
+msgstr ""
+
+msgid "Authentic products, honest pricing, and a support team that answers. If something isn't right, we make it right — no hassle."
+msgstr ""
+
+msgid "Start Shopping"
 msgstr ""
 
 msgid "Primary Menu"
@@ -115,13 +240,31 @@ msgstr ""
 msgid "Shop All"
 msgstr ""
 
-msgid "New Arrivals"
-msgstr ""
-
 msgid "Deals"
 msgstr ""
 
 msgid "About Us"
+msgstr ""
+
+msgid "Privacy and cookie notice"
+msgstr ""
+
+msgid "Dismiss"
+msgstr ""
+
+msgid "Your Privacy & Security First"
+msgstr ""
+
+msgid "We use essential cookies to ensure a highly secure, fast, and personalized shopping experience. Your data is protected and never sold."
+msgstr ""
+
+msgid "256-bit encrypted & never shared"
+msgstr ""
+
+msgid "Accept & Secure Session"
+msgstr ""
+
+msgid "Read Privacy Policy"
 msgstr ""
 
 msgid "Full Name"
@@ -358,6 +501,9 @@ msgstr ""
 msgid "Extra Discount"
 msgstr ""
 
+msgid "Return to cart"
+msgstr ""
+
 msgid "Menu"
 msgstr ""
 
@@ -424,13 +570,55 @@ msgstr ""
 msgid "Close cart"
 msgstr ""
 
-msgid "Too many attempts. Please try again in a few minutes."
+msgid "Read more"
+msgstr ""
+
+msgid "Nothing here yet"
+msgstr ""
+
+msgid "Try a search, or head back to the shop."
+msgstr ""
+
+msgid "Browse Products"
 msgstr ""
 
 msgid "Breadcrumb"
 msgstr ""
 
 msgid "Home"
+msgstr ""
+
+msgid "We're Here for You"
+msgstr ""
+
+msgid "Support Hours"
+msgstr ""
+
+msgid "Every day · 9:00 AM – 10:00 PM (BST). We usually reply within a few hours."
+msgstr ""
+
+msgid "Prefer to shop while you wait?"
+msgstr ""
+
+msgid "Browse our latest kitchen & home essentials — Cash on Delivery available across Bangladesh."
+msgstr ""
+
+msgid "Shop Now"
+msgstr ""
+
+msgid "Last updated %s"
+msgstr ""
+
+msgid "Still have questions? We're here to help."
+msgstr ""
+
+msgid "Our friendly support team replies fast — reach out any time and we'll take care of you."
+msgstr ""
+
+msgid "Call Support"
+msgstr ""
+
+msgid "Too many attempts. Please try again in a few minutes."
 msgstr ""
 
 msgid "Live Order Tracking"
@@ -490,6 +678,57 @@ msgstr ""
 msgid "Price: high to low"
 msgstr ""
 
+msgid "Filters"
+msgstr ""
+
+msgid "Close filters"
+msgstr ""
+
+msgid "Filter by Category"
+msgstr ""
+
+msgid "Price Range"
+msgstr ""
+
+msgid "Minimum price"
+msgstr ""
+
+msgid "Maximum price"
+msgstr ""
+
+msgid "Customer Rating"
+msgstr ""
+
+msgid "& up"
+msgstr ""
+
+msgid "Product Flag"
+msgstr ""
+
+msgid "In stock only"
+msgstr ""
+
+msgid "On sale"
+msgstr ""
+
+msgid "Apply Filters"
+msgstr ""
+
+msgid "Clear all"
+msgstr ""
+
+msgid "Sort by"
+msgstr ""
+
+msgid "Prev"
+msgstr ""
+
+msgid "Next"
+msgstr ""
+
+msgid "Pagination"
+msgstr ""
+
 msgid "No active deals right now"
 msgstr ""
 
@@ -502,27 +741,45 @@ msgstr ""
 msgid "Try widening your price range or clearing a filter."
 msgstr ""
 
+msgid "Clear all filters"
+msgstr ""
+
+msgid "You've unlocked FREE shipping!"
+msgstr ""
+
+msgid "You're %s away from FREE shipping"
+msgstr ""
+
+msgid "%s — pay Cash on Delivery."
+msgstr ""
+
+msgid "No payment now"
+msgstr ""
+
+msgid "256-bit SSL secure checkout."
+msgstr ""
+
+msgid "Easy 7-day returns & replacements."
+msgstr ""
+
+msgid "Checkout progress"
+msgstr ""
+
+msgid "Details"
+msgstr ""
+
 msgid "item"
 msgid_plural "items"
 msgstr[0] ""
 msgstr[1] ""
 
-msgid "Shipping Address"
+msgid "Your Cart"
 msgstr ""
 
-msgid "Billing Address"
+msgid "Continue shopping"
 msgstr ""
 
-msgid "Different from shipping?"
-msgstr ""
-
-msgid "Best Selling"
-msgstr ""
-
-msgid "Save %s%%"
-msgstr ""
-
-msgid "Stock Out"
+msgid "Only %s left — order soon"
 msgstr ""
 
 msgid "Decrease quantity"
@@ -531,13 +788,252 @@ msgstr ""
 msgid "Increase quantity"
 msgstr ""
 
+msgid "You may also like"
+msgstr ""
+
+msgid "You're %s from free shipping"
+msgstr ""
+
+msgid "Gift"
+msgstr ""
+
+msgid "You May Also Like"
+msgstr ""
+
+msgid "Add"
+msgstr ""
+
+msgid "Total:"
+msgstr ""
+
+msgid "Checkout"
+msgstr ""
+
+msgid "View Cart"
+msgstr ""
+
+msgid "Your cart is empty"
+msgstr ""
+
+msgid "Let's find something for your kitchen."
+msgstr ""
+
+msgid "Shipping Address"
+msgstr ""
+
+msgid "Have any account? please login or register"
+msgstr ""
+
 msgid "Login"
+msgstr ""
+
+msgid "Register"
+msgstr ""
+
+msgid "Order review"
+msgstr ""
+
+msgid "Payment method"
+msgstr ""
+
+msgid "Have any coupon or gift voucher?"
+msgstr ""
+
+msgid "Enter coupon code"
+msgstr ""
+
+msgid "Special notes"
+msgstr ""
+
+msgid "(Optional)"
+msgstr ""
+
+msgid "Secured with 256-bit SSL encryption. %s available — pay only when your order arrives."
+msgstr ""
+
+msgid "Billing Address"
+msgstr ""
+
+msgid "Different from shipping?"
+msgstr ""
+
+msgid "Remove item"
+msgstr ""
+
+msgid "Remove"
+msgstr ""
+
+msgid "Payment didn't go through"
+msgstr ""
+
+msgid "No charge was made. Please try again — your cart is safe."
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Order Placed!"
+msgstr ""
+
+msgid "Your order has been received and is being processed. A confirmation is on its way."
+msgstr ""
+
+msgid "Order No"
+msgstr ""
+
+msgid "Placed on"
+msgstr ""
+
+msgid "View Order Tracker"
+msgstr ""
+
+msgid "Thank you"
+msgstr ""
+
+msgid "Complete your kitchen"
+msgstr ""
+
+msgid "Popular picks other customers love — add to your next order."
+msgstr ""
+
+msgid "You're all set — we've got it from here."
+msgstr ""
+
+msgid "That's our Customer Support Promise — real humans, quick replies. We'll keep you posted as your order moves."
+msgstr ""
+
+msgid "Continue Shopping"
+msgstr ""
+
+msgid "Stock Out"
+msgstr ""
+
+msgid "Dashboard"
+msgstr ""
+
+msgid "Here's what's happening with your account."
+msgstr ""
+
+msgid "Total Orders"
+msgstr ""
+
+msgid "In Progress"
+msgstr ""
+
+msgid "Total Spent"
+msgstr ""
+
+msgid "Order again in one click"
+msgstr ""
+
+msgid "Last order"
+msgstr ""
+
+msgid "Reorder"
+msgstr ""
+
+msgid "Recent Orders"
+msgstr ""
+
+msgid "View all"
+msgstr ""
+
+msgid "%d item"
+msgid_plural "%d items"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "No orders yet"
+msgstr ""
+
+msgid "Your orders will appear here once you place one."
+msgstr ""
+
+msgid "Quick Actions"
+msgstr ""
+
+msgid "My Orders"
+msgstr ""
+
+msgid "Track & review your order history"
+msgstr ""
+
+msgid "Addresses"
+msgstr ""
+
+msgid "Manage billing & delivery details"
+msgstr ""
+
+msgid "Account Details"
+msgstr ""
+
+msgid "Name, email & password"
+msgstr ""
+
+msgid "Log out"
+msgstr ""
+
+msgid "Sign out of your account securely"
+msgstr ""
+
+msgid "Sign in"
+msgstr ""
+
+msgid "Access your account securely"
+msgstr ""
+
+msgid "Login With Credentials"
+msgstr ""
+
+msgid "Email or username"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Hide password"
+msgstr ""
+
+msgid "Show password"
+msgstr ""
+
+msgid "OR"
+msgstr ""
+
+msgid "Create a New Account"
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Email address"
 msgstr ""
 
 msgid "Create Account"
 msgstr ""
 
+msgid "or continue with"
+msgstr ""
+
+msgid "By continuing you agree to our %1$s and %2$s."
+msgstr ""
+
+msgid "Terms"
+msgstr ""
+
+msgid "Message us on Facebook"
+msgstr ""
+
+msgid "Hello, %s"
+msgstr ""
+
 msgid "Account Menu"
+msgstr ""
+
+msgid "Track, review and reorder your purchases."
+msgstr ""
+
+msgid "When you place an order it'll show up here."
 msgstr ""
 
 msgid "High demand — selling fast this week"
@@ -563,9 +1059,6 @@ msgstr ""
 msgid "In stock & ready to ship"
 msgstr ""
 
-msgid "Add to Cart"
-msgstr ""
-
 msgid "Currently Unavailable"
 msgstr ""
 
@@ -579,12 +1072,6 @@ msgid "Easy Returns"
 msgstr ""
 
 msgid "7-day replacement"
-msgstr ""
-
-msgid "Support Promise"
-msgstr ""
-
-msgid "Real humans, fast"
 msgstr ""
 
 msgid "Way More BD — Customer Support Promise"

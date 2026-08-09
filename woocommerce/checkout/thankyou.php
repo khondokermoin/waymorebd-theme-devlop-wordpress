@@ -34,7 +34,7 @@ defined( 'ABSPATH' ) || exit;
 				<span class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-rose-50 text-rose-600">
 					<svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.7 3.9a2 2 0 00-3.4 0z"/></svg>
 				</span>
-				<h1 class="mt-4 text-2xl font-bold text-brand-title">Payment didn't go through</h1>
+				<h1 class="mt-4 text-2xl font-bold text-brand-title"><?php esc_html_e( 'Payment didn\'t go through', 'isdb-custom' ); ?></h1>
 				<p class="mt-2 text-brand-body"><?php esc_html_e( 'No charge was made. Please try again — your cart is safe.', 'isdb-custom' ); ?></p>
 				<div class="mt-6 flex flex-wrap justify-center gap-3">
 					<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="rounded-card bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover"><?php esc_html_e( 'Pay again', 'woocommerce' ); ?></a>
@@ -163,8 +163,8 @@ defined( 'ABSPATH' ) || exit;
 				<span class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-primary/15 text-brand-primary">
 					<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
 				</span>
-				<p class="mt-4 text-lg font-bold">You're all set — we've got it from here.</p>
-				<p class="mx-auto mt-1 max-w-lg text-sm text-white/70">That's our Customer Support Promise — real humans, quick replies. We'll keep you posted as your order moves.</p>
+				<p class="mt-4 text-lg font-bold"><?php esc_html_e( 'You\'re all set — we\'ve got it from here.', 'isdb-custom' ); ?></p>
+				<p class="mx-auto mt-1 max-w-lg text-sm text-white/70"><?php esc_html_e( 'That\'s our Customer Support Promise — real humans, quick replies. We\'ll keep you posted as your order moves.', 'isdb-custom' ); ?></p>
 				<div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
 					<a href="<?php echo esc_url( isdb_track_order_url() ); ?>" class="rounded-xl bg-brand-primary px-7 py-3 text-sm font-bold !text-white shadow-lg shadow-black/20 transition hover:bg-brand-hover"><?php esc_html_e( 'Track Your Order', 'isdb-custom' ); ?></a>
 					<a href="<?php echo esc_url( home_url( '/shop/' ) ); ?>" class="rounded-xl bg-white px-7 py-3 text-sm font-bold !text-brand-dark transition hover:bg-white/90"><?php esc_html_e( 'Continue Shopping', 'isdb-custom' ); ?></a>

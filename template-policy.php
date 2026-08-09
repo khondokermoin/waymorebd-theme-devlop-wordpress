@@ -48,9 +48,9 @@ $lead = has_excerpt( $pid ) ? get_the_excerpt( $pid ) : '';
 	<!-- Breadcrumb strip (bg = site background) -->
 	<section class="border-b border-black/5 bg-brand-bg">
 		<div class="mx-auto max-w-7xl px-4 py-2.5 sm:px-6 lg:px-8">
-			<nav class="text-[13px] text-slate-500" aria-label="Breadcrumb">
+			<nav class="text-[13px] text-slate-500" aria-label="<?php esc_attr_e( 'Breadcrumb', 'isdb-custom' ); ?>">
 				<div class="flex flex-wrap items-center">
-					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="hover:text-brand-primary">Home</a>
+					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="hover:text-brand-primary"><?php esc_html_e( 'Home', 'isdb-custom' ); ?></a>
 					<span class="mx-2 text-slate-300">/</span>
 					<span class="text-brand-title"><?php the_title(); ?></span>
 				</div>
@@ -74,7 +74,7 @@ $lead = has_excerpt( $pid ) ? get_the_excerpt( $pid ) : '';
 				<?php if ( $lead ) : ?>
 					<p class="mx-auto mt-3 max-w-xl text-lg text-slate-500"><?php echo esc_html( $lead ); ?></p>
 				<?php endif; ?>
-				<p class="mt-4 text-xs text-slate-400">Last updated <?php echo esc_html( get_the_modified_date( 'F j, Y' ) ); ?></p>
+				<p class="mt-4 text-xs text-slate-400"><?php printf( esc_html__( 'Last updated %s', 'isdb-custom' ), esc_html( get_the_modified_date( 'F j, Y' ) ) ); ?></p>
 			</header>
 
 			<!-- Body -->
@@ -98,10 +98,10 @@ $lead = has_excerpt( $pid ) ? get_the_excerpt( $pid ) : '';
 		<div class="mt-12 flex flex-col items-center gap-5 rounded-2xl bg-brand-dark p-8 text-center text-white sm:flex-row sm:text-left">
 			<svg class="h-10 w-10 flex-none text-brand-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V5l7-3z"/></svg>
 			<div class="flex-1">
-				<p class="font-bold">Still have questions? We're here to help.</p>
-				<p class="mt-1 text-sm text-white/70">Our friendly support team replies fast — reach out any time and we'll take care of you.</p>
+				<p class="font-bold"><?php esc_html_e( 'Still have questions? We\'re here to help.', 'isdb-custom' ); ?></p>
+				<p class="mt-1 text-sm text-white/70"><?php esc_html_e( 'Our friendly support team replies fast — reach out any time and we\'ll take care of you.', 'isdb-custom' ); ?></p>
 			</div>
-			<a href="tel:+8801868662477" class="flex-none rounded-xl bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover">Call Support</a>
+			<a href="<?php echo esc_url( isdb_phone_tel() ); ?>" class="flex-none rounded-xl bg-brand-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-hover"><?php esc_html_e( 'Call Support', 'isdb-custom' ); ?></a>
 		</div>
 
 	</div>

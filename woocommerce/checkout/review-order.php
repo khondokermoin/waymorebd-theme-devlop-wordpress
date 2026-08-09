@@ -54,16 +54,16 @@ defined( 'ABSPATH' ) || exit;
 						?>
 
 						<?php if ( $single_out ) : ?>
-							<span class="mt-1.5 inline-block text-[11px] font-semibold text-slate-500">Qty: 1</span>
+							<span class="mt-1.5 inline-block text-[11px] font-semibold text-slate-500"><?php printf( esc_html__( 'Qty: %s', 'isdb-custom' ), 1 ); ?></span>
 						<?php else : ?>
 							<div class="isdb-qty mt-1.5 inline-flex items-center overflow-hidden rounded border border-[#ddd]">
 								<button type="button" class="isdb-qty-btn flex h-7 w-7 items-center justify-center text-brand-title transition hover:bg-brand-soft hover:text-brand-primary disabled:opacity-40"
-									data-key="<?php echo esc_attr( $cart_item_key ); ?>" data-qty="<?php echo esc_attr( $qty - 1 ); ?>" aria-label="Decrease quantity">
+									data-key="<?php echo esc_attr( $cart_item_key ); ?>" data-qty="<?php echo esc_attr( $qty - 1 ); ?>" aria-label="<?php esc_attr_e( 'Decrease quantity', 'isdb-custom' ); ?>">
 									<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14"/></svg>
 								</button>
 								<span class="min-w-[2rem] px-1 text-center text-[13px] font-bold text-brand-title"><?php echo esc_html( $qty ); ?></span>
 								<button type="button" class="isdb-qty-btn flex h-7 w-7 items-center justify-center text-brand-title transition hover:bg-brand-soft hover:text-brand-primary disabled:opacity-40"
-									data-key="<?php echo esc_attr( $cart_item_key ); ?>" data-qty="<?php echo esc_attr( $qty + 1 ); ?>" <?php disabled( $at_max ); ?> aria-label="Increase quantity">
+									data-key="<?php echo esc_attr( $cart_item_key ); ?>" data-qty="<?php echo esc_attr( $qty + 1 ); ?>" <?php disabled( $at_max ); ?> aria-label="<?php esc_attr_e( 'Increase quantity', 'isdb-custom' ); ?>">
 									<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
 								</button>
 							</div>
@@ -75,7 +75,7 @@ defined( 'ABSPATH' ) || exit;
 							<?php echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						</span>
 						<button type="button" class="isdb-qty-btn mt-1 text-[11px] font-medium text-slate-400 transition hover:text-rose-600"
-							data-key="<?php echo esc_attr( $cart_item_key ); ?>" data-qty="0" aria-label="Remove item">Remove</button>
+							data-key="<?php echo esc_attr( $cart_item_key ); ?>" data-qty="0" aria-label="<?php esc_attr_e( 'Remove item', 'isdb-custom' ); ?>"><?php esc_html_e( 'Remove', 'isdb-custom' ); ?></button>
 					</div>
 				</li>
 				<?php

@@ -27,7 +27,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders );
 ?>
 
 <h2 class="!mb-1 text-lg font-bold text-brand-title"><?php esc_html_e( 'Orders', 'woocommerce' ); ?></h2>
-<p class="m-0 text-[13px] text-slate-500">Track, review and reorder your purchases.</p>
+<p class="m-0 text-[13px] text-slate-500"><?php esc_html_e( 'Track, review and reorder your purchases.', 'isdb-custom' ); ?></p>
 
 <?php if ( $has_orders ) : ?>
 
@@ -75,7 +75,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders );
 					</div>
 
 					<div class="text-right">
-						<p class="m-0 text-[11px] uppercase tracking-wide text-slate-400">Total</p>
+						<p class="m-0 text-[11px] uppercase tracking-wide text-slate-400"><?php esc_html_e( 'Total', 'isdb-custom' ); ?></p>
 						<p class="m-0 text-lg font-extrabold text-brand-primary"><?php echo wp_kses_post( $order->get_formatted_order_total() ); ?></p>
 					</div>
 				</div>
@@ -180,7 +180,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders );
 			<svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
 		</span>
 		<p class="m-0 mt-4 text-base font-bold text-brand-title"><?php esc_html_e( 'No order has been made yet.', 'woocommerce' ); ?></p>
-		<p class="m-0 mt-1 text-[13px] text-slate-500">When you place an order it'll show up here.</p>
+		<p class="m-0 mt-1 text-[13px] text-slate-500"><?php esc_html_e( 'When you place an order it\'ll show up here.', 'isdb-custom' ); ?></p>
 		<a class="woocommerce-Button button mt-5 inline-block rounded-card bg-brand-primary px-6 py-3 text-[13px] font-bold text-white transition hover:bg-brand-hover" href="<?php echo esc_url( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' ) ); ?>">
 			<?php esc_html_e( 'Browse products', 'woocommerce' ); ?>
 		</a>

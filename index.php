@@ -30,7 +30,7 @@ get_header();
 							<a href="<?php the_permalink(); ?>" class="transition hover:text-amber-600"><?php the_title(); ?></a>
 						</h2>
 						<div class="mt-2 text-sm leading-relaxed text-slate-600"><?php the_excerpt(); ?></div>
-						<a href="<?php the_permalink(); ?>" class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-amber-600">Read more <span aria-hidden="true">→</span></a>
+						<a href="<?php the_permalink(); ?>" class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-amber-600"><?php esc_html_e( 'Read more', 'isdb-custom' ); ?> <span aria-hidden="true">→</span></a>
 					</article>
 				<?php endwhile; ?>
 			</div>
@@ -39,9 +39,9 @@ get_header();
 
 		<?php else : ?>
 			<div class="py-24 text-center">
-				<h1 class="text-2xl font-bold text-slate-900">Nothing here yet</h1>
-				<p class="mt-2 text-slate-500">Try a search, or head back to the shop.</p>
-				<a href="<?php echo esc_url( home_url( '/shop/' ) ); ?>" class="mt-6 inline-block rounded-xl bg-amber-500 px-6 py-3 font-bold text-slate-900 transition hover:bg-amber-400">Browse Products</a>
+				<h1 class="text-2xl font-bold text-slate-900"><?php esc_html_e( 'Nothing here yet', 'isdb-custom' ); ?></h1>
+				<p class="mt-2 text-slate-500"><?php esc_html_e( 'Try a search, or head back to the shop.', 'isdb-custom' ); ?></p>
+				<a href="<?php echo esc_url( home_url( '/shop/' ) ); ?>" class="mt-6 inline-block rounded-xl bg-amber-500 px-6 py-3 font-bold text-slate-900 transition hover:bg-amber-400"><?php esc_html_e( 'Browse Products', 'isdb-custom' ); ?></a>
 			</div>
 		<?php endif; ?>
 	</div>
