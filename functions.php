@@ -418,9 +418,23 @@ function isdb_cookie_consent_banner() {
 		}
 		function remove() { if (el && el.parentNode) { el.parentNode.removeChild(el); } }
 
-		var dismissed = false;
-		try { dismissed = sessionStorage.getItem(KEY + '_dismissed') === '1'; } catch (e) {}
-		if (hasCookie(KEY) || dismissed) { remove(); return; }
+		/*
+		 * Unlock marketing / analytics scripts that must run only AFTER consent.
+		 * Wire Meta Pixel / Google Analytics to it, e.g.:
+		 *   window.addEventListener('isdb:consent', function () {
+		 *     fbq('consent', 'grant'); gtag('consent', 'update', { ad_storage: 'granted' });
+		 *   });
+		 * or define window.isdbConsentGranted = function () { ... };
+		 */
+		function fireConsentScripts() {
+			try { window.dispatchEvent(new CustomEvent('isdb:consent', { detail: { status: 'accepted' } })); } catch (e) {}
+			if (typeof window.isdbConsentGranted === 'function') {
+				try { window.isdbConsentGranted(); } catch (e) {}
+			}
+		}
+
+		// Returning visitor who already consented → fire tracking, no banner.
+		if (hasCookie(KEY)) { fireConsentScripts(); remove(); return; }
 
 		setTimeout(function () {
 			el.style.display = 'block';
@@ -433,17 +447,18 @@ function isdb_cookie_consent_banner() {
 			setTimeout(remove, 380);
 		}
 
-		el.querySelector('.isdb-cc-accept').addEventListener('click', function () {
-			setCookie(KEY, 'secured', 30);
+		// Accept AND close (X) do the EXACT same thing: store a 30-day
+		// "accepted" consent, unlock tracking scripts, then hide gracefully.
+		function grantConsent() {
+			setCookie(KEY, 'accepted', 30);
+			fireConsentScripts();
 			hide();
-		});
-		var x = el.querySelector('.isdb-cc-dismiss');
-		if (x) {
-			x.addEventListener('click', function () {
-				try { sessionStorage.setItem(KEY + '_dismissed', '1'); } catch (e) {}
-				hide();
-			});
 		}
+
+		var accept = el.querySelector('.isdb-cc-accept');
+		if (accept) { accept.addEventListener('click', grantConsent); }
+		var close = el.querySelector('.isdb-cc-dismiss');
+		if (close) { close.addEventListener('click', grantConsent); }
 	})();
 	</script>
 	<?php
