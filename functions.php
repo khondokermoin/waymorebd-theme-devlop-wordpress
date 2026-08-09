@@ -657,6 +657,40 @@ add_filter( 'woocommerce_default_address_fields', function ( $fields ) {
 	return $fields;
 }, 20 );
 
+/* ------------------------------------------------------------------ *
+ * NEVER CACHE THE PER-VISITOR PAGES
+ *   Cart / Checkout / My Account / Order-received are unique to each session.
+ *   If a page cache (LiteSpeed, WP Rocket, W3TC, Super Cache, host-level) stores
+ *   one copy, every visitor gets that snapshot — which is why an "empty cart"
+ *   page can appear right after adding a product. These flags/headers tell every
+ *   common cache layer to skip the page.
+ * ------------------------------------------------------------------ */
+add_action( 'template_redirect', function () {
+	if ( ! function_exists( 'is_cart' ) ) {
+		return;
+	}
+
+	$is_private = is_cart()
+		|| is_checkout()
+		|| ( function_exists( 'is_account_page' ) && is_account_page() )
+		|| ( function_exists( 'is_order_received_page' ) && is_order_received_page() );
+
+	if ( ! $is_private ) {
+		return;
+	}
+
+	// Generic constants honoured by most WP caching plugins.
+	if ( ! defined( 'DONOTCACHEPAGE' ) )   { define( 'DONOTCACHEPAGE', true ); }
+	if ( ! defined( 'DONOTCACHEOBJECT' ) ) { define( 'DONOTCACHEOBJECT', true ); }
+	if ( ! defined( 'DONOTCACHEDB' ) )     { define( 'DONOTCACHEDB', true ); }
+
+	// LiteSpeed Cache explicit control.
+	do_action( 'litespeed_control_set_nocache', 'WooCommerce cart/checkout/account page' );
+
+	// Browser/proxy level.
+	nocache_headers();
+}, 0 );
+
 // Default the checkout to Bangladesh so the hidden country field is valid.
 add_filter( 'default_checkout_billing_country', function () { return 'BD'; } );
 add_filter( 'default_checkout_shipping_country', function () { return 'BD'; } );
