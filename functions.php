@@ -605,25 +605,20 @@ function isdb_simplify_checkout_fields( $fields ) {
 		}
 	}
 
-	// Billing-only: Phone required, Email optional.
+	// Billing-only: Phone + Email side by side (Full Name stays full-width above).
 	if ( isset( $fields['billing']['billing_phone'] ) ) {
 		$fields['billing']['billing_phone']['required']    = true;
 		$fields['billing']['billing_phone']['label']       = __( 'Phone Number', 'isdb-custom' );
 		$fields['billing']['billing_phone']['placeholder'] = __( 'Phone (01XXXXXXXXX)', 'isdb-custom' );
-		$fields['billing']['billing_phone']['class']       = array( 'form-row-last' );
+		$fields['billing']['billing_phone']['class']       = array( 'form-row-first' );
 		$fields['billing']['billing_phone']['priority']    = 20;
 	}
 	if ( isset( $fields['billing']['billing_email'] ) ) {
 		$fields['billing']['billing_email']['required']    = false;
 		$fields['billing']['billing_email']['label']       = __( 'Email', 'isdb-custom' ); // WC appends "(optional)" itself.
-		$fields['billing']['billing_email']['placeholder'] = __( 'Email address (optional)', 'isdb-custom' );
-		$fields['billing']['billing_email']['class']       = array( 'form-row-wide' );
+		$fields['billing']['billing_email']['placeholder'] = __( 'Email (optional)', 'isdb-custom' );
+		$fields['billing']['billing_email']['class']       = array( 'form-row-last' );
 		$fields['billing']['billing_email']['priority']    = 30;
-	}
-
-	// Billing "Full Name" sits beside Phone (2-up); shipping name stays full-width.
-	if ( isset( $fields['billing']['billing_first_name'] ) ) {
-		$fields['billing']['billing_first_name']['class'] = array( 'form-row-first' );
 	}
 
 	return $fields;
