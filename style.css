@@ -41,3 +41,235 @@ body.woocommerce-cart .isdb-floating-cart,
 body.woocommerce-checkout .isdb-floating-cart {
 	display: none !important;
 }
+
+/*
+ * Accessibility: this theme strips ALL default WooCommerce CSS
+ * (functions.php: woocommerce_enqueue_styles -> __return_empty_array), which
+ * also removed WC's `.screen-reader-text` visually-hidden rule. Without it,
+ * WooCommerce's own labels (e.g. the "Quantity of {product}" <label> emitted by
+ * quantity-input.php) render as VISIBLE text. On the cart the `.quantity`
+ * wrapper is display:contents, so that label was flowing into the qty stepper
+ * and clipping the number input. Restore the standard WP screen-reader-text.
+ */
+.screen-reader-text {
+	border: 0;
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute !important;
+	width: 1px;
+	word-wrap: normal !important;
+}
+
+/*
+ * Cart quantity stepper — guarantee the number input is visible and centred
+ * regardless of WC core markup changes or a purged utility. Scoped to the cart
+ * form so it can't affect other quantity inputs.
+ */
+.woocommerce-cart-form .wmb-qty .quantity { display: contents; }
+.woocommerce-cart-form .wmb-qty input.qty {
+	width: 2.75rem;
+	height: 2.25rem;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	text-align: center;
+	font-weight: 700;
+	font-size: 0.875rem;
+	color: #222831; /* brand-title, explicit — no CSS-var dependency */
+	-moz-appearance: textfield;
+	appearance: textfield;
+	opacity: 1;
+	visibility: visible;
+}
+.woocommerce-cart-form .wmb-qty input.qty::-webkit-outer-spin-button,
+.woocommerce-cart-form .wmb-qty input.qty::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+/*
+ * Cross-sell "You may also like" carousel (cart page).
+ * Tailwind is pre-compiled and node_modules isn't installed here, so the
+ * horizontal scroll-snap track lives in real CSS (loaded after app.css) rather
+ * than as new arbitrary-variant utilities that would need a rebuild. Replaces
+ * the old 2/3-column grid that left a lone card dangling on its own row.
+ */
+.wmb-carousel ul.products {
+	display: flex;
+	gap: 1rem;
+	list-style: none;
+	margin: 0;
+	padding: 0.25rem 0 0.75rem;   /* breathing room for card hover-shadow + scrollbar */
+	overflow-x: auto;
+	overflow-y: hidden;
+	scroll-snap-type: x mandatory;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e1 transparent;
+}
+.wmb-carousel ul.products > li.product {
+	flex: 0 0 auto;
+	width: 46%;                   /* mobile: ~2 cards in view, 3rd peeking */
+	margin: 0;
+	scroll-snap-align: start;
+}
+@media (min-width: 480px) {
+	.wmb-carousel ul.products > li.product { width: 33%; }
+}
+@media (min-width: 640px) {
+	.wmb-carousel ul.products > li.product { width: 15rem; }
+}
+.wmb-carousel ul.products::-webkit-scrollbar {
+	height: 6px;
+}
+.wmb-carousel ul.products::-webkit-scrollbar-track {
+	background: transparent;
+}
+.wmb-carousel ul.products::-webkit-scrollbar-thumb {
+	background: #cbd5e1;          /* slate-300 */
+	border-radius: 9999px;
+}
+
+/*
+ * Cart line item — responsive layout.
+ * Desktop (>=640px): a single row  [thumb] [name grows] [qty] [price] [remove]
+ * so there is no sparse empty band. Mobile: wraps to two rows —
+ * [name | price] then [qty | remove]. Layout lives here (not as Tailwind
+ * arbitrary variants) so it works without a Tailwind rebuild.
+ */
+.wmb-line {
+	display: flex;
+	gap: 1rem;
+	padding: 1rem;
+}
+.wmb-line__body {
+	min-width: 0;
+	flex: 1;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	column-gap: 0.75rem;
+	row-gap: 0.85rem;
+}
+.wmb-line__info {
+	order: 1;
+	flex: 1 1 55%;
+	min-width: 0;
+}
+.wmb-line__price {
+	order: 2;
+	margin-left: auto;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.25rem;
+	text-align: right;
+}
+.wmb-line__qty {
+	order: 3;
+}
+.wmb-line__remove {
+	order: 4;
+	margin-left: auto;
+}
+@media (min-width: 640px) {
+	.wmb-line__body {
+		flex-wrap: nowrap;
+		column-gap: 1.5rem;
+	}
+	.wmb-line__info  { flex: 1 1 auto; }
+	.wmb-line__qty   { order: 2; }
+	.wmb-line__price { order: 3; margin-left: 0; width: 8.5rem; }
+	.wmb-line__remove{ order: 4; margin-left: 0; }
+}
+
+/*
+ * Add-to-cart toast — replaces WooCommerce's full-page "added to cart" notice.
+ * Fired from the isdb-qty inline JS on the `added_to_cart` event.
+ */
+.wmb-toast-wrap {
+	position: fixed;
+	z-index: 60;
+	left: 50%;
+	bottom: 1rem;
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	width: min(92vw, 360px);
+	pointer-events: none;
+}
+@media (min-width: 640px) {
+	.wmb-toast-wrap { left: auto; right: 1.25rem; transform: none; }
+}
+.wmb-toast {
+	pointer-events: auto;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	background: #ffffff;
+	color: #222831;
+	border: 1px solid #f1f5f9;
+	border-left: 4px solid #f4600a;
+	border-radius: 0.9rem;
+	padding: 0.7rem 0.85rem;
+	box-shadow: 0 14px 34px -10px rgba(2, 6, 23, 0.28);
+	transform: translateY(130%);
+	opacity: 0;
+	transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.38s ease;
+}
+.wmb-toast.is-in { transform: translateY(0); opacity: 1; }
+.wmb-toast__icon {
+	flex: none;
+	width: 2.1rem;
+	height: 2.1rem;
+	border-radius: 0.6rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.05rem;
+	font-weight: 700;
+	color: #ffffff;
+	background: linear-gradient(180deg, #ff7d1a 0%, #f4600a 100%);
+}
+.wmb-toast__body { min-width: 0; flex: 1; }
+.wmb-toast__title {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: 700;
+	line-height: 1.2;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.wmb-toast__sub {
+	display: block;
+	margin-top: 0.1rem;
+	font-size: 0.72rem;
+	color: #64748b;
+}
+.wmb-toast__cta {
+	flex: none;
+	font-size: 0.72rem;
+	font-weight: 700;
+	color: #f4600a;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.wmb-toast__cta:hover { text-decoration: underline; }
+
+/*
+ * Floating cart pill — deep, bright orange (brighter than brand-primary
+ * #f48721). Vivid glossy gradient + warm shadow so it pops on every page.
+ */
+.isdb-floating-cart > button {
+	background: linear-gradient(180deg, #ff7d1a 0%, #f4600a 58%, #e1530a 100%) !important;
+	box-shadow: 0 10px 26px -6px rgba(234, 88, 12, 0.55) !important;
+}
+.isdb-floating-cart > button:hover {
+	background: linear-gradient(180deg, #ff8b2e 0%, #f76a12 58%, #ef5e0f 100%) !important;
+}

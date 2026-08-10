@@ -207,7 +207,8 @@ $all_imgs  = array_filter( array_merge( array( $main_id ), $gallery ) );
 				<!-- ======================================================== -->
 				<div class="mt-7">
 					<?php if ( $in_stock && $product->is_type( 'simple' ) ) : ?>
-						<form class="wmb-cart flex flex-col sm:flex-row gap-3" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
+						<?php // action = product permalink (NOT the cart) so the no-JS fallback reloads this page after adding; JS below turns it into an AJAX add (toast + cart pill, no navigation). ?>
+						<form class="wmb-cart flex flex-col sm:flex-row gap-3" action="<?php echo esc_url( get_permalink( $product->get_id() ) ); ?>" method="post">
 							<div class="flex items-center rounded-xl ring-1 ring-slate-200 bg-white">
 								<button type="button" class="wmb-qminus px-4 py-3 text-lg text-slate-500 hover:text-slate-900" aria-label="<?php esc_attr_e( 'Decrease quantity', 'isdb-custom' ); ?>">&minus;</button>
 								<input type="number" name="quantity" value="1" min="1"

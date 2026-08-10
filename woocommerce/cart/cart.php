@@ -14,10 +14,23 @@
  * Overrides: wp-content/plugins/woocommerce/templates/cart/cart.php
  *
  * @package isdb-custom
- * @version 11.0.0
+ * @version 13.0.0
+ *
+ * v13 — desktop density + reuse of the responsive line component:
+ *   • Each line item is a single .wmb-line row (see style.css). On desktop it
+ *     lays out as [thumb] [name grows] [qty] [price] [remove] on ONE line, so
+ *     the old sparse card with a lone qty stepper floating in empty space is
+ *     gone. On mobile it wraps to [name | price] then [qty | remove].
+ * v12 — responsive + clarity fixes (mobile qty no longer clipped; unit price
+ *   only when qty > 1; cross-sells as a scroll-snap carousel).
  */
 
 defined( 'ABSPATH' ) || exit;
+
+// Tell the footer to suppress the floating cart pill on this page (it overlaps
+// the quantity/Remove controls). Works even if is_cart() is unreliable because
+// the Cart page isn't set in WooCommerce → Settings → Advanced → Page setup.
+$GLOBALS['isdb_hide_floating_cart'] = true;
 
 do_action( 'woocommerce_before_cart' );
 
@@ -68,55 +81,65 @@ $shop_url   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink
 					if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_cart_item_visible', true, $cart_item, $cart_item_key ) ) {
 						$product_permalink = apply_filters( 'woocommerce_cart_item_permalink', $_product->is_visible() ? $_product->get_permalink( $cart_item ) : '', $cart_item, $cart_item_key );
 
+						$qty = (int) $cart_item['quantity'];
+
 						// Anchoring / loss-aversion: per-line savings.
 						$reg       = (float) $_product->get_regular_price();
 						$cur       = (float) $_product->get_price();
-						$item_save = ( $reg > $cur && $cur > 0 ) ? ( $reg - $cur ) * (int) $cart_item['quantity'] : 0;
+						$item_save = ( $reg > $cur && $cur > 0 ) ? ( $reg - $cur ) * $qty : 0;
 
 						// Scarcity: genuine low stock only (managed & <= 5).
 						$sq        = $_product->get_stock_quantity();
 						$low_stock = ( $_product->managing_stock() && is_numeric( $sq ) && $sq > 0 && $sq <= 5 );
 						?>
-						<div class="woocommerce-cart-form__cart-item <?php echo esc_attr( apply_filters( 'woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key ) ); ?> flex gap-4 p-4">
+						<div class="woocommerce-cart-form__cart-item <?php echo esc_attr( apply_filters( 'woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key ) ); ?> wmb-line">
 
 							<!-- Thumbnail -->
-							<a href="<?php echo esc_url( $product_permalink ); ?>" class="block h-20 w-20 flex-none overflow-hidden rounded-xl bg-brand-bg ring-1 ring-slate-100 [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
+							<a href="<?php echo esc_url( $product_permalink ); ?>" class="wmb-line__media block h-20 w-20 flex-none overflow-hidden rounded-xl bg-brand-bg ring-1 ring-slate-100 [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
 								<?php echo wp_kses_post( apply_filters( 'woocommerce_cart_item_thumbnail', $_product->get_image( 'woocommerce_thumbnail' ), $cart_item, $cart_item_key ) ); ?>
 							</a>
 
-							<!-- Name / price / qty / remove -->
-							<div class="min-w-0 flex-1">
-								<div class="text-sm font-semibold text-brand-title">
-									<?php
-									if ( ! $product_permalink ) {
-										echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key ) . '&nbsp;' );
-									} else {
-										echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', sprintf( '<a class="transition hover:text-brand-primary" href="%s">%s</a>', esc_url( $product_permalink ), $_product->get_name() ), $cart_item, $cart_item_key ) );
-									}
+							<!-- Body: [name grows] [qty] [price] [remove] — one row on desktop, wraps on mobile -->
+							<div class="wmb-line__body">
 
-									do_action( 'woocommerce_after_cart_item_name', $cart_item, $cart_item_key );
+								<!-- Name / unit price / low-stock -->
+								<div class="wmb-line__info">
+									<div class="text-sm font-semibold text-brand-title">
+										<?php
+										if ( ! $product_permalink ) {
+											echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key ) . '&nbsp;' );
+										} else {
+											echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', sprintf( '<a class="transition hover:text-brand-primary" href="%s">%s</a>', esc_url( $product_permalink ), $_product->get_name() ), $cart_item, $cart_item_key ) );
+										}
 
-									echo wc_get_formatted_cart_item_data( $cart_item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+										do_action( 'woocommerce_after_cart_item_name', $cart_item, $cart_item_key );
 
-									if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $cart_item['quantity'] ) ) {
-										echo wp_kses_post( apply_filters( 'woocommerce_cart_item_backorder_notification', '<p class="backorder_notification text-xs text-amber-600">' . esc_html__( 'Available on backorder', 'woocommerce' ) . '</p>', $product_id ) );
-									}
-									?>
+										echo wc_get_formatted_cart_item_data( $cart_item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+										if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $cart_item['quantity'] ) ) {
+											echo wp_kses_post( apply_filters( 'woocommerce_cart_item_backorder_notification', '<p class="backorder_notification text-xs text-amber-600">' . esc_html__( 'Available on backorder', 'woocommerce' ) . '</p>', $product_id ) );
+										}
+										?>
+									</div>
+
+									<?php // Unit price only when qty > 1 (at qty 1 it equals the line subtotal shown alongside — no point repeating it). ?>
+									<?php if ( $qty > 1 ) : ?>
+										<div class="mt-1 text-xs text-slate-500">
+											<?php echo apply_filters( 'woocommerce_cart_item_price', WC()->cart->get_product_price( $_product ), $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+											<span class="text-slate-400">&times; <?php echo esc_html( $qty ); ?></span>
+										</div>
+									<?php endif; ?>
+
+									<?php if ( $low_stock ) : ?>
+										<p class="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-rose-600">
+											<span class="relative flex h-1.5 w-1.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-500"></span></span>
+											<?php printf( esc_html__( 'Only %s left — order soon', 'isdb-custom' ), esc_html( $sq ) ); ?>
+										</p>
+									<?php endif; ?>
 								</div>
 
-								<div class="mt-1 text-sm text-slate-500">
-									<?php echo apply_filters( 'woocommerce_cart_item_price', WC()->cart->get_product_price( $_product ), $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								</div>
-
-								<?php if ( $low_stock ) : ?>
-									<p class="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-rose-600">
-										<span class="relative flex h-1.5 w-1.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-500"></span></span>
-										<?php printf( esc_html__( 'Only %s left — order soon', 'isdb-custom' ), esc_html( $sq ) ); ?>
-									</p>
-								<?php endif; ?>
-
-								<div class="mt-3 flex items-center gap-4">
-									<!-- Quantity stepper (auto-updates; keeps cart[key][qty]) -->
+								<!-- Quantity stepper (auto-updates; keeps cart[key][qty]) -->
+								<div class="wmb-line__qty">
 									<div class="wmb-qty inline-flex items-center overflow-hidden rounded-lg border border-[#ddd] [&_.quantity]:contents [&_input.qty]:h-9 [&_input.qty]:w-12 [&_input.qty]:border-0 [&_input.qty]:bg-transparent [&_input.qty]:p-0 [&_input.qty]:text-center [&_input.qty]:text-sm [&_input.qty]:font-bold [&_input.qty]:text-brand-title [&_input.qty]:focus:ring-0">
 										<button type="button" class="wmb-qminus flex h-9 w-9 flex-none items-center justify-center text-brand-title transition hover:bg-brand-soft hover:text-brand-primary" aria-label="<?php esc_attr_e( 'Decrease quantity', 'isdb-custom' ); ?>">
 											<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14"/></svg>
@@ -143,34 +166,36 @@ $shop_url   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink
 											<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
 										</button>
 									</div>
-
-									<!-- Remove (functional AJAX) -->
-									<?php
-									echo apply_filters( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-										'woocommerce_cart_item_remove_link',
-										sprintf(
-											'<a href="%s" class="remove inline-flex items-center gap-1 text-xs font-medium text-slate-400 transition hover:text-rose-600" aria-label="%s" data-product_id="%s" data-cart_item_key="%s" data-product_sku="%s"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>%s</a>',
-											esc_url( wc_get_cart_remove_url( $cart_item_key ) ),
-											esc_attr__( 'Remove this item', 'woocommerce' ),
-											esc_attr( $product_id ),
-											esc_attr( $cart_item_key ),
-											esc_attr( $_product->get_sku() ),
-											esc_html__( 'Remove', 'woocommerce' )
-										),
-										$cart_item_key
-									);
-									?>
 								</div>
-							</div>
 
-							<!-- Line subtotal + savings badge -->
-							<div class="flex flex-none flex-col items-end gap-1.5 text-right">
-								<span class="text-sm font-bold text-brand-title">
-									<?php echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								</span>
-								<?php if ( $item_save > 0 ) : ?>
-									<span class="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700"><?php esc_html_e( 'Save', 'isdb-custom' ); ?> <?php echo wp_kses_post( wc_price( $item_save ) ); ?></span>
-								<?php endif; ?>
+								<!-- Line subtotal + savings badge -->
+								<div class="wmb-line__price">
+									<span class="text-sm font-bold text-brand-title">
+										<?php echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									</span>
+									<?php if ( $item_save > 0 ) : ?>
+										<?php // Anchor price: regular subtotal (reg unit price x qty) struck through, to justify the Save amount. ?>
+										<del class="text-xs font-medium text-slate-400 line-through"><?php echo wp_kses_post( wc_price( $reg * $qty ) ); ?></del>
+										<span class="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700"><?php esc_html_e( 'Save', 'isdb-custom' ); ?> <?php echo wp_kses_post( wc_price( $item_save ) ); ?></span>
+									<?php endif; ?>
+								</div>
+
+								<!-- Remove (functional AJAX) -->
+								<?php
+								echo apply_filters( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+									'woocommerce_cart_item_remove_link',
+									sprintf(
+										'<a href="%s" class="wmb-line__remove remove inline-flex items-center gap-1 text-xs font-medium text-slate-400 transition hover:text-rose-600" aria-label="%s" data-product_id="%s" data-cart_item_key="%s" data-product_sku="%s"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>%s</a>',
+										esc_url( wc_get_cart_remove_url( $cart_item_key ) ),
+										esc_attr__( 'Remove this item', 'woocommerce' ),
+										esc_attr( $product_id ),
+										esc_attr( $cart_item_key ),
+										esc_attr( $_product->get_sku() ),
+										esc_html__( 'Remove', 'woocommerce' )
+									),
+									$cart_item_key
+								);
+								?>
 							</div>
 						</div>
 						<?php
@@ -185,8 +210,8 @@ $shop_url   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink
 					<?php if ( wc_coupons_enabled() ) { ?>
 						<div class="coupon flex gap-2">
 							<label for="coupon_code" class="sr-only"><?php esc_html_e( 'Coupon:', 'woocommerce' ); ?></label>
-							<input type="text" name="coupon_code" class="h-10 rounded-lg border-slate-200 text-sm focus:border-brand-primary focus:ring-brand-primary" id="coupon_code" value="" placeholder="<?php esc_attr_e( 'Have a coupon? Enter code', 'woocommerce' ); ?>" />
-							<button type="submit" class="button flex-none rounded-lg bg-brand-primary px-4 text-sm font-bold text-white transition hover:bg-brand-hover" name="apply_coupon" value="<?php esc_attr_e( 'Apply coupon', 'woocommerce' ); ?>"><?php esc_html_e( 'Apply', 'woocommerce' ); ?></button>
+							<input type="text" name="coupon_code" class="h-10 rounded-lg border-slate-200 text-sm focus:border-brand-primary focus:ring-brand-primary" id="coupon_code" value="" autocomplete="off" placeholder="<?php esc_attr_e( 'Have a coupon? Enter code', 'woocommerce' ); ?>" />
+							<button type="submit" class="button flex-none rounded-lg bg-brand-primary px-4 text-sm font-bold text-white transition hover:bg-brand-hover" name="apply_coupon" value="<?php esc_attr_e( 'Apply coupon', 'woocommerce' ); ?>"><?php esc_html_e( 'Apply', 'isdb-custom' ); ?></button>
 							<?php do_action( 'woocommerce_cart_coupon' ); ?>
 						</div>
 					<?php } ?>
@@ -206,8 +231,8 @@ $shop_url   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink
 			<?php do_action( 'woocommerce_after_cart_table' ); ?>
 		</form>
 
-		<!-- Cross-sells (upsell without leaving the cart) -->
-		<div class="mt-8 [&_h2]:mb-4 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-brand-title [&_ul.products]:grid [&_ul.products]:grid-cols-2 [&_ul.products]:gap-4 [&_ul.products]:list-none [&_ul.products]:p-0 sm:[&_ul.products]:grid-cols-3">
+		<!-- Cross-sells (upsell without leaving the cart) — horizontal carousel -->
+		<div class="wmb-carousel mt-8 [&_h2]:mb-4 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-brand-title">
 			<?php woocommerce_cross_sell_display(); ?>
 		</div>
 	</div>

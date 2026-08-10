@@ -8,7 +8,7 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ISDB_VERSION' ) ) {
-	define( 'ISDB_VERSION', '1.0.0' );
+	define( 'ISDB_VERSION', '1.0.4' );
 }
 
 /*
@@ -139,8 +139,12 @@ add_action( 'wp_enqueue_scripts', function () {
 		wp_enqueue_style( 'isdb-tailwind', get_theme_file_uri( 'assets/css/app.css' ), $isdb_font_dep, (string) filemtime( $app_css ) );
 	}
 
-	// Theme header block (x-cloak, FOUC guard).
-	wp_enqueue_style( 'isdb-style', get_stylesheet_uri(), array( 'isdb-tailwind' ), ISDB_VERSION );
+	// Theme header block (x-cloak, FOUC guard, cart carousel + qty CSS).
+	// Version off filemtime so edits to style.css always bust the browser cache
+	// (ISDB_VERSION is static and would otherwise serve a stale stylesheet).
+	$style_css     = get_stylesheet_directory() . '/style.css';
+	$style_version = file_exists( $style_css ) ? (string) filemtime( $style_css ) : ISDB_VERSION;
+	wp_enqueue_style( 'isdb-style', get_stylesheet_uri(), array( 'isdb-tailwind' ), $style_version );
 
 	// ALPINE.JS (product tabs, gallery reactivity). Bundled locally (no CDN);
 	// `defer` is required by Alpine. Falls back gracefully if the file is absent.
@@ -165,6 +169,41 @@ add_action( 'wp_enqueue_scripts', function () {
  * 4. STRIP DEFAULT WOOCOMMERCE CSS  (Tailwind owns all styling)
  * ------------------------------------------------------------------ */
 add_filter( 'woocommerce_enqueue_styles', '__return_empty_array' );
+
+/* ------------------------------------------------------------------ *
+ * 4b. STAY-ON-PAGE ADD TO CART
+ *     Force AJAX add-to-cart and never redirect to the Cart page after an
+ *     add, so shoppers can keep adding products from the listing. A toast
+ *     (isdb-qty inline JS + .wmb-toast in style.css) confirms each add in
+ *     place of WooCommerce's full-page "added to cart" notice. Filtering the
+ *     option getters overrides the WooCommerce → Settings → Products values
+ *     at runtime (non-destructive — nothing is written to the DB).
+ * ------------------------------------------------------------------ */
+add_filter( 'option_woocommerce_enable_ajax_add_to_cart', function () { return 'yes'; } );
+add_filter( 'option_woocommerce_cart_redirect_after_add', function () { return 'no'; } );
+
+/*
+ * No standalone Cart page — the slide-over drawer IS the cart (like the
+ * reference store). Anyone who still lands on /cart/ (direct URL, an old link,
+ * order-again, etc.) is sent to Checkout; an empty cart goes to the shop. The
+ * drawer's "View Cart" link is removed in cart/mini-cart.php.
+ */
+add_action( 'template_redirect', function () {
+	if ( is_admin() || ! function_exists( 'is_cart' ) ) {
+		return;
+	}
+	if ( is_cart() || is_page( 'cart' ) ) {
+		$empty = ! ( function_exists( 'WC' ) && WC()->cart ) || WC()->cart->is_empty();
+		if ( $empty ) {
+			$shop = wc_get_page_permalink( 'shop' );
+			$dest = $shop ? $shop : home_url( '/' );
+		} else {
+			$dest = wc_get_checkout_url();
+		}
+		wp_safe_redirect( $dest );
+		exit;
+	}
+}, 5 );
 
 /* ------------------------------------------------------------------ *
  * 5. CONTENT WRAPPERS
@@ -220,12 +259,15 @@ add_filter( 'woocommerce_add_to_cart_fragments', function ( $fragments ) {
  * Rendered in footer.php and refreshed through the cart fragments filter.
  */
 function isdb_floating_cart() {
-	// Redundant on the Cart/Checkout pages — and its fixed right-centre
-	// position overlaps the cart-item quantity selector and "Remove" link
-	// on mobile. Don't render it there at all.
-	if ( function_exists( 'is_cart' ) && ( is_cart() || is_checkout() ) ) {
-		return;
-	}
+	// IMPORTANT: this renderer feeds a WooCommerce cart fragment — see the
+	// woocommerce_add_to_cart_fragments filter above (key 'div.isdb-floating-cart').
+	// Fragments are cached in the browser's sessionStorage and re-applied to the
+	// DOM on EVERY page across the whole site. It must therefore emit the SAME
+	// markup in every request context; page-conditional output here (e.g. an
+	// early return on Cart/Checkout) gets cached and then wipes the pill on all
+	// pages until sessionStorage clears. Cart/Checkout hiding is handled at the
+	// footer.php call site (skips the direct render) and by CSS in style.css —
+	// never in here.
 	$count = isdb_cart_count();
 	?>
 	<div class="isdb-floating-cart fixed right-0 top-1/2 z-40 -translate-y-1/2 <?php echo $count > 0 ? '' : 'hidden'; ?>">
@@ -1768,6 +1810,18 @@ function isdb_checkout_qty() {
 }
 
 /**
+ * Fresh cart-qty nonce, served UNCACHED via WC-AJAX (?wc-ajax=isdb_nonce).
+ * Full-page caching freezes the wp_localize nonce, so admin-ajax's
+ * check_ajax_referer() 403s; the stepper JS refetches from here and retries.
+ * WC-AJAX sends no-cache headers and runs for guests + logged-in users. The
+ * response is same-origin readable only, so it stays CSRF-safe.
+ */
+add_action( 'wc_ajax_isdb_nonce', 'isdb_ajax_nonce' );
+function isdb_ajax_nonce() {
+	wp_send_json( array( 'nonce' => wp_create_nonce( 'isdb-checkout-qty' ) ) );
+}
+
+/**
  * Inline JS for the checkout quantity stepper.
  * Delegated binding: the review box is replaced wholesale on every
  * update_checkout, so handlers must survive DOM replacement.
@@ -1783,6 +1837,8 @@ add_action( 'wp_enqueue_scripts', function () {
 		'nonce'      => wp_create_nonce( 'isdb-checkout-qty' ),
 		'snonce'     => wp_create_nonce( 'isdb-frontend' ),
 		'isCheckout' => ( function_exists( 'is_checkout' ) && is_checkout() ) ? 1 : 0,
+		'cartUrl'    => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : '',
+		'nonceUrl'   => class_exists( 'WC_AJAX' ) ? WC_AJAX::get_endpoint( 'isdb_nonce' ) : '',
 	) );
 	wp_add_inline_script( 'isdb-qty', <<<'JS'
 jQuery(function ($) {
@@ -1812,6 +1868,22 @@ jQuery(function ($) {
 		});
 	}
 
+	// Cart-qty nonce, kept fresh via an UNCACHED WC-AJAX endpoint. A full-page
+	// cache embeds a stale wp_localize nonce, so admin-ajax's check_ajax_referer
+	// returns 403; we refetch a fresh nonce and retry once. Readable same-origin
+	// only, so it stays CSRF-safe.
+	var isdbNonce = (window.isdbQty && isdbQty.nonce) ? isdbQty.nonce : '';
+	function isdbWcAjax(action) {
+		return (typeof wc_add_to_cart_params !== 'undefined' && wc_add_to_cart_params.wc_ajax_url)
+			? wc_add_to_cart_params.wc_ajax_url.toString().replace('%%endpoint%%', action)
+			: '';
+	}
+	function isdbRefreshNonce(cb) {
+		var u = (window.isdbQty && isdbQty.nonceUrl) ? isdbQty.nonceUrl : isdbWcAjax('isdb_nonce');
+		if (!u) { cb(); return; }
+		$.get(u).done(function (r) { if (r && r.nonce) { isdbNonce = r.nonce; } }).always(cb);
+	}
+
 	$(document.body).on('click', '.isdb-qty-btn', function (e) {
 		e.preventDefault();
 		e.stopPropagation();
@@ -1825,12 +1897,11 @@ jQuery(function ($) {
 		busy = true;
 		$btn.closest('.isdb-review-item, .isdb-cart-ctl, .isdb-mini-item').css('opacity', 0.5);
 
-		$.post(isdbQty.ajax, {
-			action: 'isdb_checkout_qty',
-			nonce: isdbQty.nonce,
-			cart_item_key: key,
-			quantity: qty
-		}).done(function (res) {
+		function finish() {
+			busy = false;
+			$('.isdb-review-item, .isdb-cart-ctl, .isdb-mini-item').css('opacity', '');
+		}
+		function done(res) {
 			if (isdbQty.isCheckout) {
 				if (res && res.success && res.data && res.data.is_empty) {
 					window.location.href = res.data.cart_url;
@@ -1840,15 +1911,100 @@ jQuery(function ($) {
 			}
 			$(document.body).trigger('wc_fragment_refresh');
 			refreshCards();
-		}).always(function () {
-			busy = false;
-			$('.isdb-review-item, .isdb-cart-ctl, .isdb-mini-item').css('opacity', '');
-		});
+		}
+		function send(retry) {
+			$.post(isdbQty.ajax, {
+				action: 'isdb_checkout_qty',
+				nonce: isdbNonce,
+				cart_item_key: key,
+				quantity: qty
+			}).done(function (res) {
+				done(res);
+				finish();
+			}).fail(function (xhr) {
+				if (xhr && xhr.status === 403 && !retry) {
+					isdbRefreshNonce(function () { send(true); });
+				} else {
+					finish();
+				}
+			});
+		}
+		send(false);
 	});
 
 	// After WooCommerce's own AJAX add-to-cart, turn that card into a stepper.
 	$(document.body).on('added_to_cart wc_fragments_refreshed wc_fragments_loaded', function () {
 		refreshCards();
+	});
+
+	// Toast confirmation on AJAX add-to-cart (replaces WC's full-page notice).
+	function isdbToast(title) {
+		var wrap = document.querySelector('.wmb-toast-wrap');
+		if (!wrap) {
+			wrap = document.createElement('div');
+			wrap.className = 'wmb-toast-wrap';
+			document.body.appendChild(wrap);
+		}
+		var cartUrl = (window.isdbQty && isdbQty.cartUrl) ? isdbQty.cartUrl : '';
+		var t = document.createElement('div');
+		t.className = 'wmb-toast';
+		t.setAttribute('role', 'status');
+		t.innerHTML =
+			'<span class="wmb-toast__icon" aria-hidden="true">✓</span>' +
+			'<span class="wmb-toast__body">' +
+				'<span class="wmb-toast__title"></span>' +
+				'<span class="wmb-toast__sub">Added to your cart</span>' +
+			'</span>' +
+			(cartUrl ? '<a class="wmb-toast__cta" href="' + cartUrl + '">View cart →</a>' : '');
+		t.querySelector('.wmb-toast__title').textContent = title || 'Item added';
+		wrap.appendChild(t);
+		requestAnimationFrame(function () { t.classList.add('is-in'); });
+		setTimeout(function () {
+			t.classList.remove('is-in');
+			setTimeout(function () { if (t.parentNode) { t.parentNode.removeChild(t); } }, 420);
+		}, 3500);
+	}
+
+	$(document.body).on('added_to_cart', function (e, fragments, cart_hash, $btn) {
+		var name = '';
+		try {
+			var $b = $($btn);
+			name = $.trim($b.closest('li.product').find('h3').first().text());
+			if (!name) { name = $.trim($b.closest('.product, form.wmb-cart, form.cart').find('.product_title, h1').first().text()); }
+			if (!name) { name = $.trim($('.product_title, h1.entry-title').first().text()); }
+		} catch (err) {}
+		isdbToast(name || 'Item added to cart');
+	});
+
+	// Single-product add-to-cart via AJAX — never navigate to /cart/. Adds the
+	// product, refreshes the cart fragments (the floating pill + mini-cart) and
+	// shows the toast. Variable/grouped forms are left to WooCommerce (they need
+	// variation handling; with redirect off they simply reload the same page).
+	$(document.body).on('submit', 'form.wmb-cart, form.cart', function (e) {
+		var $form = $(this);
+		if ($form.is('.variations_form, .grouped_form') || $form.find('[name="variation_id"]').length) {
+			return; // let WooCommerce handle these natively
+		}
+		var pid = $form.find('[name="add-to-cart"]').val();
+		if (!pid || isNaN(parseInt(pid, 10))) { return; } // can't resolve -> normal submit
+		if (typeof wc_add_to_cart_params === 'undefined' || !wc_add_to_cart_params.wc_ajax_url) { return; }
+		e.preventDefault();
+		var qty = parseInt($form.find('[name="quantity"]').val(), 10);
+		if (!qty || qty < 1) { qty = 1; }
+		var $submit = $form.find('button[type="submit"], [name="add-to-cart"]').first();
+		$submit.addClass('loading').prop('disabled', true);
+		var url = wc_add_to_cart_params.wc_ajax_url.toString().replace('%%endpoint%%', 'add_to_cart');
+		$.post(url, { product_id: pid, quantity: qty }, function (res) {
+			if (!res) { return; }
+			if (res.error && res.product_url) { window.location = res.product_url; return; }
+			if (res.fragments) {
+				$.each(res.fragments, function (key, value) { $(key).replaceWith(value); });
+			}
+			$(document.body).trigger('wc_fragments_loaded');
+			$(document.body).trigger('added_to_cart', [res.fragments, res.cart_hash, $submit]);
+		}).always(function () {
+			$submit.removeClass('loading').prop('disabled', false);
+		});
 	});
 
 	// Self-heal a STALE cached mini-cart fragment: WooCommerce stores the mini

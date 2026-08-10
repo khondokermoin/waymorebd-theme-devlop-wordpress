@@ -254,7 +254,23 @@ defined( 'ABSPATH' ) || exit;
 </footer>
 
 <!-- Floating cart pill (refreshed via cart fragments) -->
-<?php if ( function_exists( 'isdb_floating_cart' ) ) { isdb_floating_cart(); } ?>
+<?php
+// Suppress the pill on Cart/Checkout — its fixed right-centre position overlaps
+// the cart-item quantity stepper and "Remove" link (worst on mobile ~360–414px).
+// We only skip the DIRECT render here; the cart fragment still renders the pill
+// so its cached value stays identical site-wide (see isdb_floating_cart()).
+// The $GLOBALS flag is set by the cart/checkout templates and is reliable even
+// where those pages aren't assigned in WooCommerce → Settings → Advanced → Page
+// setup (there is_cart()/is_checkout() return false); is_cart()/is_checkout()
+// are also checked so this keeps working once Page setup is corrected.
+if ( function_exists( 'isdb_floating_cart' ) ) {
+	$isdb_on_cart = ! empty( $GLOBALS['isdb_hide_floating_cart'] )
+		|| ( function_exists( 'is_cart' ) && ( is_cart() || is_checkout() ) );
+	if ( ! $isdb_on_cart ) {
+		isdb_floating_cart();
+	}
+}
+?>
 
 <!-- Scroll to top -->
 <button id="isdb-top" type="button" aria-label="<?php esc_attr_e( 'Scroll to top', 'isdb-custom' ); ?>"

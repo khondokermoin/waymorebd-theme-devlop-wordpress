@@ -196,13 +196,10 @@ $free_ship = function_exists( 'isdb_free_shipping_progress' ) ? isdb_free_shippi
 			<span class="text-lg font-extrabold text-brand-title"><?php echo wp_kses_post( isdb_cart_subtotal_html() ); ?></span>
 		</div>
 
+		<?php // No "View Cart" — the drawer IS the cart; /cart/ redirects to checkout (see functions.php). ?>
 		<a href="<?php echo esc_url( wc_get_checkout_url() ); ?>"
 			class="mt-3 block rounded-card bg-brand-primary py-3 text-center text-sm font-bold uppercase tracking-wide text-white transition hover:bg-brand-hover">
 			<?php esc_html_e( 'Checkout', 'isdb-custom' ); ?>
-		</a>
-		<a href="<?php echo esc_url( wc_get_cart_url() ); ?>"
-			class="mt-2 block rounded-card border border-[#ddd] py-2.5 text-center text-[13px] font-semibold text-brand-title transition hover:bg-brand-bg">
-			<?php esc_html_e( 'View Cart', 'isdb-custom' ); ?>
 		</a>
 	</div>
 

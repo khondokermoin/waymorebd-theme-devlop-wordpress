@@ -35,6 +35,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Suppress the floating cart pill on this page (see cart/cart.php for why).
+$GLOBALS['isdb_hide_floating_cart'] = true;
+
 do_action( 'woocommerce_before_checkout_form_cart_notices' );
 
 $checkout = WC()->checkout();
