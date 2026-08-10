@@ -220,6 +220,12 @@ add_filter( 'woocommerce_add_to_cart_fragments', function ( $fragments ) {
  * Rendered in footer.php and refreshed through the cart fragments filter.
  */
 function isdb_floating_cart() {
+	// Redundant on the Cart/Checkout pages — and its fixed right-centre
+	// position overlaps the cart-item quantity selector and "Remove" link
+	// on mobile. Don't render it there at all.
+	if ( function_exists( 'is_cart' ) && ( is_cart() || is_checkout() ) ) {
+		return;
+	}
 	$count = isdb_cart_count();
 	?>
 	<div class="isdb-floating-cart fixed right-0 top-1/2 z-40 -translate-y-1/2 <?php echo $count > 0 ? '' : 'hidden'; ?>">
