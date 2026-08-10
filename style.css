@@ -30,3 +30,14 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 /* Hide the theme until Alpine + Tailwind have painted, prevents FOUC */
 .wmb-no-fouc { visibility: hidden; }
 .wmb-ready .wmb-no-fouc { visibility: visible; }
+
+/*
+ * Floating cart pill (.isdb-floating-cart): fixed to the right-centre of the
+ * viewport. On the Cart & Checkout pages it overlaps the cart-item quantity
+ * selector and "Remove" link (worst on mobile ~360–414px). It's redundant on
+ * those pages — the user is already looking at their cart — so hide it there.
+ */
+body.woocommerce-cart .isdb-floating-cart,
+body.woocommerce-checkout .isdb-floating-cart {
+	display: none !important;
+}
