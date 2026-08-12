@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 480" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Way More BD grocery products on a wooden table with a scenic countryside background">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#bfe6ff"/>
+      <stop offset="0.55" stop-color="#dff2ff"/>
+      <stop offset="1" stop-color="#f3fbff"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff7e0"/>
+      <stop offset="1" stop-color="#fff7e0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hillFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a7d47f"/><stop offset="1" stop-color="#8ec46a"/>
+    </linearGradient>
+    <linearGradient id="hillMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7cbf5a"/><stop offset="1" stop-color="#5fae44"/>
+    </linearGradient>
+    <linearGradient id="hillNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5aa83f"/><stop offset="1" stop-color="#3f8c30"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a9702f"/>
+      <stop offset="0.5" stop-color="#8a5622"/>
+      <stop offset="1" stop-color="#6d411a"/>
+    </linearGradient>
+    <linearGradient id="oil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6a13a"/><stop offset="1" stop-color="#e07c12"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="0.25" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="1600" height="480" fill="url(#sky)"/>
+  <circle cx="1230" cy="120" r="210" fill="url(#sun)"/>
+
+  <!-- Clouds -->
+  <g fill="#ffffff" opacity="0.85">
+    <g opacity="0.9">
+      <ellipse cx="300" cy="90" rx="70" ry="26"/><ellipse cx="360" cy="80" rx="55" ry="30"/><ellipse cx="250" cy="98" rx="48" ry="22"/>
+    </g>
+    <g opacity="0.8">
+      <ellipse cx="1050" cy="70" rx="80" ry="26"/><ellipse cx="1120" cy="62" rx="58" ry="30"/><ellipse cx="990" cy="80" rx="50" ry="22"/>
+    </g>
+    <g opacity="0.7">
+      <ellipse cx="700" cy="60" rx="60" ry="20"/><ellipse cx="760" cy="54" rx="46" ry="24"/>
+    </g>
+  </g>
+
+  <!-- Hills -->
+  <path d="M0 300 Q 250 235 520 285 T 1080 275 T 1600 290 L1600 480 L0 480 Z" fill="url(#hillFar)"/>
+  <path d="M0 330 Q 320 270 640 320 T 1240 315 T 1600 330 L1600 480 L0 480 Z" fill="url(#hillMid)"/>
+  <path d="M0 360 Q 400 315 820 355 T 1600 358 L1600 480 L0 480 Z" fill="url(#hillNear)"/>
+
+  <!-- Wooden table -->
+  <rect x="0" y="372" width="1600" height="108" fill="url(#wood)"/>
+  <rect x="0" y="372" width="1600" height="7" fill="#c78a45" opacity="0.6"/>
+  <g stroke="#5c3714" stroke-width="1.5" opacity="0.35">
+    <line x1="0" y1="410" x2="1600" y2="410"/>
+    <line x1="0" y1="446" x2="1600" y2="446"/>
+    <line x1="360" y1="379" x2="360" y2="480"/>
+    <line x1="820" y1="379" x2="820" y2="480"/>
+    <line x1="1240" y1="379" x2="1240" y2="480"/>
+  </g>
+
+  <!-- Soft shadows under products -->
+  <g fill="#000000" opacity="0.14">
+    <ellipse cx="250" cy="378" rx="70" ry="10"/>
+    <ellipse cx="410" cy="378" rx="60" ry="9"/>
+    <ellipse cx="560" cy="378" rx="55" ry="9"/>
+    <ellipse cx="700" cy="378" rx="70" ry="10"/>
+    <ellipse cx="880" cy="380" rx="95" ry="12"/>
+    <ellipse cx="1060" cy="378" rx="60" ry="9"/>
+    <ellipse cx="1200" cy="378" rx="66" ry="10"/>
+    <ellipse cx="1360" cy="378" rx="72" ry="10"/>
+  </g>
+
+  <!-- ============ PRODUCTS (stylised) ============ -->
+
+  <!-- 1. Cream pouch (powder) -->
+  <g>
+    <path d="M198 372 L198 232 Q198 216 214 216 L286 216 Q302 216 302 232 L302 372 Z" fill="#f3ead6"/>
+    <path d="M206 216 L294 216 L286 205 L214 205 Z" fill="#d8c9a8"/>
+    <rect x="214" y="252" width="72" height="70" rx="6" fill="#ffffff"/>
+    <circle cx="250" cy="278" r="17" fill="#5aa83f"/>
+    <rect x="224" y="304" width="52" height="7" rx="3.5" fill="#e07c12"/>
+  </g>
+
+  <!-- 2. Turmeric pouch (orange) -->
+  <g>
+    <path d="M366 372 L366 250 Q366 236 380 236 L442 236 Q456 236 456 250 L456 372 Z" fill="#f4a11f"/>
+    <path d="M374 236 L448 236 L440 226 L382 226 Z" fill="#d98410"/>
+    <rect x="379" y="270" width="64" height="66" rx="6" fill="#fff4e0"/>
+    <circle cx="411" cy="296" r="14" fill="#e07c12"/>
+    <rect x="389" y="320" width="44" height="6" rx="3" fill="#8a5622"/>
+  </g>
+
+  <!-- 3. Honey squeeze bottle (amber) -->
+  <g>
+    <rect x="524" y="300" width="72" height="72" rx="10" fill="url(#oil)"/>
+    <path d="M534 300 Q560 262 586 300 Z" fill="#f6a13a"/>
+    <rect x="548" y="250" width="44" height="26" rx="5" fill="#3f8c30"/>
+    <rect x="556" y="238" width="28" height="16" rx="4" fill="#2e6f24"/>
+    <rect x="534" y="316" width="52" height="42" rx="5" fill="#fff4e0"/>
+    <rect x="544" y="326" width="32" height="6" rx="3" fill="#e07c12"/>
+    <rect x="544" y="338" width="26" height="5" rx="2.5" fill="#b06414"/>
+  </g>
+
+  <!-- 4. Tea / masala box (dark green) -->
+  <g>
+    <rect x="648" y="236" width="104" height="136" rx="6" fill="#123b2e"/>
+    <rect x="648" y="236" width="104" height="34" rx="6" fill="#0d2c22"/>
+    <rect x="666" y="286" width="68" height="56" rx="4" fill="#f4a11f" opacity="0.9"/>
+    <circle cx="700" cy="252" r="10" fill="#f4a11f"/>
+    <rect x="672" y="352" width="56" height="6" rx="3" fill="#ffffff" opacity="0.7"/>
+  </g>
+
+  <!-- 5. Dates gift box (gold) -->
+  <g>
+    <rect x="770" y="262" width="92" height="110" rx="6" fill="#caa23a"/>
+    <rect x="770" y="262" width="92" height="110" rx="6" fill="url(#glass)"/>
+    <rect x="782" y="286" width="68" height="44" rx="4" fill="#fdf3d3"/>
+    <rect x="792" y="296" width="48" height="8" rx="4" fill="#8a5622"/>
+    <rect x="792" y="312" width="36" height="6" rx="3" fill="#b06414"/>
+  </g>
+
+  <!-- 6. BIG mustard-oil bottle (hero, centre) -->
+  <g>
+    <rect x="826" y="196" width="118" height="176" rx="16" fill="url(#oil)"/>
+    <rect x="826" y="196" width="42" height="176" rx="16" fill="url(#glass)"/>
+    <rect x="862" y="150" width="46" height="52" rx="6" fill="#e07c12"/>
+    <rect x="856" y="138" width="58" height="20" rx="6" fill="#f4c56a"/>
+    <rect x="842" y="238" width="86" height="96" rx="8" fill="#fffaf0"/>
+    <circle cx="885" cy="268" r="20" fill="#f4a11f"/>
+    <path d="M885 258 l6 12 l-12 0 z" fill="#e07c12"/>
+    <rect x="856" y="298" width="58" height="8" rx="4" fill="#123b2e"/>
+    <rect x="864" y="312" width="42" height="6" rx="3" fill="#8a5622"/>
+  </g>
+
+  <!-- 7. Ghee / milk jar (white) -->
+  <g>
+    <rect x="1012" y="286" width="90" height="86" rx="10" fill="#fdfdfd" stroke="#e5e5e5" stroke-width="2"/>
+    <rect x="1024" y="262" width="66" height="30" rx="6" fill="#e07c12"/>
+    <rect x="1024" y="304" width="66" height="52" rx="5" fill="#fef3e2"/>
+    <circle cx="1057" cy="326" r="13" fill="#5aa83f"/>
+    <rect x="1034" y="346" width="46" height="6" rx="3" fill="#b06414"/>
+  </g>
+
+  <!-- 8. Chia / seeds pouch (black) -->
+  <g>
+    <path d="M1148 372 L1148 250 Q1148 236 1162 236 L1238 236 Q1252 236 1252 250 L1252 372 Z" fill="#1c1c1c"/>
+    <path d="M1156 236 L1244 236 L1236 226 L1164 226 Z" fill="#0f0f0f"/>
+    <rect x="1162" y="272" width="76" height="64" rx="6" fill="#2a2a2a"/>
+    <circle cx="1200" cy="296" r="14" fill="#5aa83f"/>
+    <rect x="1174" y="320" width="52" height="6" rx="3" fill="#f4a11f"/>
+  </g>
+
+  <!-- 9. Chili powder pack (red) -->
+  <g>
+    <path d="M1312 372 L1312 244 Q1312 230 1326 230 L1402 230 Q1416 230 1416 244 L1416 372 Z" fill="#c62d21"/>
+    <path d="M1320 230 L1408 230 L1400 220 L1328 220 Z" fill="#a3241a"/>
+    <rect x="1326" y="266" width="76" height="66" rx="6" fill="#fff0ee"/>
+    <circle cx="1364" cy="292" r="15" fill="#c62d21"/>
+    <rect x="1338" y="318" width="52" height="6" rx="3" fill="#8a5622"/>
+  </g>
+
+  <!-- gentle front-light sheen on table -->
+  <rect x="0" y="372" width="1600" height="34" fill="#ffffff" opacity="0.06"/>
+</svg>
