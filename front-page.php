@@ -212,7 +212,11 @@ function isdb_render_product_grid( $products, $limit = 8 ) {
 								</span>
 							<?php endif; ?>
 
-							<!-- Add to Cart + Buy now, side by side -->
+							<?php // Add to Cart (stays on page + toast) beside Buy Now (express: AJAX
+							// add, then straight to checkout). Buy Now uses the safe .wmb-buy-now
+							// flow (handled in the isdb-qty interceptor) — NOT a raw redirect — so
+							// a normal "Add to Cart" tap never lands on checkout by accident.
+							$t_buyable = $tp->is_type( 'simple' ) && $tp->is_purchasable() && $tp->is_in_stock(); ?>
 							<div class="mt-3 flex flex-wrap gap-2">
 								<div class="isdb-cart-ctl min-w-[120px] flex-1" data-product="<?php echo esc_attr( $tp->get_id() ); ?>">
 									<div class="isdb-add-wrap
@@ -231,10 +235,15 @@ function isdb_render_product_grid( $products, $limit = 8 ) {
 									</div>
 								</div>
 
-								<a href="<?php echo esc_url( isdb_buy_now_url( $tp->get_id() ) ); ?>"
-									class="inline-flex min-w-[100px] flex-1 items-center justify-center rounded-card bg-brand-primary px-3 py-2 text-[12px] font-semibold text-white transition hover:bg-brand-hover">
-									<?php esc_html_e( 'Buy now', 'isdb-custom' ); ?>
-								</a>
+								<?php if ( $t_buyable ) : ?>
+									<a href="<?php echo esc_url( add_query_arg( array( 'add-to-cart' => $tp->get_id(), 'buy_now' => 1 ), wc_get_checkout_url() ) ); ?>"
+										class="wmb-buy-now flex min-w-[120px] flex-1 items-center justify-center gap-1.5 rounded-card bg-brand-primary px-3 py-2 text-[12px] font-semibold text-white no-underline transition hover:bg-brand-hover"
+										data-product_id="<?php echo esc_attr( $tp->get_id() ); ?>"
+										rel="nofollow">
+										<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+										<?php esc_html_e( 'Buy Now', 'isdb-custom' ); ?>
+									</a>
+								<?php endif; ?>
 							</div>
 						</div>
 					</div>
@@ -247,7 +256,7 @@ function isdb_render_product_grid( $products, $limit = 8 ) {
 	<?php if ( ! empty( $brands ) ) :
 		$brand_tax = isdb_brand_taxonomy(); ?>
 		<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
-			<?php isdb_section_head( __( 'Our Brands', 'isdb-custom' ), get_post_type_archive_link( 'product' ) ?: $shop_url, __( 'See all', 'isdb-custom' ) ); ?>
+			<?php isdb_section_head( __( 'Our Brands', 'isdb-custom' ), function_exists( 'isdb_brands_url' ) ? isdb_brands_url() : $shop_url, __( 'See all', 'isdb-custom' ) ); ?>
 			<?php isdb_carousel_start(); ?>
 				<?php foreach ( $brands as $brand ) :
 					$b_thumb = get_term_meta( $brand->term_id, 'thumbnail_id', true );

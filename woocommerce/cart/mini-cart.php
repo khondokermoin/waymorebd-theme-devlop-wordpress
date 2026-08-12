@@ -179,7 +179,8 @@ $free_ship = function_exists( 'isdb_free_shipping_progress' ) ? isdb_free_shippi
 								<span class="mt-1.5 line-clamp-2 block text-[11px] leading-tight text-brand-title"><?php echo esc_html( $rp->get_name() ); ?></span>
 							</a>
 							<span class="mt-1 block text-[12px] font-bold text-brand-primary"><?php echo wp_kses_post( $rp->get_price_html() ); ?></span>
-							<a href="?add-to-cart=<?php echo esc_attr( $rp->get_id() ); ?>"
+							<?php // href = product page (fail-safe); JS intercepts for the AJAX add. Never ?add-to-cart= (that would redirect). ?>
+							<a href="<?php echo esc_url( $rp->get_permalink() ); ?>"
 								data-quantity="1" data-product_id="<?php echo esc_attr( $rp->get_id() ); ?>"
 								class="add_to_cart_button ajax_add_to_cart mt-1.5 flex items-center justify-center gap-1 rounded border border-brand-primary bg-white py-1 text-[11px] font-semibold text-brand-primary transition hover:bg-brand-primary hover:text-white">
 								+ <?php esc_html_e( 'Add', 'isdb-custom' ); ?>

@@ -193,18 +193,20 @@ body.woocommerce-checkout .isdb-floating-cart {
  */
 .wmb-toast-wrap {
 	position: fixed;
-	z-index: 60;
-	left: 50%;
-	bottom: 1rem;
-	transform: translateX(-50%);
+	z-index: 9999;              /* above the sticky header */
+	top: 1rem;                  /* pinned to the TOP */
+	right: 0.75rem;             /* anchored to the RIGHT edge (mobile) */
+	left: auto;
+	bottom: auto;
+	transform: none;
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
-	width: min(92vw, 360px);
+	width: min(88vw, 360px);
 	pointer-events: none;
 }
 @media (min-width: 640px) {
-	.wmb-toast-wrap { left: auto; right: 1.25rem; transform: none; }
+	.wmb-toast-wrap { right: 1.25rem; top: 1.25rem; }  /* top-right on desktop */
 }
 .wmb-toast {
 	pointer-events: auto;
@@ -218,11 +220,24 @@ body.woocommerce-checkout .isdb-floating-cart {
 	border-radius: 0.9rem;
 	padding: 0.7rem 0.85rem;
 	box-shadow: 0 14px 34px -10px rgba(2, 6, 23, 0.28);
-	transform: translateY(130%);
+	/* Enter: start off-screen to the RIGHT, fully transparent. */
+	transform: translateX(115%);
 	opacity: 0;
-	transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.38s ease;
+	filter: blur(0);
+	will-change: transform, opacity, filter;
+	/* Smooth spring-like slide in from the right. */
+	transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease-out;
 }
-.wmb-toast.is-in { transform: translateY(0); opacity: 1; }
+/* Slide in smoothly from the right. */
+.wmb-toast.is-in { transform: translateX(0); opacity: 1; }
+/* Exit: dissolve like mist — fade + blur + a gentle upward drift, NO slide back.
+   Overrides .is-in (declared after it), so the toast melts away in place. */
+.wmb-toast.is-out {
+	transform: translateY(-8px) scale(1.04);
+	opacity: 0;
+	filter: blur(7px);
+	transition: opacity 0.6s ease, filter 0.6s ease, transform 0.6s ease;
+}
 .wmb-toast__icon {
 	flex: none;
 	width: 2.1rem;
@@ -263,13 +278,11 @@ body.woocommerce-checkout .isdb-floating-cart {
 .wmb-toast__cta:hover { text-decoration: underline; }
 
 /*
- * Floating cart pill — deep, bright orange (brighter than brand-primary
- * #f48721). Vivid glossy gradient + warm shadow so it pops on every page.
+ * Floating cart pill — solid-orange top + white price block (per spec).
+ * Colours come from the Tailwind classes in the markup (bg-brand-primary /
+ * bg-white / text-brand-primary); here we only add a soft shadow toward the
+ * screen so the pill lifts off the page edge.
  */
 .isdb-floating-cart > button {
-	background: linear-gradient(180deg, #ff7d1a 0%, #f4600a 58%, #e1530a 100%) !important;
-	box-shadow: 0 10px 26px -6px rgba(234, 88, 12, 0.55) !important;
-}
-.isdb-floating-cart > button:hover {
-	background: linear-gradient(180deg, #ff8b2e 0%, #f76a12 58%, #ef5e0f 100%) !important;
+	box-shadow: -6px 8px 20px -8px rgba(2, 6, 23, 0.30) !important;
 }

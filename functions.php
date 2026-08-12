@@ -183,6 +183,43 @@ add_filter( 'option_woocommerce_enable_ajax_add_to_cart', function () { return '
 add_filter( 'option_woocommerce_cart_redirect_after_add', function () { return 'no'; } );
 
 /*
+ * DEFINITIVE "never jump to checkout after Add to Cart" guarantee.
+ * The option filter above only controls WooCommerce's built-in redirect. A
+ * custom snippet (e.g. a WPCode "skip cart, go straight to checkout" hack) or a
+ * funnel plugin can still hook woocommerce_add_to_cart_redirect directly and
+ * force /checkout/ — which is EXACTLY the reported bug. We run at the highest
+ * priority so the theme always wins: keep the shopper on the page they added
+ * from (the referring URL), never the cart or checkout. The JS interceptor
+ * already prevents any reload; this is the server-side safety net for the
+ * no-JS / JS-blocked / optimizer-delayed path.
+ */
+add_filter( 'woocommerce_add_to_cart_redirect', function ( $url ) {
+	// "Buy Now" is the ONE intentional exception: it carries a buy_now flag and
+	// SHOULD land on Checkout (express purchase). Everything else stays put.
+	if ( ! empty( $_REQUEST['buy_now'] ) && function_exists( 'wc_get_checkout_url' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only redirect decision, WC handles the add nonce.
+		return wc_get_checkout_url();
+	}
+	$ref = wp_get_referer();
+	return $ref ? $ref : $url;
+}, PHP_INT_MAX );
+
+/*
+ * FAIL-SAFE fallback for product-card "Add to Cart" links. The JS (capture-
+ * phase handler in the isdb-qty inline script) intercepts the click and does the
+ * real AJAX add. This only rewrites the anchor's href so that IF the JS is ever
+ * delayed/blocked (e.g. an optimizer's "Delay JavaScript" feature), a click goes
+ * to the product page — NEVER to ?add-to-cart= (which would add + redirect to the
+ * cart/checkout). data-product_id + the ajax classes are untouched, so the AJAX
+ * path is unaffected.
+ */
+add_filter( 'woocommerce_loop_add_to_cart_link', function ( $html, $product ) {
+	if ( $product instanceof WC_Product && $product->is_type( 'simple' ) ) {
+		$html = preg_replace( '/\shref="[^"]*"/', ' href="' . esc_url( $product->get_permalink() ) . '"', $html, 1 );
+	}
+	return $html;
+}, 10, 2 );
+
+/*
  * No standalone Cart page — the slide-over drawer IS the cart (like the
  * reference store). Anyone who still lands on /cart/ (direct URL, an old link,
  * order-again, etc.) is sent to Checkout; an empty cart goes to the shop. The
@@ -228,12 +265,12 @@ add_action( 'woocommerce_after_main_content', function () {
 add_filter( 'woocommerce_add_to_cart_fragments', function ( $fragments ) {
 	$count = function_exists( 'WC' ) && WC()->cart ? WC()->cart->get_cart_contents_count() : 0;
 
-	// (a) The header badge count.
+	// (a) The header badge count. Markup MUST match header.php's .wmb-cart-count
+	// exactly (brand-primary pill, same position) so the badge doesn't visibly
+	// restyle when this fragment replaces it after an AJAX add.
 	ob_start();
 	?>
-	<span class="wmb-cart-count absolute -right-1 -top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-bold text-slate-900 <?php echo $count > 0 ? '' : 'hidden'; ?>">
-		<?php echo esc_html( $count ); ?>
-	</span>
+	<span class="wmb-cart-count absolute -right-2.5 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand-primary px-1 text-[10px] font-bold text-white <?php echo $count > 0 ? '' : 'hidden'; ?>"><?php echo esc_html( $count ); ?></span>
 	<?php
 	$fragments['.wmb-cart-count'] = ob_get_clean();
 
@@ -271,13 +308,14 @@ function isdb_floating_cart() {
 	$count = isdb_cart_count();
 	?>
 	<div class="isdb-floating-cart fixed right-0 top-1/2 z-40 -translate-y-1/2 <?php echo $count > 0 ? '' : 'hidden'; ?>">
+		<?php // Two-tone pill: solid-orange top (bag icon + "N Items"), white bottom (price in orange). Only the LEFT corners round; right stays flush to the screen edge. ?>
 		<button type="button" onclick="window.dispatchEvent(new CustomEvent('isdb-open-cart'))"
-			class="flex flex-col items-stretch overflow-hidden rounded-l-2xl bg-brand-primary text-white shadow-lg ring-1 ring-black/5 transition hover:bg-brand-hover">
-			<span class="flex flex-col items-center gap-1 px-3 pb-2 pt-2.5">
+			class="flex flex-col items-stretch overflow-hidden rounded-l-2xl bg-brand-primary shadow-lg ring-1 ring-black/5 transition hover:bg-brand-hover">
+			<span class="flex flex-col items-center gap-1 px-4 pb-2 pt-2.5 text-white">
 				<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
-				<span class="whitespace-nowrap text-[11px] font-semibold leading-none"><?php echo esc_html( $count ); ?> Items</span>
+				<span class="isdb-fc-count whitespace-nowrap text-[11px] font-semibold leading-none"><?php echo esc_html( $count ); ?> Items</span>
 			</span>
-			<span class="isdb-fc-price block whitespace-nowrap border-t border-white/25 bg-black/10 px-3 py-1.5 text-center text-[13px] font-extrabold leading-none"><?php echo wp_kses_post( isdb_cart_subtotal_html() ); ?></span>
+			<span class="isdb-fc-price block whitespace-nowrap bg-white px-4 py-2 text-center text-[13px] font-extrabold leading-none text-brand-primary"><?php echo wp_kses_post( isdb_cart_subtotal_html() ); ?></span>
 		</button>
 	</div>
 	<?php
@@ -829,6 +867,50 @@ add_action( 'admin_init', function () {
 	}
 	isdb_ensure_track_order_page();
 	update_option( 'isdb_track_page_done', 1 );
+} );
+
+/**
+ * Public URL of the "All Brands" directory page (slug: brands).
+ * Falls back to the shop archive if the page doesn't exist yet. Filterable.
+ *
+ * @return string
+ */
+function isdb_brands_url() {
+	$page = get_page_by_path( 'brands' );
+	if ( $page ) {
+		$url = get_permalink( $page );
+	} else {
+		$url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' );
+	}
+	return apply_filters( 'isdb_brands_url', $url ? $url : home_url( '/brands/' ) );
+}
+
+/**
+ * Auto-create the public "Brands" page (slug: brands) using the "Brands"
+ * template, so the "Our Brands → See all" link works with no manual setup.
+ * Runs on theme activation and once in admin (option-guarded).
+ */
+function isdb_ensure_brands_page() {
+	if ( get_page_by_path( 'brands' ) ) {
+		return;
+	}
+	$page_id = wp_insert_post( array(
+		'post_title'  => 'Brands',
+		'post_name'   => 'brands',
+		'post_status' => 'publish',
+		'post_type'   => 'page',
+	) );
+	if ( $page_id && ! is_wp_error( $page_id ) ) {
+		update_post_meta( $page_id, '_wp_page_template', 'template-brands.php' );
+	}
+}
+add_action( 'after_switch_theme', 'isdb_ensure_brands_page' );
+add_action( 'admin_init', function () {
+	if ( get_option( 'isdb_brands_page_done' ) ) {
+		return;
+	}
+	isdb_ensure_brands_page();
+	update_option( 'isdb_brands_page_done', 1 );
 } );
 
 /**
@@ -1837,10 +1919,206 @@ add_action( 'wp_enqueue_scripts', function () {
 		'nonce'      => wp_create_nonce( 'isdb-checkout-qty' ),
 		'snonce'     => wp_create_nonce( 'isdb-frontend' ),
 		'isCheckout' => ( function_exists( 'is_checkout' ) && is_checkout() ) ? 1 : 0,
-		'cartUrl'    => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : '',
-		'nonceUrl'   => class_exists( 'WC_AJAX' ) ? WC_AJAX::get_endpoint( 'isdb_nonce' ) : '',
+		'cartUrl'     => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : '',
+		'checkoutUrl' => function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '',
+		'nonceUrl'    => class_exists( 'WC_AJAX' ) ? WC_AJAX::get_endpoint( 'isdb_nonce' ) : '',
+		'addUrl'      => class_exists( 'WC_AJAX' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '',
 	) );
 	wp_add_inline_script( 'isdb-qty', <<<'JS'
+/* ============================================================================
+ * ADD-TO-CART INTERCEPTOR — self-contained, dependency-free.
+ * Runs on its own (NOT inside the jQuery block below), so nothing about script
+ * execution order, other header scripts (WPCode/CartFlows/Variation Swatches),
+ * or an error elsewhere can stop it binding. Capture-phase delegation on
+ * document => it fires before ANY bubble handler; element-agnostic selector
+ * (.add_to_cart_button / .ajax_add_to_cart, not just <a>); preventDefault +
+ * stopImmediatePropagation at the very top so no redirect/other handler runs.
+ * ========================================================================== */
+(function () {
+	function CFG() { return window.isdbQty || {}; }
+
+	function toast(title) {
+		var wrap = document.querySelector('.wmb-toast-wrap');
+		if (!wrap) { wrap = document.createElement('div'); wrap.className = 'wmb-toast-wrap'; document.body.appendChild(wrap); }
+		var cartUrl = CFG().cartUrl || '';
+		var t = document.createElement('div');
+		t.className = 'wmb-toast';
+		t.setAttribute('role', 'status');
+		t.innerHTML =
+			'<span class="wmb-toast__icon" aria-hidden="true">✓</span>' +
+			'<span class="wmb-toast__body"><span class="wmb-toast__title"></span>' +
+			'<span class="wmb-toast__sub">Added to your cart</span></span>' +
+			(cartUrl ? '<a class="wmb-toast__cta" href="' + cartUrl + '">View cart →</a>' : '');
+		t.querySelector('.wmb-toast__title').textContent = title || 'Item added';
+		wrap.appendChild(t);
+		// Double rAF: let the browser paint the off-screen start state first, so the
+		// slide-in from the right always animates smoothly (a single rAF can skip it).
+		requestAnimationFrame(function () { requestAnimationFrame(function () { t.classList.add('is-in'); }); });
+		// After a beat, dissolve like mist (fade + blur, handled by .is-out) then remove.
+		setTimeout(function () {
+			t.classList.add('is-out');
+			setTimeout(function () { if (t.parentNode) { t.parentNode.removeChild(t); } }, 650);
+		}, 3500);
+	}
+	window.isdbToast = toast;
+
+	function applyFragments(fragments) {
+		if (!fragments) { return; }
+		if (window.jQuery) {
+			window.jQuery.each(fragments, function (key, value) { window.jQuery(key).replaceWith(value); });
+		} else {
+			Object.keys(fragments).forEach(function (key) {
+				var nodes = document.querySelectorAll(key);
+				for (var i = 0; i < nodes.length; i++) {
+					var tmp = document.createElement('div');
+					tmp.innerHTML = fragments[key];
+					if (tmp.firstElementChild && nodes[i].parentNode) { nodes[i].parentNode.replaceChild(tmp.firstElementChild, nodes[i]); }
+				}
+			});
+		}
+	}
+
+	function productName(el) {
+		try {
+			var li = (el && el.closest) ? el.closest('li.product') : null;
+			if (li) { var h = li.querySelector('h3'); if (h && h.textContent.trim()) { return h.textContent.trim(); } }
+			var p = (el && el.closest) ? el.closest('.product') : null;
+			if (p) { var pt = p.querySelector('.product_title, h1, h3'); if (pt && pt.textContent.trim()) { return pt.textContent.trim(); } }
+			var g = document.querySelector('.product_title, h1.entry-title');
+			if (g && g.textContent.trim()) { return g.textContent.trim(); }
+		} catch (e) {}
+		return '';
+	}
+
+	function add(el, pid, qty) {
+		var url = CFG().addUrl;
+		if (!url || !pid) { return; }
+		if (el && el.classList) { el.classList.add('loading'); }
+		fetch(url, {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+			body: 'product_id=' + encodeURIComponent(pid) + '&quantity=' + encodeURIComponent(qty || 1)
+		}).then(function (r) { return r.json(); }).then(function (res) {
+			if (el && el.classList) { el.classList.remove('loading'); }
+			if (!res) { return; }
+			if (res.error && res.product_url) { window.location = res.product_url; return; }
+			applyFragments(res.fragments);
+			toast(productName(el) || 'Item added to cart');
+			// Deliberately DO NOT fire WooCommerce's `added_to_cart` jQuery event —
+			// a funnel plugin (e.g. CartFlows) can hook it to redirect to checkout,
+			// which is exactly the reported symptom. Refresh the product-card
+			// steppers directly instead; the header/pill/mini-cart already updated
+			// via the fragments above.
+			if (window.isdbRefreshCards) { window.isdbRefreshCards(); }
+		}).catch(function () { if (el && el.classList) { el.classList.remove('loading'); } });
+	}
+
+	// BUY NOW — add via AJAX, then go STRAIGHT to checkout (express purchase).
+	// On any failure we still navigate to the button's own href, which points at
+	// checkout?add-to-cart=ID&buy_now=1 (the server then adds + redirects), so a
+	// Buy Now click never dead-ends.
+	function addThenCheckout(el, pid, qty) {
+		var checkout = CFG().checkoutUrl || CFG().cartUrl || '';
+		var href = (el && el.getAttribute) ? el.getAttribute('href') : '';
+		var fallback = href || checkout;
+		if (!CFG().addUrl || !pid) { if (fallback) { window.location = fallback; } return; }
+		if (el && el.style) { el.style.opacity = '0.6'; el.style.pointerEvents = 'none'; }
+		fetch(CFG().addUrl, {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+			body: 'product_id=' + encodeURIComponent(pid) + '&quantity=' + encodeURIComponent(qty || 1)
+		}).then(function (r) { return r.json(); }).then(function (res) {
+			if (res && res.error && res.product_url) { window.location = res.product_url; return; }
+			window.location = checkout || fallback;
+		}).catch(function () { window.location = fallback; });
+	}
+
+	// Resolve product id from data-product_id OR from a ?add-to-cart=ID href.
+	// Custom cards / CartFlows buttons often have NO data attribute and are just
+	// <a href="?add-to-cart=123"> (sometimes even href="/checkout/?add-to-cart=123")
+	// — that href IS the redirect we must kill, so we read the id straight from it.
+	function resolvePid(el) {
+		var holder = el.closest ? el.closest('[data-product_id]') : null;
+		if (holder && holder.getAttribute('data-product_id')) { return holder.getAttribute('data-product_id'); }
+		var href = (el.getAttribute && el.getAttribute('href')) || '';
+		if (!href && el.closest) { var link = el.closest('a[href]'); href = link ? link.getAttribute('href') : ''; }
+		var m = href && href.match(/[?&]add-to-cart=(\d+)/);
+		return m ? m[1] : '';
+	}
+	function resolveQty(el) {
+		var q = (el.getAttribute && el.getAttribute('data-quantity')) || '';
+		if (q) { return q; }
+		var href = (el.getAttribute && el.getAttribute('href')) || '';
+		var m = href && href.match(/[?&]quantity=(\d+)/);
+		return m ? m[1] : 1;
+	}
+
+	// CLICK — any product-card add button (element-agnostic; id from data attr or href).
+	document.addEventListener('click', function (e) {
+		if (!e.target || !e.target.closest) { return; }
+
+		// BUY NOW — handle before the generic add logic so it redirects to checkout
+		// instead of showing the stay-on-page toast.
+		var buy = e.target.closest('.wmb-buy-now');
+		if (buy) {
+			var bpid = resolvePid(buy);
+			if (bpid && CFG().addUrl) {
+				e.preventDefault();
+				e.stopImmediatePropagation();
+				addThenCheckout(buy, bpid, resolveQty(buy));
+			}
+			return; // unresolved -> let the href (checkout?add-to-cart=…&buy_now=1) run
+		}
+
+		// Match the theme's own ajax buttons FIRST, then fall back to ANY link that
+		// carries an ?add-to-cart=ID (a snippet/plugin "add to cart" or even a rogue
+		// "…/checkout/?add-to-cart=ID" link — that href IS the redirect we must kill).
+		var el = e.target.closest('.add_to_cart_button, .ajax_add_to_cart');
+		if (!el) {
+			var link = e.target.closest('a[href*="add-to-cart="]');
+			// Only hijack SIMPLE add links: a variation/grouped add carries extra
+			// query args (variation_id=…) that a bare id POST can't satisfy — leave
+			// those to open the product page so the shopper can choose options.
+			if (link && !/[?&](variation_id|attribute_)/.test(link.getAttribute('href') || '')) {
+				el = link;
+			}
+		}
+		if (!el) { return; }
+		// Variable/grouped/external products are NOT addable by id alone — their
+		// button says "Select options" and must open the product page so the
+		// shopper can pick a variation. WooCommerce marks them with a
+		// product_type_* class and withholds `ajax_add_to_cart`. Without this
+		// guard we swallow the click, POST an id the server rejects, and only
+		// THEN follow res.product_url — a slow round-trip ending in the same
+		// full page load we are trying to avoid.
+		if (el.classList && (el.classList.contains('product_type_variable') ||
+			el.classList.contains('product_type_grouped') ||
+			el.classList.contains('product_type_external'))) { return; }
+		var pid = resolvePid(el);
+		if (!pid || !CFG().addUrl) { return; } // still can't resolve -> leave the click alone
+		e.preventDefault();
+		e.stopImmediatePropagation();
+		add(el, pid, resolveQty(el));
+	}, true);
+
+	// SUBMIT — single-product simple form (custom .wmb-cart or default .cart).
+	document.addEventListener('submit', function (e) {
+		var form = e.target;
+		if (!form || !form.matches || !form.matches('form.wmb-cart, form.cart')) { return; }
+		if (form.matches('.variations_form, .grouped_form') || form.querySelector('[name="variation_id"]')) { return; }
+		var atc = form.querySelector('[name="add-to-cart"]');
+		var pid = atc ? atc.value : '';
+		if (!pid || isNaN(parseInt(pid, 10)) || !CFG().addUrl) { return; }
+		e.preventDefault();
+		e.stopImmediatePropagation();
+		var qEl = form.querySelector('[name="quantity"]');
+		var qty = qEl ? parseInt(qEl.value, 10) : 1;
+		add(atc || form, pid, (!qty || qty < 1) ? 1 : qty);
+	}, true);
+})();
+
 jQuery(function ($) {
 	var busy = false;
 
@@ -1854,8 +2132,13 @@ jQuery(function ($) {
 				var pid  = String($ctl.data('product'));
 				var st   = items[pid];
 				if (st) {
+					// Some cards (homepage rails) render an Add button with NO stepper.
+					// Without this guard we'd hide the Add button and show nothing —
+					// the button would simply vanish after adding.
+					var $st = $ctl.find('.isdb-step-wrap');
+					if (!$st.length) { return; }
 					$ctl.find('.isdb-add-wrap').addClass('hidden');
-					var $st = $ctl.find('.isdb-step-wrap').removeClass('hidden');
+					$st.removeClass('hidden');
 					$st.find('.isdb-step-val').text(st.qty);
 					$st.find('.isdb-qty-btn').attr('data-key', st.key);
 					$st.find('.isdb-step-minus').attr('data-qty', st.qty - 1);
@@ -1867,6 +2150,7 @@ jQuery(function ($) {
 			});
 		});
 	}
+	window.isdbRefreshCards = refreshCards; // called by the top add-to-cart module
 
 	// Cart-qty nonce, kept fresh via an UNCACHED WC-AJAX endpoint. A full-page
 	// cache embeds a stale wp_localize nonce, so admin-ajax's check_ajax_referer
@@ -1937,75 +2221,9 @@ jQuery(function ($) {
 		refreshCards();
 	});
 
-	// Toast confirmation on AJAX add-to-cart (replaces WC's full-page notice).
-	function isdbToast(title) {
-		var wrap = document.querySelector('.wmb-toast-wrap');
-		if (!wrap) {
-			wrap = document.createElement('div');
-			wrap.className = 'wmb-toast-wrap';
-			document.body.appendChild(wrap);
-		}
-		var cartUrl = (window.isdbQty && isdbQty.cartUrl) ? isdbQty.cartUrl : '';
-		var t = document.createElement('div');
-		t.className = 'wmb-toast';
-		t.setAttribute('role', 'status');
-		t.innerHTML =
-			'<span class="wmb-toast__icon" aria-hidden="true">✓</span>' +
-			'<span class="wmb-toast__body">' +
-				'<span class="wmb-toast__title"></span>' +
-				'<span class="wmb-toast__sub">Added to your cart</span>' +
-			'</span>' +
-			(cartUrl ? '<a class="wmb-toast__cta" href="' + cartUrl + '">View cart →</a>' : '');
-		t.querySelector('.wmb-toast__title').textContent = title || 'Item added';
-		wrap.appendChild(t);
-		requestAnimationFrame(function () { t.classList.add('is-in'); });
-		setTimeout(function () {
-			t.classList.remove('is-in');
-			setTimeout(function () { if (t.parentNode) { t.parentNode.removeChild(t); } }, 420);
-		}, 3500);
-	}
-
-	$(document.body).on('added_to_cart', function (e, fragments, cart_hash, $btn) {
-		var name = '';
-		try {
-			var $b = $($btn);
-			name = $.trim($b.closest('li.product').find('h3').first().text());
-			if (!name) { name = $.trim($b.closest('.product, form.wmb-cart, form.cart').find('.product_title, h1').first().text()); }
-			if (!name) { name = $.trim($('.product_title, h1.entry-title').first().text()); }
-		} catch (err) {}
-		isdbToast(name || 'Item added to cart');
-	});
-
-	// Single-product add-to-cart via AJAX — never navigate to /cart/. Adds the
-	// product, refreshes the cart fragments (the floating pill + mini-cart) and
-	// shows the toast. Variable/grouped forms are left to WooCommerce (they need
-	// variation handling; with redirect off they simply reload the same page).
-	$(document.body).on('submit', 'form.wmb-cart, form.cart', function (e) {
-		var $form = $(this);
-		if ($form.is('.variations_form, .grouped_form') || $form.find('[name="variation_id"]').length) {
-			return; // let WooCommerce handle these natively
-		}
-		var pid = $form.find('[name="add-to-cart"]').val();
-		if (!pid || isNaN(parseInt(pid, 10))) { return; } // can't resolve -> normal submit
-		if (typeof wc_add_to_cart_params === 'undefined' || !wc_add_to_cart_params.wc_ajax_url) { return; }
-		e.preventDefault();
-		var qty = parseInt($form.find('[name="quantity"]').val(), 10);
-		if (!qty || qty < 1) { qty = 1; }
-		var $submit = $form.find('button[type="submit"], [name="add-to-cart"]').first();
-		$submit.addClass('loading').prop('disabled', true);
-		var url = wc_add_to_cart_params.wc_ajax_url.toString().replace('%%endpoint%%', 'add_to_cart');
-		$.post(url, { product_id: pid, quantity: qty }, function (res) {
-			if (!res) { return; }
-			if (res.error && res.product_url) { window.location = res.product_url; return; }
-			if (res.fragments) {
-				$.each(res.fragments, function (key, value) { $(key).replaceWith(value); });
-			}
-			$(document.body).trigger('wc_fragments_loaded');
-			$(document.body).trigger('added_to_cart', [res.fragments, res.cart_hash, $submit]);
-		}).always(function () {
-			$submit.removeClass('loading').prop('disabled', false);
-		});
-	});
+	// (Add-to-cart + toast now live in the self-contained module at the TOP of
+	// this script — bound independently so nothing about load order can break it.
+	// refreshCards still runs on the added_to_cart event fired by that module.)
 
 	// Self-heal a STALE cached mini-cart fragment: WooCommerce stores the mini
 	// cart HTML in the browser (localStorage), so after a template update the old

@@ -92,10 +92,12 @@ $simple_add = $product->is_type( 'simple' ) && $product->is_purchasable() && $pr
 	</div>
 
 	<!-- Cart control -->
-	<div class="isdb-cart-ctl relative z-20 mt-2.5" data-product="<?php echo esc_attr( $pid ); ?>">
+	<?php // Bestsellers get a "Buy Now" express-checkout button beside Add to Cart. ?>
+	<?php $show_buy_now = $simple_add && $is_bestseller; ?>
+	<div class="isdb-cart-ctl relative z-20 mt-2.5 <?php echo $show_buy_now ? 'flex items-stretch gap-2' : ''; ?>" data-product="<?php echo esc_attr( $pid ); ?>">
 
 		<!-- Add to cart (orange outline) -->
-		<div class="isdb-add-wrap <?php echo $in_cart && $simple_add ? 'hidden' : ''; ?>
+		<div class="isdb-add-wrap <?php echo $show_buy_now ? 'flex-1 min-w-0' : ''; ?> <?php echo $in_cart && $simple_add ? 'hidden' : ''; ?>
 			[&_.button]:flex [&_.button]:w-full [&_.button]:items-center [&_.button]:justify-center [&_.button]:gap-2
 			[&_.button]:rounded-card [&_.button]:border [&_.button]:border-brand-primary [&_.button]:bg-white
 			[&_.button]:px-3 [&_.button]:py-2.5 [&_.button]:text-[13px] [&_.button]:font-semibold
@@ -108,7 +110,7 @@ $simple_add = $product->is_type( 'simple' ) && $product->is_purchasable() && $pr
 
 		<!-- Quantity stepper (shown once the item is in the cart) -->
 		<?php if ( $simple_add ) : ?>
-			<div class="isdb-step-wrap <?php echo $in_cart ? '' : 'hidden'; ?> flex items-stretch overflow-hidden rounded-card border border-brand-primary">
+			<div class="isdb-step-wrap <?php echo $show_buy_now ? 'flex-1 min-w-0' : ''; ?> <?php echo $in_cart ? '' : 'hidden'; ?> flex items-stretch overflow-hidden rounded-card border border-brand-primary">
 				<button type="button"
 					class="isdb-qty-btn isdb-step-minus flex w-11 flex-none items-center justify-center bg-brand-primary text-white transition hover:bg-brand-hover"
 					data-key="<?php echo esc_attr( $cart_key ); ?>"
@@ -127,6 +129,18 @@ $simple_add = $product->is_type( 'simple' ) && $product->is_purchasable() && $pr
 					<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
 				</button>
 			</div>
+		<?php endif; ?>
+
+		<!-- Buy Now (express checkout) — bestsellers only. JS adds via AJAX then
+		     sends the shopper straight to Checkout; the buy_now flag lets the
+		     server redirect to Checkout too when JS is unavailable. -->
+		<?php if ( $show_buy_now ) : ?>
+			<a href="<?php echo esc_url( add_query_arg( array( 'add-to-cart' => $pid, 'buy_now' => 1 ), wc_get_checkout_url() ) ); ?>"
+				class="wmb-buy-now flex flex-1 min-w-0 items-center justify-center gap-1 rounded-card bg-brand-primary px-3 py-2.5 text-center text-[13px] font-semibold text-white no-underline transition hover:bg-brand-hover"
+				data-product_id="<?php echo esc_attr( $pid ); ?>"
+				rel="nofollow">
+				<?php esc_html_e( 'Buy Now', 'isdb-custom' ); ?>
+			</a>
 		<?php endif; ?>
 	</div>
 </li>
